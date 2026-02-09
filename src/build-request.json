@@ -1,76 +1,86 @@
 {
   "kind": "build_request",
-  "title": "Fix Current Position (GPS) city detection bugs",
+  "title": "Revert the frontend typography to pre-Lovalina (Version 8 styling)",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-20",
-      "text": "Implement a working “Use Current Position” flow that uses browser geolocation (navigator.geolocation) to detect the user’s latitude/longitude and set the app’s selected location accordingly, while keeping the existing manual City Picker selection as a fallback.",
+      "id": "REQ-39",
+      "text": "Remove the Lovalina font integration so the app no longer loads or registers the Lovalina font (revert to the pre-font-change setup). This includes removing the @font-face declaration for Lovalina and removing the Tailwind font family entry for Lovalina.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-4"
         ],
         "quotes": [
-          "current position is still not working.  can you fix the bugs?"
+          "please revert back to version 8 before the font change"
         ]
       },
       "acceptanceCriteria": [
-        "City Picker provides a clear control labeled in English (e.g., \"Use Current Position\") to trigger location detection.",
-        "If geolocation is supported and the user grants permission, the app updates the selected location immediately (header city label/local time and Today page computation update without refresh).",
-        "If geolocation is not supported, permission is denied, or a timeout/error occurs, the UI shows an English error message and the user can still select a city manually without being blocked."
+        "`frontend/src/index.css` no longer contains an `@font-face` block for `font-family: 'Lovalina'` or any references to `/assets/fonts/lovalina/...`.",
+        "`frontend/tailwind.config.js` no longer defines a `fontFamily.lovalina` entry.",
+        "The frontend builds successfully without requiring any Lovalina font files to exist."
       ]
     },
     {
-      "id": "REQ-21",
-      "text": "Update the city selection model/validation so a geolocation-derived selection can be persisted in localStorage and reloaded safely even though it may not be one of the predefined entries in frontend/src/data/cities.ts.",
+      "id": "REQ-40",
+      "text": "Revert all UI usage of the Lovalina font classes to the default typography used before the font change by removing `font-lovalina` from all components/pages that currently apply it (App header brand title and primary page titles).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-4"
         ],
         "quotes": [
-          "current position is still not working.  can you fix the bugs?"
+          "please revert back to version 8 before the font change"
         ]
       },
       "acceptanceCriteria": [
-        "A geolocation-derived selection (name + valid IANA timezone + optional lat/lng) can be saved to and restored from localStorage without being rejected by validation.",
-        "If a stored geolocation-derived selection is missing required fields or contains an invalid timezone identifier, the app falls back to the default city (New York) without crashing.",
-        "Existing predefined-city selection behavior continues to work (selecting London/Paris/etc. still persists and restores correctly)."
+        "`frontend/src/components/layout/AppHeader.tsx` brand title \"Daily Nakshatra\" no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/TodayPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/TomorrowPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/KnowledgeBasePage.tsx` page title no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/NakshatraDetailPage.tsx` page title no longer uses the `font-lovalina` Tailwind class."
       ]
     },
     {
-      "id": "REQ-22",
-      "text": "When setting a location from geolocation, derive and store a timezone identifier in a way that does not require external APIs (e.g., use the device-resolved IANA timezone via Intl.DateTimeFormat().resolvedOptions().timeZone), and ensure Today page calculations use that timezone for local-time context.",
+      "id": "REQ-41",
+      "text": "Ensure there are no remaining references to Lovalina assets/classes anywhere in the frontend codebase after the revert, so the deployed app matches the pre-font-change (Version 8) typography behavior.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-4"
         ],
         "quotes": [
-          "current position is still not working.  can you fix the bugs?"
+          "please revert back to version 8 before the font change"
         ]
       },
       "acceptanceCriteria": [
-        "The geolocation-based selection includes a timezone string that passes Intl timezone formatting (no crashes in local time display).",
-        "Today page continues to display \"Calculated for … local time (…timezone…)\" using the geolocation-derived timezone when current position is selected.",
-        "Nakshatra results refresh correctly after selecting current position (no stale React Query result from the previously selected city/timezone)."
+        "A repository-wide search finds no remaining occurrences of `font-lovalina`, `Lovalina`, or `/assets/fonts/lovalina` in frontend source/config files.",
+        "The app renders with the normal/default font stack (no custom Lovalina typography) and there are no missing-font 404s in the browser network panel."
       ]
     }
   ],
   "constraints": [
-    "Do not use any external geocoding/timezone web services or third-party APIs to map coordinates to timezone or city.",
-    "Do not edit files under frontend/src/components/ui or any other paths listed in frontend.immutablePaths.",
-    "Keep backend as a single Motoko actor; no backend changes are required unless absolutely necessary for this fix.",
-    "All user-facing text must be in English."
+    "Do not modify any files under `frontend/src/components/ui` (read-only UI component sources must be composed, not edited).",
+    "Do not edit any frontend files listed in `frontend.immutablePaths` in SYSTEM_CONTEXT.",
+    "Keep backend Motoko code unchanged; this is a frontend-only revert."
   ],
   "nonGoals": [
-    "Adding push notifications or background location tracking.",
-    "Adding a full world-city database or reverse-geocoding from coordinates to a specific city name.",
-    "Improving the astronomical accuracy of the lunar longitude algorithm beyond making the current-position selection work."
+    "Do not introduce new fonts, font providers, or external font CDNs.",
+    "Do not change the color theme, layout, or spacing beyond what is required to remove the Lovalina font usage.",
+    "Do not add new features or modify Nakshatra computation logic."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

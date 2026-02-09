@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { nakshatras } from '@/data/nakshatras';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { nakshatras } from '@/data/nakshatras';
 import NakshatraListItem from '@/components/nakshatra/NakshatraListItem';
 
 export default function KnowledgeBasePage() {
@@ -14,9 +14,9 @@ export default function KnowledgeBasePage() {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold">Nakshatra Knowledge Base</h1>
+        <h1 className="text-4xl">Knowledge Base</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Explore all 27 lunar mansions, their symbolism, traits, and the four Padas within each
+          Explore all 27 Nakshatras, their symbolism, traits, and the four Padas within each lunar mansion
         </p>
       </div>
 
@@ -31,16 +31,16 @@ export default function KnowledgeBasePage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredNakshatras.map((nakshatra, index) => (
           <NakshatraListItem key={nakshatra.name} nakshatra={nakshatra} number={index + 1} />
         ))}
       </div>
 
       {filteredNakshatras.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
+        <p className="text-center text-muted-foreground py-12">
           No Nakshatras found matching "{searchQuery}"
-        </div>
+        </p>
       )}
     </div>
   );

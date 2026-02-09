@@ -23,7 +23,7 @@ export default function AppHeader() {
               className="h-10 w-10 transition-transform group-hover:scale-105"
             />
             <div className="flex flex-col">
-              <h1 className="text-xl font-semibold tracking-tight">Daily Nakshatra</h1>
+              <h1 className="text-xl tracking-tight">Daily Nakshatra</h1>
               <p className="text-xs text-muted-foreground">Lunar Wisdom for Today</p>
             </div>
           </Link>
@@ -36,6 +36,14 @@ export default function AppHeader() {
               }`}
             >
               Today
+            </Link>
+            <Link
+              to="/tomorrow"
+              className={`text-sm font-medium transition-colors hover:text-foreground ${
+                currentPath === '/tomorrow' ? 'text-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              Tomorrow
             </Link>
             <Link
               to="/knowledge"

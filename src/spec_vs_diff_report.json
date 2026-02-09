@@ -1,26 +1,49 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T08:17:10.824Z",
-  "summary": "Implemented a “Use Current Position” geolocation flow in the City Picker, added support for persisting/restoring geolocation-derived locations (with timezone validation and safe fallback), and ensured Nakshatra/React Query recomputes/refetches when switching to current position by incorporating a selection refresh key into hooks/query keys.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-09T09:12:27.979Z",
+  "summary": "The diff clearly removes Lovalina usage from several key UI titles (AppHeader, KnowledgeBasePage, NakshatraDetailPage) and shows no Tailwind `fontFamily.lovalina` entry in the provided tailwind.config.js snippet, and no `@font-face` for Lovalina in the provided index.css snippet. However, the TodayPage and TomorrowPage diffs are truncated so removal of `font-lovalina` there cannot be confirmed, and repository-wide absence/build-no-font-files cannot be proven from the diff summary alone.",
+  "missing_requirements": [
     {
-      "description": "Expanded/overwrote the predefined city list to a larger set of 25 cities with coordinates.",
-      "reason": "The BuildRequest focuses on fixing current-position geolocation/timezone persistence/refresh behavior and explicitly lists as a non-goal “Adding a full world-city database”. While this is not necessarily a full database, modifying the predefined list to many global cities was not requested as part of REQ-20/21/22.",
+      "id": "REQ-40",
+      "requirement": "Remove `font-lovalina` from hero titles on TodayPage and TomorrowPage.",
+      "reason": "Both TodayPage.tsx and TomorrowPage.tsx are truncated in the diff summary; the hero title lines where `font-lovalina` would appear are not shown, so the acceptance criteria for those files cannot be verified from provided evidence.",
       "evidence": [
-        "frontend/src/data/cities.ts"
+        "frontend/src/pages/TodayPage.tsx (truncated)",
+        "frontend/src/pages/TomorrowPage.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "requirement": "Ensure there are no remaining references to `font-lovalina`, `Lovalina`, or `/assets/fonts/lovalina` anywhere in frontend source/config files.",
+      "reason": "The diff summary only shows excerpts from a subset of files and does not include repository-wide search results. Therefore, absence of all remaining references cannot be confirmed.",
+      "evidence": [
+        "frontend/src/pages/TodayPage.tsx (truncated)",
+        "frontend/src/pages/TomorrowPage.tsx (truncated)",
+        "frontend/tailwind.config.js (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "requirement": "Frontend builds successfully without requiring any Lovalina font files to exist.",
+      "reason": "Build success and runtime network behavior (no missing-font 404s) are acceptance criteria but are not verifiable from the diff summary alone.",
+      "evidence": [
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
       ]
     }
   ],
-  "confidence": 0.74,
+  "hallucinated_features": [],
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/city/CityPicker.tsx",
-    "frontend/src/data/cities.ts",
-    "frontend/src/hooks/useCitySelection.ts",
-    "frontend/src/hooks/useNakshatraNow.ts",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/components/layout/AppHeader.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/KnowledgeBasePage.tsx",
+    "frontend/src/pages/NakshatraDetailPage.tsx",
+    "frontend/src/pages/TodayPage.tsx",
+    "frontend/src/pages/TomorrowPage.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

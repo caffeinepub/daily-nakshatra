@@ -1,9 +1,9 @@
 import { useParams, Link } from '@tanstack/react-router';
 import { nakshatras } from '@/data/nakshatras';
 import { getNakshatraBySlug } from '@/lib/nakshatra';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Moon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import NakshatraSections from '@/components/nakshatra/NakshatraSections';
 
 export default function NakshatraDetailPage() {
@@ -12,8 +12,8 @@ export default function NakshatraDetailPage() {
 
   if (!nakshatra) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground mb-4">Nakshatra not found</p>
+      <div className="text-center py-12 space-y-4">
+        <p className="text-destructive text-lg font-medium">Nakshatra not found</p>
         <Link to="/knowledge">
           <Button variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -36,26 +36,13 @@ export default function NakshatraDetailPage() {
       </Link>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Moon className="h-8 w-8 text-primary" />
-          <div>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <h1 className="text-4xl font-bold">{nakshatra.name}</h1>
-              <Badge variant="outline">#{nakshatraNumber} of 27</Badge>
-            </div>
-            <p className="text-muted-foreground mt-1">
-              Ruled by {nakshatra.planetaryRuler} • {nakshatra.deity}
-            </p>
-          </div>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h1 className="text-4xl">{nakshatra.name}</h1>
+          <Badge variant="outline" className="text-sm">
+            #{nakshatraNumber} of 27
+          </Badge>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          {nakshatra.symbols.map((symbol) => (
-            <Badge key={symbol} variant="secondary">
-              {symbol}
-            </Badge>
-          ))}
-        </div>
+        <p className="text-lg text-muted-foreground">{nakshatra.elementalThemes}</p>
       </div>
 
       <NakshatraSections nakshatra={nakshatra} />

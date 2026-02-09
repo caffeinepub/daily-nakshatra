@@ -1,78 +1,109 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Current Position (GPS) city detection and persistence",
+  "title": "Revert typography by removing Lovalina font integration and usage",
   "requirements": [
     {
-      "id": "REQ-20",
-      "summary": "Add a reliable “Use Current Position” flow in the City Picker using browser geolocation, with clear UI control and manual city selection fallback on any error.",
+      "id": "REQ-39",
+      "summary": "Remove Lovalina font registration and Tailwind font family configuration so the app no longer depends on Lovalina font files.",
       "acceptanceCriteria": [
-        "City Picker provides a clear control labeled in English (e.g., \"Use Current Position\") to trigger location detection.",
-        "If geolocation is supported and the user grants permission, the app updates the selected location immediately (header city label/local time and Today page computation update without refresh).",
-        "If geolocation is not supported, permission is denied, or a timeout/error occurs, the UI shows an English error message and the user can still select a city manually without being blocked."
+        "`frontend/src/index.css` no longer contains an `@font-face` block for `font-family: 'Lovalina'` or any references to `/assets/fonts/lovalina/...`.",
+        "`frontend/tailwind.config.js` no longer defines a `fontFamily.lovalina` entry.",
+        "The frontend builds successfully without requiring any Lovalina font files to exist."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/city/CityPicker.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Implement a prominent \"Use Current Position\" Button in the dialog that triggers navigator.geolocation, shows an in-dialog loading state, and renders English error text on unsupported/denied/timeout/other errors while keeping manual city search/select unchanged. Use existing shadcn/ui Dialog, Button, Input, and ScrollArea components for consistent UI. Verify the component's usage instructions before implementing."
+          "description": "Remove the Lovalina-related `@font-face` declaration and any references/commentary mentioning Lovalina or `/assets/fonts/lovalina` so global styles match the pre-font-change setup."
         },
         {
-          "path": "frontend/src/hooks/useCitySelection.ts",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Expose a geolocation-friendly setter (or broaden the existing setCity) so CityPicker can set a geolocation-derived selection and the rest of the app reacts immediately (header label/local time and Today calculations) without requiring refresh."
+          "description": "Remove the `extend.fontFamily.lovalina` entry (and any other Lovalina mentions, if present) so Tailwind no longer generates `font-lovalina` utilities or references the Lovalina family."
         }
       ]
     },
     {
-      "id": "REQ-21",
-      "summary": "Allow geolocation-derived city selections to be persisted/restored from localStorage even if they are not in the predefined cities list, with safe validation and fallback to New York on invalid data.",
+      "id": "REQ-40",
+      "summary": "Revert UI typography by removing `font-lovalina` class usage from the header brand and key page titles.",
       "acceptanceCriteria": [
-        "A geolocation-derived selection (name + valid IANA timezone + optional lat/lng) can be saved to and restored from localStorage without being rejected by validation.",
-        "If a stored geolocation-derived selection is missing required fields or contains an invalid timezone identifier, the app falls back to the default city (New York) without crashing.",
-        "Existing predefined-city selection behavior continues to work (selecting London/Paris/etc. still persists and restores correctly)."
+        "`frontend/src/components/layout/AppHeader.tsx` brand title \"Daily Nakshatra\" no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/TodayPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/TomorrowPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/KnowledgeBasePage.tsx` page title no longer uses the `font-lovalina` Tailwind class.",
+        "`frontend/src/pages/NakshatraDetailPage.tsx` page title no longer uses the `font-lovalina` Tailwind class."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useCitySelection.ts",
+          "path": "frontend/src/components/layout/AppHeader.tsx",
           "operation": "modify",
-          "description": "Update the city selection model/validation so it accepts either (a) a predefined city from frontend/src/data/cities.ts or (b) a geolocation-derived object with required fields (name, timezone) and optional lat/lng; validate timezone via Intl formatting, and fall back to DEFAULT_CITY (New York) when missing/invalid without crashing. Ensure localStorage persistence/restoration supports the broader model."
+          "description": "Remove `font-lovalina` from the brand title styling so it uses the default typography (pre-Lovalina behavior)."
         },
         {
-          "path": "frontend/src/data/cities.ts",
+          "path": "frontend/src/pages/TodayPage.tsx",
           "operation": "modify",
-          "description": "Adjust the exported City type (or introduce a compatible widened type) so the app can represent both predefined cities and geolocation-derived selections without type conflicts, while keeping the existing predefined list intact."
+          "description": "Remove `font-lovalina` from the hero title styling so it uses the default typography (pre-Lovalina behavior)."
+        },
+        {
+          "path": "frontend/src/pages/TomorrowPage.tsx",
+          "operation": "modify",
+          "description": "Remove `font-lovalina` from the hero title styling so it uses the default typography (pre-Lovalina behavior)."
+        },
+        {
+          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
+          "operation": "modify",
+          "description": "Remove `font-lovalina` from the page title styling so it uses the default typography (pre-Lovalina behavior)."
+        },
+        {
+          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
+          "operation": "modify",
+          "description": "Remove `font-lovalina` from the page title styling so it uses the default typography (pre-Lovalina behavior)."
         }
       ]
     },
     {
-      "id": "REQ-22",
-      "summary": "Derive timezone for geolocation selections without external services using device-resolved IANA timezone, and ensure Today computations and React Query refresh correctly when current position is selected.",
+      "id": "REQ-41",
+      "summary": "Eliminate any remaining Lovalina references (classes, font name, asset paths) throughout the frontend to fully match pre-font-change typography and avoid missing-font requests.",
       "acceptanceCriteria": [
-        "The geolocation-based selection includes a timezone string that passes Intl timezone formatting (no crashes in local time display).",
-        "Today page continues to display \"Calculated for … local time (…timezone…)\" using the geolocation-derived timezone when current position is selected.",
-        "Nakshatra results refresh correctly after selecting current position (no stale React Query result from the previously selected city/timezone)."
+        "A repository-wide search finds no remaining occurrences of `font-lovalina`, `Lovalina`, or `/assets/fonts/lovalina` in frontend source/config files.",
+        "The app renders with the normal/default font stack (no custom Lovalina typography) and there are no missing-font 404s in the browser network panel."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/city/CityPicker.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "When geolocation succeeds, derive the timezone via Intl.DateTimeFormat().resolvedOptions().timeZone (no external services) and set a geolocation-derived selection (English display name such as \"Current Position\") that includes the timezone and optional lat/lng. Verify the component's usage instructions before implementing."
+          "description": "Double-check and remove any remaining string occurrences of `Lovalina` or `/assets/fonts/lovalina` (including comments) so repo-wide searches do not find them after the revert."
         },
         {
-          "path": "frontend/src/hooks/useCitySelection.ts",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Ensure geolocation-derived selections store a timezone that is validated with Intl, and include a lightweight refresh token/selection identifier updated on each \"Use Current Position\" action so downstream computations can reliably rerun even when timezone is unchanged."
+          "description": "Ensure there are no remaining references to `Lovalina` or `lovalina` font-family entries so repo-wide searches do not find them and builds do not rely on removed font utilities."
         },
         {
-          "path": "frontend/src/hooks/useNakshatraNow.ts",
+          "path": "frontend/src/components/layout/AppHeader.tsx",
           "operation": "modify",
-          "description": "Include the city selection refresh token/selection identifier in the effect dependencies so lunar longitude recomputes immediately after choosing current position, and pass a stable selection key to the data query hook to avoid reusing stale cached results."
+          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/pages/TodayPage.tsx",
           "operation": "modify",
-          "description": "Update the React Query queryKey inputs to incorporate the city selection key/refresh token (in addition to lunarLongitude/timezone/name) so selecting current position triggers a fresh query result rather than reusing cached data when values coincide."
+          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
+        },
+        {
+          "path": "frontend/src/pages/TomorrowPage.tsx",
+          "operation": "modify",
+          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
+        },
+        {
+          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
+          "operation": "modify",
+          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
+        },
+        {
+          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
+          "operation": "modify",
+          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
         }
       ]
     }

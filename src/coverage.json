@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T08:17:10.827Z",
+  "generatedAt": "2026-02-09T09:12:27.983Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,46 +11,58 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-20",
-        "summary": "Implement a working “Use Current Position” flow that uses browser geolocation (navigator.geolocation) to detect the user’s latitude/longitude and set the app’s selected location accordingly, while keeping the existing manual City Picker selection as a fallback.",
+        "id": "REQ-39",
+        "summary": "Remove the Lovalina font integration so the app no longer loads or registers the Lovalina font (revert to the pre-font-change setup). This includes removing the @font-face declaration for Lovalina and removing the Tailwind font family entry for Lovalina.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/city/CityPicker.tsx",
-          "frontend/src/hooks/useCitySelection.ts"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
         ],
         "matchedFiles": [
-          "frontend/src/components/city/CityPicker.tsx",
-          "frontend/src/hooks/useCitySelection.ts"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
         ]
       },
       {
-        "id": "REQ-21",
-        "summary": "Update the city selection model/validation so a geolocation-derived selection can be persisted in localStorage and reloaded safely even though it may not be one of the predefined entries in frontend/src/data/cities.ts.",
+        "id": "REQ-40",
+        "summary": "Revert all UI usage of the Lovalina font classes to the default typography used before the font change by removing `font-lovalina` from all components/pages that currently apply it (App header brand title and primary page titles).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useCitySelection.ts",
-          "frontend/src/data/cities.ts"
+          "frontend/src/components/layout/AppHeader.tsx",
+          "frontend/src/pages/TodayPage.tsx",
+          "frontend/src/pages/TomorrowPage.tsx",
+          "frontend/src/pages/KnowledgeBasePage.tsx",
+          "frontend/src/pages/NakshatraDetailPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useCitySelection.ts",
-          "frontend/src/data/cities.ts"
+          "frontend/src/components/layout/AppHeader.tsx",
+          "frontend/src/pages/TodayPage.tsx",
+          "frontend/src/pages/TomorrowPage.tsx",
+          "frontend/src/pages/KnowledgeBasePage.tsx",
+          "frontend/src/pages/NakshatraDetailPage.tsx"
         ]
       },
       {
-        "id": "REQ-22",
-        "summary": "When setting a location from geolocation, derive and store a timezone identifier in a way that does not require external APIs (e.g., use the device-resolved IANA timezone via Intl.DateTimeFormat().resolvedOptions().timeZone), and ensure Today page calculations use that timezone for local-time context.",
+        "id": "REQ-41",
+        "summary": "Ensure there are no remaining references to Lovalina assets/classes anywhere in the frontend codebase after the revert, so the deployed app matches the pre-font-change (Version 8) typography behavior.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/city/CityPicker.tsx",
-          "frontend/src/hooks/useCitySelection.ts",
-          "frontend/src/hooks/useNakshatraNow.ts",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/layout/AppHeader.tsx",
+          "frontend/src/pages/TodayPage.tsx",
+          "frontend/src/pages/TomorrowPage.tsx",
+          "frontend/src/pages/KnowledgeBasePage.tsx",
+          "frontend/src/pages/NakshatraDetailPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/city/CityPicker.tsx",
-          "frontend/src/hooks/useCitySelection.ts",
-          "frontend/src/hooks/useNakshatraNow.ts",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/layout/AppHeader.tsx",
+          "frontend/src/pages/TodayPage.tsx",
+          "frontend/src/pages/TomorrowPage.tsx",
+          "frontend/src/pages/KnowledgeBasePage.tsx",
+          "frontend/src/pages/NakshatraDetailPage.tsx"
         ]
       }
     ]
@@ -60,11 +72,13 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/city/CityPicker.tsx",
-    "frontend/src/data/cities.ts",
-    "frontend/src/hooks/useCitySelection.ts",
-    "frontend/src/hooks/useNakshatraNow.ts",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/components/layout/AppHeader.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/KnowledgeBasePage.tsx",
+    "frontend/src/pages/NakshatraDetailPage.tsx",
+    "frontend/src/pages/TodayPage.tsx",
+    "frontend/src/pages/TomorrowPage.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

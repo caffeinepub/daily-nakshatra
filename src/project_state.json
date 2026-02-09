@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 11,
+  "projectStateVersion": 21,
   "summary": "Daily Nakshatra: a location-aware Vedic astrology app that determines the Moon’s current Nakshatra/Pada by user city and local time, presents an experiential daily interpretation, and provides a Nakshatra knowledge base with symbolism, traits, and Pada breakdowns, with optional alerts and reflective tools.",
   "architectural_notes": [
     "Use device location services for city detection with a manual override/search flow.",
@@ -10,7 +10,11 @@
   "known_issues": [
     "City selector issue: user cannot change selected city from New York to another city (\"select your city\" tab appears stuck).",
     "Nakshatra computation appears not to correspond to the selected city/location (data mismatch).",
-    "Current position (GPS-based location detection) is still not working; user reports it failing and requests bug fixes."
+    "Current position (GPS-based location detection) is still not working; user reports it failing and requests bug fixes.",
+    "Intermittent/blocking runtime error: \"Error loading Nakshatra data. Please try again.\" prevents Today view from loading Nakshatra content/data.",
+    "Tomorrow page also shows/blocking runtime error: \"Error loading Nakshatra data. Please try again.\" (user requests fix on Tomorrow view as well as Today).",
+    "Build/deployment blocked by an internal configuration problem when attempting to update fonts (header/title to Lovalina).",
+    "User requested rollback/revert to the last deployed version prior to the Lovalina font change (revert to version 8)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -181,6 +185,134 @@
         "REQ-22"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-harden-the-frontend-nakshatra-query-so-it-never-issues-a-backend-call-with-a-non-finite-longitude-and-provide-a-user-facing-retry-action-when-nakshatra-loading-fails",
+      "title": "Harden the frontend Nakshatra query so it never issues a backend call with a non-finite longitude, and provide a user-facing retry action when Nakshatra loading fails.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-today-page-error-state-to-include-more-helpful-english-guidance-specific-to-this-failure-mode-without-adding-new-features-tell-the-user-to-retry-and-if-it-persists-to-change-city-timezone-selection-and-try-again",
+      "title": "Update the Today page error state to include more helpful English guidance specific to this failure mode (without adding new features): tell the user to retry and, if it persists, to change city/timezone selection and try again.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-top-level-navigation-tab-labeled-tomorrow-that-routes-to-a-new-tomorrow-page-alongside-the-existing-today-and-knowledge-base-navigation-items",
+      "title": "Add a new top-level navigation tab labeled \"Tomorrow\" that routes to a new Tomorrow page, alongside the existing \"Today\" and \"Knowledge Base\" navigation items.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-tomorrow-page-so-it-computes-and-displays-the-nakshatra-pada-reading-for-the-selected-city-time-context-at-an-anchor-time-exactly-24-hours-after-the-user-s-viewing-time-i-e-when-the-tomorrow-page-is-opened",
+      "title": "Implement the Tomorrow page so it computes and displays the Nakshatra/Pada reading for the selected city/time context at an anchor time exactly 24 hours after the user’s viewing time (i.e., when the Tomorrow page is opened).",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-tomorrow-page-reuse-the-existing-daily-interpretation-content-blocks-to-show-the-interpretation-for-the-computed-tomorrow-nakshatra-using-the-existing-daily-content-dataset",
+      "title": "On the Tomorrow page, reuse the existing daily interpretation content blocks to show the interpretation for the computed “tomorrow” Nakshatra, using the existing daily content dataset.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-tomorrow-page-has-robust-loading-and-error-ui-consistent-with-the-today-page-including-a-retry-action-and-do-not-issue-a-backend-request-when-the-computed-longitude-is-invalid-non-finite",
+      "title": "Ensure the Tomorrow page has robust loading and error UI consistent with the Today page (including a Retry action), and do not issue a backend request when the computed longitude is invalid/non-finite.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-tomorrow-page-make-it-clear-in-english-what-tomorrow-means-by-showing-the-viewing-time-anchor-and-the-computed-target-time-24-hours-in-the-selected-city-s-timezone-context",
+      "title": "On the Tomorrow page, make it clear (in English) what “Tomorrow” means by showing the viewing time anchor and the computed target time (+24 hours) in the selected city’s timezone context.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-todaypage-and-tomorrowpage-to-display-a-clear-user-facing-error-state-when-the-app-cannot-compute-a-valid-lunar-longitude-instead-of-rendering-a-blank-state-with-english-guidance-to-retry-and-or-change-city-timezone-selection",
+      "title": "Update TodayPage and TomorrowPage to display a clear user-facing error state when the app cannot compute a valid lunar longitude (instead of rendering a blank state), with English guidance to retry and/or change city/timezone selection.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-tomorrow-page-s-viewing-time-anchor-behavior-matches-the-intended-ux-when-the-selected-city-timezone-context-changes-the-page-should-recompute-the-anchor-and-target-time-24h-consistently-so-the-computed-longitude-and-backend-query-correspond-to-the-currently-selected-city-time-context",
+      "title": "Ensure the Tomorrow page’s viewing-time anchor behavior matches the intended UX: when the selected city/timezone context changes, the page should recompute the anchor and target time (+24h) consistently so the computed longitude and backend query correspond to the currently selected city/time context.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-today-and-tomorrow-pages-resilient-to-transient-actor-initialization-timing-by-preventing-user-visible-error-loading-nakshatra-data-from-being-shown-due-to-brief-actor-not-ready-states-only-show-the-backend-error-ui-when-a-real-backend-failure-occurs-after-the-query-is-eligible-to-run",
+      "title": "Make the Today and Tomorrow pages resilient to transient actor initialization timing by preventing user-visible \"Error loading Nakshatra data\" from being shown due to brief actor-not-ready states; only show the backend error UI when a real backend failure occurs after the query is eligible to run.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-lovalina-font-to-the-frontend-as-a-self-hosted-static-asset-and-register-it-for-use-via-tailwind-classes-do-not-rely-on-external-font-cdns",
+      "title": "Add the Lovalina font to the frontend as a self-hosted static asset and register it for use via Tailwind classes (do not rely on external font CDNs).",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-lovalina-font-to-the-app-header-brand-title-daily-nakshatra-in-the-top-navigation-header",
+      "title": "Apply the Lovalina font to the app header brand title \"Daily Nakshatra\" in the top navigation header.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-lovalina-font-to-primary-page-titles-across-the-app-e-g-the-main-h1-h2-title-text-at-the-top-of-today-tomorrow-knowledge-base-and-nakshatra-detail-pages",
+      "title": "Apply the Lovalina font to primary page titles across the app (e.g., the main H1/H2 title text at the top of Today, Tomorrow, Knowledge Base, and Nakshatra Detail pages).",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-lovalina-font-integration-so-the-app-no-longer-loads-or-registers-the-lovalina-font-revert-to-the-pre-font-change-setup-this-includes-removing-the-font-face-declaration-for-lovalina-and-removing-the-tailwind-font-family-entry-for-lovalina",
+      "title": "Remove the Lovalina font integration so the app no longer loads or registers the Lovalina font (revert to the pre-font-change setup). This includes removing the @font-face declaration for Lovalina and removing the Tailwind font family entry for Lovalina.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-revert-all-ui-usage-of-the-lovalina-font-classes-to-the-default-typography-used-before-the-font-change-by-removing-font-lovalina-from-all-components-pages-that-currently-apply-it-app-header-brand-title-and-primary-page-titles",
+      "title": "Revert all UI usage of the Lovalina font classes to the default typography used before the font change by removing `font-lovalina` from all components/pages that currently apply it (App header brand title and primary page titles).",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-there-are-no-remaining-references-to-lovalina-assets-classes-anywhere-in-the-frontend-codebase-after-the-revert-so-the-deployed-app-matches-the-pre-font-change-version-8-typography-behavior",
+      "title": "Ensure there are no remaining references to Lovalina assets/classes anywhere in the frontend codebase after the revert, so the deployed app matches the pre-font-change (Version 8) typography behavior.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -250,6 +382,42 @@
       "reqIds": [
         "REQ-3"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Eliminate intermittent backend traps in determineNakshatra by ensuring the full 0–360° longitude range maps to exactly one Nakshatra (no gaps at boundary decimals) and always returns a valid result for any finite input in range.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add a “Tomorrow” tab that shows the Nakshatra/Pada reading computed for exactly 24 hours after the user’s current viewing time (using the same selected city/time context).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Eliminate intermittent backend traps in determineNakshatra by ensuring the full 0–360° longitude range maps to exactly one Nakshatra (no gaps from truncated boundary decimals) and determineNakshatra never traps for any finite longitude in range.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Fix the incorrect Nakshatra boundary data that can cause overlaps/gaps (e.g., Jyeshtha start degree currently differs from the expected sequence) and align all Nakshatra start/end degrees to a consistent, mathematically correct progression across all 27 segments.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Change the app header and page title font to Lovalina",
+      "reqIds": [],
       "status": "pending"
     }
   ],

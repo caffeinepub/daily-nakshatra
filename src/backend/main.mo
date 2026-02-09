@@ -17,52 +17,71 @@ actor {
     };
   };
 
-  let nakshatras : [Nakshatra] = [
-    { name = "Ashwini"; startDegree = 0.0; endDegree = 13.333 },
-    { name = "Bharani"; startDegree = 13.334; endDegree = 26.666 },
-    { name = "Krittika"; startDegree = 26.667; endDegree = 40.0 },
-    { name = "Rohini"; startDegree = 40.001; endDegree = 53.333 },
-    { name = "Mrigashirsha"; startDegree = 53.334; endDegree = 66.666 },
-    { name = "Ardra"; startDegree = 66.667; endDegree = 80.0 },
-    { name = "Punarvasu"; startDegree = 80.001; endDegree = 93.333 },
-    { name = "Pushya"; startDegree = 93.334; endDegree = 106.666 },
-    { name = "Ashlesha"; startDegree = 106.667; endDegree = 120.0 },
-    { name = "Magha"; startDegree = 120.001; endDegree = 133.333 },
-    { name = "Purva Phalguni"; startDegree = 133.334; endDegree = 146.666 },
-    { name = "Uttara Phalguni"; startDegree = 146.667; endDegree = 160.0 },
-    { name = "Hasta"; startDegree = 160.001; endDegree = 173.333 },
-    { name = "Chitra"; startDegree = 173.334; endDegree = 186.666 },
-    { name = "Swati"; startDegree = 186.667; endDegree = 200.0 },
-    { name = "Vishakha"; startDegree = 200.001; endDegree = 213.333 },
-    { name = "Anuradha"; startDegree = 213.334; endDegree = 226.666 },
-    { name = "Jyeshtha"; startDegree = 226.667; endDegree = 240.0 },
-    { name = "Mula"; startDegree = 240.001; endDegree = 253.333 },
-    { name = "Purva Ashadha"; startDegree = 253.334; endDegree = 266.666 },
-    { name = "Uttara Ashadha"; startDegree = 266.667; endDegree = 280.0 },
-    { name = "Shravana"; startDegree = 280.001; endDegree = 293.333 },
-    { name = "Dhanishta"; startDegree = 293.334; endDegree = 306.666 },
-    { name = "Shatabhisha"; startDegree = 306.667; endDegree = 320.0 },
-    { name = "Purva Bhadrapada"; startDegree = 320.001; endDegree = 333.333 },
-    { name = "Uttara Bhadrapada"; startDegree = 333.334; endDegree = 346.666 },
-    { name = "Revati"; startDegree = 346.667; endDegree = 360.0 },
-  ];
+  // Calculate all Nakshatra boundaries programmatically
+  func computeNakshatras() : [Nakshatra] {
+    let namesArray : [Text] = [
+      "Ashwini",
+      "Bharani",
+      "Krittika",
+      "Rohini",
+      "Mrigashirsha",
+      "Ardra",
+      "Punarvasu",
+      "Pushya",
+      "Ashlesha",
+      "Magha",
+      "Purva Phalguni",
+      "Uttara Phalguni",
+      "Hasta",
+      "Chitra",
+      "Swati",
+      "Vishakha",
+      "Anuradha",
+      "Jyeshtha",
+      "Mula",
+      "Purva Ashadha",
+      "Uttara Ashadha",
+      "Shravana",
+      "Dhanishta",
+      "Shatabhisha",
+      "Purva Bhadrapada",
+      "Uttara Bhadrapada",
+      "Revati",
+    ];
+
+    Array.tabulate<Nakshatra>(
+      namesArray.size(),
+      func(i) {
+        let name = namesArray[i];
+        let startDegree = i.toFloat() * (40.0 / 3.0);
+        let endDegree = startDegree + (40.0 / 3.0);
+        {
+          name;
+          startDegree;
+          endDegree;
+        };
+      },
+    );
+  };
+
+  let nakshatras = computeNakshatras();
 
   func findNakshatraByDegree(lunarLongitude : Float) : ?Nakshatra {
     nakshatras.find(
       func(n) {
-        n.startDegree <= lunarLongitude and lunarLongitude <= n.endDegree;
+        n.startDegree <= lunarLongitude and lunarLongitude < n.endDegree;
       }
     );
   };
 
   func calculatePada(lunarLongitude : Float, nakshatraStartDegree : Float) : Int {
     let relativePos = lunarLongitude - nakshatraStartDegree;
-    Int.min(4, Int.max(1, (relativePos / 3.334).toInt() + 1));
+    Int.min(4, Int.max(1, (relativePos / (10.0 / 3.0)).toInt() + 1));
   };
 
   func validateDegree(degree : Float) : () {
-    if (degree < 0.0 or degree > 360.0) {
-      Runtime.trap("Lunar longitude must be between 0 and 360 degrees.");
+    if (degree < 0.0 or degree >= 360.0) {
+      Runtime.trap("Lunar longitude must be between 0 (inclusive) and 360 (exclusive) degrees.");
     };
   };
 
@@ -81,26 +100,21 @@ actor {
       Runtime.trap("No nakshatra found for given longitude");
     };
 
-    // Calculate Nakshatra number (1-based)
     let nakshatraIndex = nakshatras.indexOf(nakshatra);
     let nakshatraNumber = switch (nakshatraIndex) {
       case (?index) { index + 1 };
       case (null) { Runtime.trap("Nakshatra index not found") };
     };
 
-    // Calculate Pada (1-4)
     let padaNum = calculatePada(lunarLongitude, nakshatra.startDegree);
 
-    // Calculate precise remaining degrees
     let remainingDegrees = nakshatra.endDegree - lunarLongitude;
-    let remainingDegreesInNakshatra = Float.max(0.0, Float.min(13.333, remainingDegrees));
+    let remainingDegreesInNakshatra = Float.max(0.0, Float.min(40.0 / 3.0, remainingDegrees));
 
-    // Calculate remaining degrees within current Pada (range 0 - 3.333)
-    let positionInCurrentPada = (lunarLongitude - nakshatra.startDegree) % 3.334;
-    let remainingDegreesInCurrentPada = Float.max(0.0, Float.min(3.333, 3.333 - positionInCurrentPada));
+    let positionInCurrentPada = (lunarLongitude - nakshatra.startDegree) % (10.0 / 3.0);
+    let remainingDegreesInCurrentPada = Float.max(0.0, Float.min(10.0 / 3.0, (10.0 / 3.0) - positionInCurrentPada));
 
-    // Calculate degrees to next Pada boundary (always positive)
-    let degreesUntilNextPada = 3.334 - positionInCurrentPada;
+    let degreesUntilNextPada = (10.0 / 3.0) - positionInCurrentPada;
 
     {
       nakshatraName = nakshatra.name;

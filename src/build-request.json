@@ -1,0 +1,201 @@
+{
+  "kind": "build_request",
+  "title": "Build Daily Nakshatra: real-time Nakshatra/Pada by city with daily interpretation + knowledge base",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create the core app navigation and pages for Daily Nakshatra: (1) Today view showing the current Nakshatra/Pada for the selected city/time and the daily interpretation sections, (2) Knowledge Base list of all Nakshatras, and (3) Nakshatra detail page with Symbolism & Mythology, Core Traits, and Pada Breakdown.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Core Functionality\n🌙 Real-Time Moon Tracking by City",
+          "Deep Dive: Nakshatra Knowledge Base"
+        ]
+      },
+      "acceptanceCriteria": [
+        "App has a clear landing/Today screen plus navigation to Knowledge Base.",
+        "Knowledge Base page lists all Nakshatras (27 entries) and can open a detail view for any Nakshatra.",
+        "Nakshatra detail page renders three sections: Symbolism & Mythology, Core Traits & Psychological Themes, and Pada Breakdown (4 Padas).",
+        "All user-facing copy is in English."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement city selection with a manual fallback as the primary path: provide a searchable city picker with a built-in starter list (city name + timezone identifier and optional lat/long) and allow the user to set and persist their chosen city locally in the browser.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Automatically detects the user’s city (or allows manual selection)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can open a city picker, search, and select a city from a built-in list.",
+        "Selected city persists across reloads (local storage).",
+        "UI clearly shows the currently selected city and its local time."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add backend logic to compute the Moon’s current Nakshatra and Pada from an input timestamp (UTC) and return a structured result that the frontend can display (Nakshatra name, Pada 1–4, and the computed lunar longitude used for the determination).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Calculates the current Nakshatra and Pada based on precise lunar longitude",
+          "Updates seamlessly as the Moon shifts Nakshatras (including mid-day transitions)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes a query method that accepts a timestamp and returns: lunar longitude, Nakshatra index/name, and Pada number.",
+        "Frontend can call the backend method and render the returned Nakshatra and Pada.",
+        "Given different timestamps spanning a day, results can change to reflect Nakshatra transitions."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement seamless updating on the Today view: recompute and refresh the active Nakshatra/Pada on an interval and when the selected city changes, and show the next transition time (estimated) when the Moon enters the next Nakshatra and when it enters the next Pada.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Updates seamlessly as the Moon shifts Nakshatras (including mid-day transitions)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Today view updates automatically without a full page refresh (interval-based polling is acceptable).",
+        "When city selection changes, Today view recalculates and updates displayed values.",
+        "UI shows an estimated next Pada transition time and next Nakshatra transition time in the selected city’s local time."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add the Today view content blocks for the active Nakshatra: (1) “What Today Feels Like” (emotional climate, mental focus/motivation, social/relational tone, productivity vs rest tendencies, common frictions/blessings) and (2) “A Day in the Life” vignette, driven by a Nakshatra content dataset.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Daily Experience: “What Today Feels Like”",
+          "“A Day in the Life” – Nakshatra Embodiment"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Today view renders “What Today Feels Like” and “A Day in the Life” sections for the currently active Nakshatra.",
+        "Content is data-driven (switches when Nakshatra changes).",
+        "At minimum, Uttara Phalguni includes the provided example tone/vignette (paraphrase allowed but must remain consistent in meaning and in English)."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Create a Nakshatra knowledge base dataset covering all 27 Nakshatras, each with: primary symbols, ruling deity/archetype, planetary ruler, elemental/psychological themes, core traits (strengths + shadow expressions), and a 4-Pada breakdown (including the ruling Navamsa sign for each Pada).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Each Nakshatra has a dedicated section broken into three layers:",
+          "3️⃣ Pada Breakdown (Micro-Energetics)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dataset contains entries for 27 Nakshatras, each including the fields listed in the requirement.",
+        "Each entry contains 4 Padas with distinct descriptions and a Navamsa sign per Pada.",
+        "Knowledge Base pages render from this dataset without hardcoding per-page text in components."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add an in-app alerting option (not push notifications) that can be toggled on/off to surface a visible banner when the Moon has entered a new Nakshatra for the currently selected city/time context.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Optional notifications for Nakshatra changes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can toggle “In-app Nakshatra change alerts” on/off in the UI.",
+        "When enabled, the app shows a banner/notice when the Nakshatra changes compared to the previously displayed value.",
+        "No external push notification service is used."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Define and apply a cohesive visual theme for the app (colors, typography, spacing, and component styling) with a distinct “lunar / contemplative” aesthetic, consistently across Today, Knowledge Base, and detail pages (avoid a blue/purple primary palette).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Daily Nakshatra is not about fate—it’s about context."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Theme is applied consistently across major pages and components (buttons, cards, headings, background).",
+        "Primary palette does not rely on blue/purple as the main brand colors.",
+        "UI feels intentionally designed (not default template styling)."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Generate and include static visual assets to support the theme: a simple app logo mark and a subtle hero/background illustration, and render them from the frontend as static assets (do not serve images through the backend).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Generated images exist under frontend/public/assets/generated and are referenced directly by the frontend.",
+        "Logo appears in the app header and/or landing area.",
+        "Background/hero image is used on the Today view without degrading readability (appropriate overlay/contrast)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit immutable hook/entry files listed in SYSTEM_CONTEXT (compose around them).",
+    "Do not implement GPS/geolocation or map-based location detection; rely on manual city selection (and built-in list) instead.",
+    "Do not implement push notifications; only in-app alerts are allowed."
+  ],
+  "nonGoals": [
+    "Personalized birth Nakshatra resonance tracking (not part of this build unless explicitly requested later).",
+    "Relationship overlay insights (optional expansion; not included in this build).",
+    "Journal prompts and ritual/focus suggestions (optional expansion; not included in this build).",
+    "External city databases, maps, or GPS-based auto-detection."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimal moon-and-star logo mark, flat vector style with warm parchment + charcoal palette (daily-nakshatra-logo.dim_512x512.png)",
+      "Subtle textured hero background with faint lunar mansion / star map motif, low-contrast, readable under text overlay (daily-nakshatra-hero-bg.dim_1600x900.png)"
+    ],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

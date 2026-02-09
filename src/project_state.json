@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Daily Nakshatra: a location-aware Vedic astrology app that determines the Moon’s current Nakshatra/Pada by user city and local time, presents an experiential daily interpretation, and provides a Nakshatra knowledge base with symbolism, traits, and Pada breakdowns, with optional alerts and reflective tools.",
+  "architectural_notes": [
+    "Use device location services for city detection with a manual override/search flow.",
+    "Require a lunar ephemeris/astronomy calculation method to map time -> lunar longitude -> Nakshatra/Pada.",
+    "Store Nakshatra content (snapshots, vignettes, symbolism/traits, pada micro-descriptions) in a structured content database for retrieval by Nakshatra/Pada."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Minimal moon-and-star logo mark, flat vector style with warm parchment + charcoal palette (daily-nakshatra-logo.dim_512x512.png)\n- Subtle textured hero background with faint lunar mansion / star map motif, low-contrast, readable under text overlay (daily-nakshatra-hero-bg.dim_1600x900.png)",
+  "existing_features": [
+    {
+      "id": "feature-create-the-core-app-navigation-and-pages-for-daily-nakshatra-1-today-view-showing-the-current-nakshatra-pada-for-the-selected-city-time-and-the-daily-interpretation-sections-2-knowledge-base-list-of-all-nakshatras-and-3-nakshatra-detail-page-with-symbolism-mythology-core-traits-and-pada-breakdown",
+      "title": "Create the core app navigation and pages for Daily Nakshatra: (1) Today view showing the current Nakshatra/Pada for the selected city/time and the daily interpretation sections, (2) Knowledge Base list of all Nakshatras, and (3) Nakshatra detail page with Symbolism & Mythology, Core Traits, and Pada Breakdown.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-city-selection-with-a-manual-fallback-as-the-primary-path-provide-a-searchable-city-picker-with-a-built-in-starter-list-city-name-timezone-identifier-and-optional-lat-long-and-allow-the-user-to-set-and-persist-their-chosen-city-locally-in-the-browser",
+      "title": "Implement city selection with a manual fallback as the primary path: provide a searchable city picker with a built-in starter list (city name + timezone identifier and optional lat/long) and allow the user to set and persist their chosen city locally in the browser.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-seamless-updating-on-the-today-view-recompute-and-refresh-the-active-nakshatra-pada-on-an-interval-and-when-the-selected-city-changes-and-show-the-next-transition-time-estimated-when-the-moon-enters-the-next-nakshatra-and-when-it-enters-the-next-pada",
+      "title": "Implement seamless updating on the Today view: recompute and refresh the active Nakshatra/Pada on an interval and when the selected city changes, and show the next transition time (estimated) when the Moon enters the next Nakshatra and when it enters the next Pada.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-today-view-content-blocks-for-the-active-nakshatra-1-what-today-feels-like-emotional-climate-mental-focus-motivation-social-relational-tone-productivity-vs-rest-tendencies-common-frictions-blessings-and-2-a-day-in-the-life-vignette-driven-by-a-nakshatra-content-dataset",
+      "title": "Add the Today view content blocks for the active Nakshatra: (1) “What Today Feels Like” (emotional climate, mental focus/motivation, social/relational tone, productivity vs rest tendencies, common frictions/blessings) and (2) “A Day in the Life” vignette, driven by a Nakshatra content dataset.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-nakshatra-knowledge-base-dataset-covering-all-27-nakshatras-each-with-primary-symbols-ruling-deity-archetype-planetary-ruler-elemental-psychological-themes-core-traits-strengths-shadow-expressions-and-a-4-pada-breakdown-including-the-ruling-navamsa-sign-for-each-pada",
+      "title": "Create a Nakshatra knowledge base dataset covering all 27 Nakshatras, each with: primary symbols, ruling deity/archetype, planetary ruler, elemental/psychological themes, core traits (strengths + shadow expressions), and a 4-Pada breakdown (including the ruling Navamsa sign for each Pada).",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-in-app-alerting-option-not-push-notifications-that-can-be-toggled-on-off-to-surface-a-visible-banner-when-the-moon-has-entered-a-new-nakshatra-for-the-currently-selected-city-time-context",
+      "title": "Add an in-app alerting option (not push notifications) that can be toggled on/off to surface a visible banner when the Moon has entered a new Nakshatra for the currently selected city/time context.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-define-and-apply-a-cohesive-visual-theme-for-the-app-colors-typography-spacing-and-component-styling-with-a-distinct-lunar-contemplative-aesthetic-consistently-across-today-knowledge-base-and-detail-pages-avoid-a-blue-purple-primary-palette",
+      "title": "Define and apply a cohesive visual theme for the app (colors, typography, spacing, and component styling) with a distinct “lunar / contemplative” aesthetic, consistently across Today, Knowledge Base, and detail pages (avoid a blue/purple primary palette).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-include-static-visual-assets-to-support-the-theme-a-simple-app-logo-mark-and-a-subtle-hero-background-illustration-and-render-them-from-the-frontend-as-static-assets-do-not-serve-images-through-the-backend",
+      "title": "Generate and include static visual assets to support the theme: a simple app logo mark and a subtle hero/background illustration, and render them from the frontend as static assets (do not serve images through the backend).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Detect user city (GPS) with manual location selection fallback",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Compute real-time Moon position to determine current Nakshatra and Pada for the user’s local time/location, including mid-day transitions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Daily view: “What Today Feels Like” experiential snapshot for the active Nakshatra (emotional/mental/social/productivity themes)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "“A Day in the Life” narrative vignette per Nakshatra to support embodiment/attunement",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Nakshatra knowledge base with Symbolism/Mythology, Core Traits/Psychological Themes, and Pada breakdown (4 padas)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Optional notifications/alerts when the Moon enters a new Nakshatra in the user’s location",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Optional journaling prompts tailored to each Nakshatra",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Optional ritual/focus suggestions (work/rest/reflection/boundaries) based on the active Nakshatra",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Optional relationship overlay insights based on today’s Nakshatra",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Optional integration with user birth Nakshatra for resonance tracking",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add backend logic to compute the Moon’s current Nakshatra and Pada from an input timestamp (UTC) and return a structured result that the frontend can display (Nakshatra name, Pada 1–4, and the computed lunar longitude used for the determination).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Daily Nakshatra",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

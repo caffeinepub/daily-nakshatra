@@ -1,0 +1,296 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Daily Nakshatra: real-time Nakshatra/Pada by city with daily interpretation + knowledge base (frontend)",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Create core navigation and pages: Today, Knowledge Base list (27), and Nakshatra detail with required sections.",
+      "acceptanceCriteria": [
+        "App has a clear landing/Today screen plus navigation to Knowledge Base.",
+        "Knowledge Base page lists all Nakshatras (27 entries) and can open a detail view for any Nakshatra.",
+        "Nakshatra detail page renders three sections: Symbolism & Mythology, Core Traits & Psychological Themes, and Pada Breakdown (4 Padas).",
+        "All user-facing copy is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the app shell and route wiring for Today, Knowledge Base, and Nakshatra detail pages; include a shared layout with header navigation. Use shadcn-ui components (e.g., navigation, buttons, cards) for consistent UI. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "create",
+          "description": "Create a shared layout component with header + main container that is reused across Today, Knowledge Base, and detail views. Use shadcn-ui layout primitives (e.g., Card, Separator) to keep styling consistent. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "create",
+          "description": "Create a header that shows the app logo and navigation links to Today and Knowledge Base; also includes the current city display and quick access to the city picker and alert toggle. Use shadcn-ui components for header actions (Button, Dropdown/Popover as needed). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "create",
+          "description": "Create the Today page view that renders the active Nakshatra/Pada (from the live computation hook) and the daily interpretation blocks (wired to the Nakshatra dataset). Use shadcn-ui Card/Badge/Typography patterns for readable content blocks. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
+          "operation": "create",
+          "description": "Create the Knowledge Base page that lists all 27 Nakshatras from the dataset with search/filter and links to each detail page. Use shadcn-ui Input + Card components for list/search UI. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
+          "operation": "create",
+          "description": "Create the Nakshatra detail page that renders: Symbolism & Mythology, Core Traits & Psychological Themes, and a 4-Pada breakdown (including Navamsa sign per Pada) from the dataset. Use shadcn-ui Accordion/Tabs as appropriate to structure long-form content. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/nakshatra/NakshatraListItem.tsx",
+          "operation": "create",
+          "description": "Create a reusable list item/card component for the Knowledge Base list entries (name, key symbols, ruler), with a link to the detail route. Use shadcn-ui Card/Button primitives. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/nakshatra/NakshatraSections.tsx",
+          "operation": "create",
+          "description": "Create a reusable renderer for the three required detail sections to ensure the detail page stays purely data-driven (no hardcoded per-page text). Use shadcn-ui Typography/Accordion components. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement a searchable city picker with a built-in city list and local persistence; show selected city and its local time.",
+      "acceptanceCriteria": [
+        "User can open a city picker, search, and select a city from a built-in list.",
+        "Selected city persists across reloads (local storage).",
+        "UI clearly shows the currently selected city and its local time."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/data/cities.ts",
+          "operation": "create",
+          "description": "Add a built-in starter city list dataset (city name + IANA timezone identifier; optional lat/long fields) used by the city picker. Keep this local-only (no GPS, no external city DB)."
+        },
+        {
+          "path": "frontend/src/hooks/useLocalStorage.ts",
+          "operation": "create",
+          "description": "Create a small typed localStorage hook to persist the chosen city and alert preferences across reloads."
+        },
+        {
+          "path": "frontend/src/hooks/useCitySelection.ts",
+          "operation": "create",
+          "description": "Create a hook that exposes current city, setter, and a derived formatted local-time string (via Intl.DateTimeFormat with the city’s timezone). It should persist the selection via localStorage and provide a sane default city from the starter list."
+        },
+        {
+          "path": "frontend/src/components/city/CityPicker.tsx",
+          "operation": "create",
+          "description": "Create a searchable city picker UI (dialog/popover) backed by the built-in list and wired to useCitySelection. Use shadcn-ui Dialog/Command components for search-and-select interactions. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Wire the CityPicker into the header (manual city selection as the primary path), and display the selected city + its current local time clearly. Use shadcn-ui Button/Popover triggers. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Seamlessly refresh Today view on an interval and on city change; estimate and display next Nakshatra/Pada transition times in the selected city’s local time.",
+      "acceptanceCriteria": [
+        "Today view updates automatically without a full page refresh (interval-based polling is acceptable).",
+        "When city selection changes, Today view recalculates and updates displayed values.",
+        "UI shows an estimated next Pada transition time and next Nakshatra transition time in the selected city’s local time."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/astro/lunarLongitude.ts",
+          "operation": "create",
+          "description": "Implement a lightweight lunar longitude approximation utility (UTC timestamp -> approximate ecliptic longitude in degrees) to support real-time recomputation without adding GPS/location detection."
+        },
+        {
+          "path": "frontend/src/lib/time/timezone.ts",
+          "operation": "create",
+          "description": "Add utilities to format timestamps into the selected city’s local time using its IANA timezone identifier (Intl.DateTimeFormat), and to compute future local times for transition estimates."
+        },
+        {
+          "path": "frontend/src/hooks/useNakshatraNow.ts",
+          "operation": "create",
+          "description": "Create a hook that (a) polls on an interval and when city changes, (b) computes current UTC timestamp and approximate lunar longitude, (c) calls the backendInterface determineNakshatra method via the existing core-infrastructure backend connection setup, and (d) derives estimated next Pada/Nakshatra transition timestamps using returned remaining degrees plus an assumed lunar motion rate. Verify the core-infrastructure usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "modify",
+          "description": "Wire Today page to use useNakshatraNow; render current Nakshatra name, Pada, precise/approx longitude (as appropriate), and display estimated next Pada + next Nakshatra transition times formatted in the selected city’s local time. Use shadcn-ui Badge/Card for clear presentation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/nakshatra/TransitionTimes.tsx",
+          "operation": "create",
+          "description": "Create a small UI component to present the two transition estimates (next Pada and next Nakshatra) in a readable, consistent format. Use shadcn-ui components (Card/Separator) for styling. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add data-driven Today content blocks (“What Today Feels Like” and “A Day in the Life”) for the active Nakshatra, with Uttara Phalguni example included.",
+      "acceptanceCriteria": [
+        "Today view renders “What Today Feels Like” and “A Day in the Life” sections for the currently active Nakshatra.",
+        "Content is data-driven (switches when Nakshatra changes).",
+        "At minimum, Uttara Phalguni includes the provided example tone/vignette (paraphrase allowed but must remain consistent in meaning and in English)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/data/nakshatraDailyContent.ts",
+          "operation": "create",
+          "description": "Create a daily-interpretation dataset keyed by Nakshatra (27 entries) containing “What Today Feels Like” subfields (emotional climate, mental focus/motivation, social/relational tone, productivity vs rest tendencies, common frictions/blessings) and an “A Day in the Life” vignette. Ensure Uttara Phalguni includes the required example meaning in English (paraphrase allowed)."
+        },
+        {
+          "path": "frontend/src/components/today/DailyInterpretationBlocks.tsx",
+          "operation": "create",
+          "description": "Create a component that renders the two Today content blocks from the daily content dataset for the currently active Nakshatra. Use shadcn-ui Card/Typography components for structured content. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "modify",
+          "description": "Wire DailyInterpretationBlocks into Today page and ensure it switches content when useNakshatraNow reports a different active Nakshatra. Use shadcn-ui components for consistent styling. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Create a complete 27-Nakshatra knowledge base dataset and render Knowledge Base and detail pages from it (no per-page hardcoding).",
+      "acceptanceCriteria": [
+        "Dataset contains entries for 27 Nakshatras, each including the fields listed in the requirement.",
+        "Each entry contains 4 Padas with distinct descriptions and a Navamsa sign per Pada.",
+        "Knowledge Base pages render from this dataset without hardcoding per-page text in components."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/data/nakshatras.ts",
+          "operation": "create",
+          "description": "Create the full Nakshatra knowledge base dataset (27 entries), each with: primary symbols, ruling deity/archetype, planetary ruler, elemental/psychological themes, core traits (strengths + shadow expressions), and a 4-Pada breakdown including the ruling Navamsa sign for each Pada. Keep all copy in English."
+        },
+        {
+          "path": "frontend/src/lib/nakshatra/index.ts",
+          "operation": "create",
+          "description": "Add small helper functions to lookup Nakshatra entries by name/number and to normalize routing slugs, ensuring pages remain data-driven and consistent."
+        },
+        {
+          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
+          "operation": "modify",
+          "description": "Render the 27-entry list directly from frontend/src/data/nakshatras.ts, with simple search/filter; link each item to its detail route via slug or id. Use shadcn-ui Input/Card components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
+          "operation": "modify",
+          "description": "Render the three required detail sections entirely from the dataset (including 4 Padas + Navamsa signs), using shared section renderer components to avoid per-page hardcoding. Use shadcn-ui Accordion/Tabs for readability. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add an in-app (non-push) alert toggle and show a visible banner when the Nakshatra changes.",
+      "acceptanceCriteria": [
+        "User can toggle “In-app Nakshatra change alerts” on/off in the UI.",
+        "When enabled, the app shows a banner/notice when the Nakshatra changes compared to the previously displayed value.",
+        "No external push notification service is used."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useNakshatraAlerts.ts",
+          "operation": "create",
+          "description": "Create a hook that persists an alerts-enabled toggle in localStorage and compares the latest active Nakshatra to the previously seen value to decide when to show a banner."
+        },
+        {
+          "path": "frontend/src/components/alerts/NakshatraChangeBanner.tsx",
+          "operation": "create",
+          "description": "Create a visible in-app banner component shown when a Nakshatra transition is detected (when alerts are enabled), with a dismiss action. Use shadcn-ui Alert/Button components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/alerts/AlertsToggle.tsx",
+          "operation": "create",
+          "description": "Create a UI toggle control for “In-app Nakshatra change alerts” and persist the setting locally. Use shadcn-ui Switch/Label components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Wire the AlertsToggle into the header (or a small settings area) so it’s easily accessible. Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "modify",
+          "description": "Wire useNakshatraAlerts + NakshatraChangeBanner into Today page so the banner appears when the displayed Nakshatra changes (and alerts are enabled), without using push notifications. Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Define and apply a cohesive “lunar / contemplative” theme (non-blue/purple primary) across the app.",
+      "acceptanceCriteria": [
+        "Theme is applied consistently across major pages and components (buttons, cards, headings, background).",
+        "Primary palette does not rely on blue/purple as the main brand colors.",
+        "UI feels intentionally designed (not default template styling)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Define global CSS variables and base styles to establish a warm parchment + charcoal theme (non-blue/purple primary), with comfortable spacing and typography; ensure consistent styling hooks for shadcn-ui tokens (via Tailwind CSS variables)."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Adjust/extend Tailwind theme tokens as needed to support the contemplative palette (warm neutrals, charcoal, muted gold/ochre accents) and consistent typography defaults; keep compatibility with shadcn-ui variable-driven color system. Verify shadcn-ui styling guidance before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Apply consistent page background, max-width, and typographic rhythm across all pages; ensure the layout supports the hero background on Today while keeping text readable. Use shadcn-ui components where helpful. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "modify",
+          "description": "Apply the theme to Today view content blocks (headings, cards, badges) and ensure overall composition matches the lunar/contemplative aesthetic without relying on blue/purple. Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
+          "operation": "modify",
+          "description": "Apply the theme consistently to Knowledge Base list/search UI (cards, inputs, typography). Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
+          "operation": "modify",
+          "description": "Apply the theme consistently to the detail page sections (typography, cards/accordions). Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Include generated static logo and hero/background assets and render them in the UI (frontend static assets only).",
+      "acceptanceCriteria": [
+        "Generated images exist under frontend/public/assets/generated and are referenced directly by the frontend.",
+        "Logo appears in the app header and/or landing area.",
+        "Background/hero image is used on the Today view without degrading readability (appropriate overlay/contrast)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/daily-nakshatra-logo.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated logo asset to the required static path so it can be referenced directly by the frontend (no backend serving)."
+        },
+        {
+          "path": "frontend/public/assets/generated/daily-nakshatra-hero-bg.dim_1600x900.png",
+          "operation": "create",
+          "description": "Add the generated hero/background asset to the required static path so it can be referenced directly by the frontend (no backend serving)."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Render the static logo image from frontend/public/assets/generated/daily-nakshatra-logo.dim_512x512.png in the header (and/or Today landing area) to reinforce branding. Verify any framework/static-asset usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "modify",
+          "description": "Use the hero/background image from frontend/public/assets/generated/daily-nakshatra-hero-bg.dim_1600x900.png as a subtle background on Today view with an overlay/contrast treatment to preserve readability. Verify any framework/static-asset usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

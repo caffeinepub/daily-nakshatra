@@ -1,0 +1,179 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-the-core-app-navigation-and-pages-for-daily-nakshatra-1-today-view-showing-the-current-nakshatra-pada-for-the-selected-city-time-and-the-daily-interpretation-sections-2-knowledge-base-list-of-all-nakshatras-and-3-nakshatra-detail-page-with-symbolism-mythology-core-traits-and-pada-breakdown",
+      "featureTitle": "Create the core app navigation and pages for Daily Nakshatra: (1) Today view showing the current Nakshatra/Pada for the selected city/time and the daily interpretation sections, (2) Knowledge Base list of all Nakshatras, and (3) Nakshatra detail page with Symbolism & Mythology, Core Traits, and Pada Breakdown.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/AppHeader.tsx",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/components/nakshatra/NakshatraListItem.tsx",
+        "frontend/src/components/nakshatra/NakshatraSections.tsx",
+        "frontend/src/pages/KnowledgeBasePage.tsx",
+        "frontend/src/pages/NakshatraDetailPage.tsx",
+        "frontend/src/pages/TodayPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-city-selection-with-a-manual-fallback-as-the-primary-path-provide-a-searchable-city-picker-with-a-built-in-starter-list-city-name-timezone-identifier-and-optional-lat-long-and-allow-the-user-to-set-and-persist-their-chosen-city-locally-in-the-browser",
+      "featureTitle": "Implement city selection with a manual fallback as the primary path: provide a searchable city picker with a built-in starter list (city name + timezone identifier and optional lat/long) and allow the user to set and persist their chosen city locally in the browser.",
+      "files": [
+        "frontend/src/components/city/CityPicker.tsx",
+        "frontend/src/components/layout/AppHeader.tsx",
+        "frontend/src/data/cities.ts",
+        "frontend/src/hooks/useCitySelection.ts",
+        "frontend/src/hooks/useLocalStorage.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-seamless-updating-on-the-today-view-recompute-and-refresh-the-active-nakshatra-pada-on-an-interval-and-when-the-selected-city-changes-and-show-the-next-transition-time-estimated-when-the-moon-enters-the-next-nakshatra-and-when-it-enters-the-next-pada",
+      "featureTitle": "Implement seamless updating on the Today view: recompute and refresh the active Nakshatra/Pada on an interval and when the selected city changes, and show the next transition time (estimated) when the Moon enters the next Nakshatra and when it enters the next Pada.",
+      "files": [
+        "frontend/src/components/nakshatra/TransitionTimes.tsx",
+        "frontend/src/hooks/useNakshatraNow.ts",
+        "frontend/src/lib/astro/lunarLongitude.ts",
+        "frontend/src/lib/time/timezone.ts",
+        "frontend/src/pages/TodayPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-the-today-view-content-blocks-for-the-active-nakshatra-1-what-today-feels-like-emotional-climate-mental-focus-motivation-social-relational-tone-productivity-vs-rest-tendencies-common-frictions-blessings-and-2-a-day-in-the-life-vignette-driven-by-a-nakshatra-content-dataset",
+      "featureTitle": "Add the Today view content blocks for the active Nakshatra: (1) “What Today Feels Like” (emotional climate, mental focus/motivation, social/relational tone, productivity vs rest tendencies, common frictions/blessings) and (2) “A Day in the Life” vignette, driven by a Nakshatra content dataset.",
+      "files": [
+        "frontend/src/components/today/DailyInterpretationBlocks.tsx",
+        "frontend/src/data/nakshatraDailyContent.ts",
+        "frontend/src/pages/TodayPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-nakshatra-knowledge-base-dataset-covering-all-27-nakshatras-each-with-primary-symbols-ruling-deity-archetype-planetary-ruler-elemental-psychological-themes-core-traits-strengths-shadow-expressions-and-a-4-pada-breakdown-including-the-ruling-navamsa-sign-for-each-pada",
+      "featureTitle": "Create a Nakshatra knowledge base dataset covering all 27 Nakshatras, each with: primary symbols, ruling deity/archetype, planetary ruler, elemental/psychological themes, core traits (strengths + shadow expressions), and a 4-Pada breakdown (including the ruling Navamsa sign for each Pada).",
+      "files": [
+        "frontend/src/data/nakshatras.ts",
+        "frontend/src/lib/nakshatra/index.ts",
+        "frontend/src/pages/KnowledgeBasePage.tsx",
+        "frontend/src/pages/NakshatraDetailPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-in-app-alerting-option-not-push-notifications-that-can-be-toggled-on-off-to-surface-a-visible-banner-when-the-moon-has-entered-a-new-nakshatra-for-the-currently-selected-city-time-context",
+      "featureTitle": "Add an in-app alerting option (not push notifications) that can be toggled on/off to surface a visible banner when the Moon has entered a new Nakshatra for the currently selected city/time context.",
+      "files": [
+        "frontend/src/components/alerts/AlertsToggle.tsx",
+        "frontend/src/components/alerts/NakshatraChangeBanner.tsx",
+        "frontend/src/components/layout/AppHeader.tsx",
+        "frontend/src/hooks/useNakshatraAlerts.ts",
+        "frontend/src/pages/TodayPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-define-and-apply-a-cohesive-visual-theme-for-the-app-colors-typography-spacing-and-component-styling-with-a-distinct-lunar-contemplative-aesthetic-consistently-across-today-knowledge-base-and-detail-pages-avoid-a-blue-purple-primary-palette",
+      "featureTitle": "Define and apply a cohesive visual theme for the app (colors, typography, spacing, and component styling) with a distinct “lunar / contemplative” aesthetic, consistently across Today, Knowledge Base, and detail pages (avoid a blue/purple primary palette).",
+      "files": [
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/KnowledgeBasePage.tsx",
+        "frontend/src/pages/NakshatraDetailPage.tsx",
+        "frontend/src/pages/TodayPage.tsx",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-and-include-static-visual-assets-to-support-the-theme-a-simple-app-logo-mark-and-a-subtle-hero-background-illustration-and-render-them-from-the-frontend-as-static-assets-do-not-serve-images-through-the-backend",
+      "featureTitle": "Generate and include static visual assets to support the theme: a simple app logo mark and a subtle hero/background illustration, and render them from the frontend as static assets (do not serve images through the backend).",
+      "files": [
+        "frontend/src/components/layout/AppHeader.tsx",
+        "frontend/src/pages/TodayPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

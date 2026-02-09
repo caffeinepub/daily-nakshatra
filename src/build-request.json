@@ -1,73 +1,74 @@
 {
   "kind": "build_request",
-  "title": "Revert the frontend typography to pre-Lovalina (Version 8 styling)",
+  "title": "Fix intermittent 'Error loading Nakshatra data' failures on Today/Tomorrow pages",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-39",
-      "text": "Remove the Lovalina font integration so the app no longer loads or registers the Lovalina font (revert to the pre-font-change setup). This includes removing the @font-face declaration for Lovalina and removing the Tailwind font family entry for Lovalina.",
+      "id": "REQ-42",
+      "text": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "please revert back to version 8 before the font change"
+          "error loading nakshatra data. Please fix the bugs"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/index.css` no longer contains an `@font-face` block for `font-family: 'Lovalina'` or any references to `/assets/fonts/lovalina/...`.",
-        "`frontend/tailwind.config.js` no longer defines a `fontFamily.lovalina` entry.",
-        "The frontend builds successfully without requiring any Lovalina font files to exist."
+        "`isValidLongitude` treats 360 as invalid (valid range is >= 0 and < 360), matching backend expectations.",
+        "Before calling `actor.determineNakshatra`, the frontend normalizes any computed longitude to the [0, 360) range (e.g., 360 becomes 0; negatives wrap into range).",
+        "The app does not show the \"Error loading Nakshatra data\" state due to a frontend-sent boundary value (e.g., 360) that the backend rejects.",
+        "User-facing error text remains in English."
       ]
     },
     {
-      "id": "REQ-40",
-      "text": "Revert all UI usage of the Lovalina font classes to the default typography used before the font change by removing `font-lovalina` from all components/pages that currently apply it (App header brand title and primary page titles).",
+      "id": "REQ-43",
+      "text": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "please revert back to version 8 before the font change"
+          "error loading nakshatra data. Please fix the bugs"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/components/layout/AppHeader.tsx` brand title \"Daily Nakshatra\" no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/TodayPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/TomorrowPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/KnowledgeBasePage.tsx` page title no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/NakshatraDetailPage.tsx` page title no longer uses the `font-lovalina` Tailwind class."
+        "When `tomorrowLongitude` is `null`/not yet computed, no backend request is sent from TomorrowPage (the query remains disabled).",
+        "TomorrowPage does not pass a placeholder longitude (e.g., 0) that could incorrectly trigger a backend call before the correct target time computation is ready.",
+        "TomorrowPage continues to show a loading skeleton state while computing longitude/initializing actor, and only shows backend error UI after a real eligible query fails.",
+        "User-facing error text remains in English."
       ]
     },
     {
-      "id": "REQ-41",
-      "text": "Ensure there are no remaining references to Lovalina assets/classes anywhere in the frontend codebase after the revert, so the deployed app matches the pre-font-change (Version 8) typography behavior.",
-      "target": "frontend",
+      "id": "REQ-44",
+      "text": "Harden the backend `determineNakshatra` implementation so it does not trap on boundary-equivalent finite inputs (e.g., 360.0 due to float rounding) by normalizing the input longitude into [0, 360) before validation and lookup.",
+      "target": "backend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "please revert back to version 8 before the font change"
+          "error loading nakshatra data. Please fix the bugs"
         ]
       },
       "acceptanceCriteria": [
-        "A repository-wide search finds no remaining occurrences of `font-lovalina`, `Lovalina`, or `/assets/fonts/lovalina` in frontend source/config files.",
-        "The app renders with the normal/default font stack (no custom Lovalina typography) and there are no missing-font 404s in the browser network panel."
+        "Backend normalizes `lunarLongitude` into the [0, 360) range at the start of `determineNakshatra` (e.g., 360.0 maps to 0.0) before any range checks and nakshatra lookup.",
+        "For any finite input longitude, `determineNakshatra` returns a valid nakshatra result and does not trap due solely to a 360-boundary equivalent value.",
+        "No changes violate the single-actor architecture (all logic remains in `backend/main.mo`)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under `frontend/src/components/ui` (read-only UI component sources must be composed, not edited).",
-    "Do not edit any frontend files listed in `frontend.immutablePaths` in SYSTEM_CONTEXT.",
-    "Keep backend Motoko code unchanged; this is a frontend-only revert."
+    "Frontend must not modify files under `frontend/src/components/ui` or other `frontend.immutablePaths` listed in SYSTEM_CONTEXT.",
+    "Backend must remain a single Motoko actor with logic in `backend/main.mo`; add `backend/migration.mo` only if a stable-state upgrade is required (not expected for these fixes).",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not introduce new fonts, font providers, or external font CDNs.",
-    "Do not change the color theme, layout, or spacing beyond what is required to remove the Lovalina font usage.",
-    "Do not add new features or modify Nakshatra computation logic."
+    "Adding new app features unrelated to the Nakshatra loading failure (e.g., journaling, new datasets, new navigation).",
+    "Changing the astronomical model/algorithm beyond normalization/validation needed to stop errors.",
+    "Introducing external APIs or third-party services for moon calculations or timezone resolution."
   ],
   "imageRequirements": {
     "required": [],

@@ -2,11 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-the-lovalina-font-integration-so-the-app-no-longer-loads-or-registers-the-lovalina-font-revert-to-the-pre-font-change-setup-this-includes-removing-the-font-face-declaration-for-lovalina-and-removing-the-tailwind-font-family-entry-for-lovalina",
-      "featureTitle": "Remove the Lovalina font integration so the app no longer loads or registers the Lovalina font (revert to the pre-font-change setup). This includes removing the @font-face declaration for Lovalina and removing the Tailwind font family entry for Lovalina.",
+      "featureId": "feature-prevent-any-backend-determinenakshatra-call-from-being-issued-with-an-out-of-range-or-boundary-invalid-lunar-longitude-by-normalizing-and-validating-the-longitude-to-the-backend-accepted-domain-0-360-in-the-frontend-query-layer",
+      "featureTitle": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
       "files": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
+        "frontend/src/hooks/useNakshatraNow.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,18 +17,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-39"
+        "REQ-42"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-revert-all-ui-usage-of-the-lovalina-font-classes-to-the-default-typography-used-before-the-font-change-by-removing-font-lovalina-from-all-components-pages-that-currently-apply-it-app-header-brand-title-and-primary-page-titles",
-      "featureTitle": "Revert all UI usage of the Lovalina font classes to the default typography used before the font change by removing `font-lovalina` from all components/pages that currently apply it (App header brand title and primary page titles).",
+      "featureId": "feature-eliminate-premature-or-placeholder-backend-requests-on-the-tomorrow-page-by-ensuring-the-determinenakshatra-query-is-disabled-until-the-tomorrow-longitude-has-been-computed-and-validated-for-the-selected-city-timezone-context",
+      "featureTitle": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
       "files": [
-        "frontend/src/components/layout/AppHeader.tsx",
-        "frontend/src/pages/KnowledgeBasePage.tsx",
-        "frontend/src/pages/NakshatraDetailPage.tsx",
-        "frontend/src/pages/TodayPage.tsx",
+        "frontend/src/hooks/useQueries.ts",
         "frontend/src/pages/TomorrowPage.tsx"
       ],
       "components": [
@@ -38,31 +36,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-40"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-there-are-no-remaining-references-to-lovalina-assets-classes-anywhere-in-the-frontend-codebase-after-the-revert-so-the-deployed-app-matches-the-pre-font-change-version-8-typography-behavior",
-      "featureTitle": "Ensure there are no remaining references to Lovalina assets/classes anywhere in the frontend codebase after the revert, so the deployed app matches the pre-font-change (Version 8) typography behavior.",
-      "files": [
-        "frontend/src/components/layout/AppHeader.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/KnowledgeBasePage.tsx",
-        "frontend/src/pages/NakshatraDetailPage.tsx",
-        "frontend/src/pages/TodayPage.tsx",
-        "frontend/src/pages/TomorrowPage.tsx",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-41"
+        "REQ-43"
       ],
       "confidence": "high"
     }

@@ -3,7 +3,7 @@ import { useDetermineNakshatra } from './useQueries';
 import { calculateLunarLongitude } from '@/lib/astro/lunarLongitude';
 import { getCurrentTimeInTimezone } from '@/lib/time/timezone';
 import { useCitySelection } from './useCitySelection';
-import { isValidLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
+import { isValidLongitude, normalizeLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
 
 const POLL_INTERVAL = 60000; // 1 minute
 
@@ -12,7 +12,8 @@ export function useNakshatraNow() {
   
   const [currentLongitude, setCurrentLongitude] = useState<number>(() => {
     const cityTime = getCurrentTimeInTimezone(currentCity.timezone);
-    return calculateLunarLongitude(cityTime);
+    const longitude = calculateLunarLongitude(cityTime);
+    return normalizeLongitude(longitude);
   });
 
   const [isLongitudeValid, setIsLongitudeValid] = useState<boolean>(() => 
@@ -23,12 +24,14 @@ export function useNakshatraNow() {
 
   const recomputeLongitude = () => {
     const cityTime = getCurrentTimeInTimezone(currentCity.timezone);
-    const longitude = calculateLunarLongitude(cityTime);
+    const rawLongitude = calculateLunarLongitude(cityTime);
+    const longitude = normalizeLongitude(rawLongitude);
     const valid = isValidLongitude(longitude);
     
     if (!valid) {
       console.warn('[useNakshatraNow] Invalid longitude computed', {
-        longitude,
+        rawLongitude,
+        normalizedLongitude: longitude,
         city: currentCity.name,
         timezone: currentCity.timezone,
         cityTime: cityTime.toISOString(),

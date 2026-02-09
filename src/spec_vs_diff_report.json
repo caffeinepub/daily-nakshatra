@@ -1,49 +1,34 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T09:12:27.979Z",
-  "summary": "The diff clearly removes Lovalina usage from several key UI titles (AppHeader, KnowledgeBasePage, NakshatraDetailPage) and shows no Tailwind `fontFamily.lovalina` entry in the provided tailwind.config.js snippet, and no `@font-face` for Lovalina in the provided index.css snippet. However, the TodayPage and TomorrowPage diffs are truncated so removal of `font-lovalina` there cannot be confirmed, and repository-wide absence/build-no-font-files cannot be proven from the diff summary alone.",
-  "missing_requirements": [
+  "generatedAt": "2026-02-09T09:18:32.463Z",
+  "summary": "The diff implements longitude normalization/validation in the frontend query layer, disables Tomorrow backend queries until a computed/validated longitude exists, and normalizes backend inputs into [0, 360) to avoid boundary traps. Overall the changes align with REQ-42/43/44 based on the provided diff excerpts.",
+  "missing_requirements": [],
+  "hallucinated_features": [
     {
-      "id": "REQ-40",
-      "requirement": "Remove `font-lovalina` from hero titles on TodayPage and TomorrowPage.",
-      "reason": "Both TodayPage.tsx and TomorrowPage.tsx are truncated in the diff summary; the hero title lines where `font-lovalina` would appear are not shown, so the acceptance criteria for those files cannot be verified from provided evidence.",
+      "description": "Added a diagnostics/logging helper for Nakshatra query failures (standardized console.warn logging with categories and context).",
+      "reason": "BuildRequest focuses on preventing invalid/boundary longitude requests and hardening backend normalization; it does not explicitly request adding a diagnostics/logging module, though it is related to debugging the failure.",
       "evidence": [
-        "frontend/src/pages/TodayPage.tsx (truncated)",
-        "frontend/src/pages/TomorrowPage.tsx (truncated)"
+        "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
+        "frontend/src/hooks/useQueries.ts"
       ]
     },
     {
-      "id": "REQ-41",
-      "requirement": "Ensure there are no remaining references to `font-lovalina`, `Lovalina`, or `/assets/fonts/lovalina` anywhere in frontend source/config files.",
-      "reason": "The diff summary only shows excerpts from a subset of files and does not include repository-wide search results. Therefore, absence of all remaining references cannot be confirmed.",
+      "description": "Added a dedicated TomorrowPage UI state for invalid computed longitude with retry guidance and a Retry button.",
+      "reason": "REQ-43 specifies keeping loading skeletons while computing and only showing backend error UI after eligible query fails; it does not explicitly require introducing a new invalid-longitude error screen (even though it is plausibly supportive of the fix).",
       "evidence": [
-        "frontend/src/pages/TodayPage.tsx (truncated)",
-        "frontend/src/pages/TomorrowPage.tsx (truncated)",
-        "frontend/tailwind.config.js (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-39",
-      "requirement": "Frontend builds successfully without requiring any Lovalina font files to exist.",
-      "reason": "Build success and runtime network behavior (no missing-font 404s) are acceptance criteria but are not verifiable from the diff summary alone.",
-      "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
+        "frontend/src/pages/TomorrowPage.tsx"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.62,
+  "confidence": 0.78,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/layout/AppHeader.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/KnowledgeBasePage.tsx",
-    "frontend/src/pages/NakshatraDetailPage.tsx",
-    "frontend/src/pages/TodayPage.tsx",
+    "frontend/src/hooks/useNakshatraNow.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
     "frontend/src/pages/TomorrowPage.tsx",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

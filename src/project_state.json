@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 23,
   "summary": "Daily Nakshatra: a location-aware Vedic astrology app that determines the Moon’s current Nakshatra/Pada by user city and local time, presents an experiential daily interpretation, and provides a Nakshatra knowledge base with symbolism, traits, and Pada breakdowns, with optional alerts and reflective tools.",
   "architectural_notes": [
     "Use device location services for city detection with a manual override/search flow.",
@@ -12,9 +12,7 @@
     "Nakshatra computation appears not to correspond to the selected city/location (data mismatch).",
     "Current position (GPS-based location detection) is still not working; user reports it failing and requests bug fixes.",
     "Intermittent/blocking runtime error: \"Error loading Nakshatra data. Please try again.\" prevents Today view from loading Nakshatra content/data.",
-    "Tomorrow page also shows/blocking runtime error: \"Error loading Nakshatra data. Please try again.\" (user requests fix on Tomorrow view as well as Today).",
-    "Build/deployment blocked by an internal configuration problem when attempting to update fonts (header/title to Lovalina).",
-    "User requested rollback/revert to the last deployed version prior to the Lovalina font change (revert to version 8)."
+    "Tomorrow page also shows/blocking runtime error: \"Error loading Nakshatra data. Please try again.\" (user requests fix on Tomorrow view as well as Today)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -313,6 +311,22 @@
         "REQ-41"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-prevent-any-backend-determinenakshatra-call-from-being-issued-with-an-out-of-range-or-boundary-invalid-lunar-longitude-by-normalizing-and-validating-the-longitude-to-the-backend-accepted-domain-0-360-in-the-frontend-query-layer",
+      "title": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-eliminate-premature-or-placeholder-backend-requests-on-the-tomorrow-page-by-ensuring-the-determinenakshatra-query-is-disabled-until-the-tomorrow-longitude-has-been-computed-and-validated-for-the-selected-city-timezone-context",
+      "title": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -415,9 +429,11 @@
       "status": "pending"
     },
     {
-      "id": "AR-18",
-      "summary": "Change the app header and page title font to Lovalina",
-      "reqIds": [],
+      "id": "AR-20",
+      "summary": "Harden the backend `determineNakshatra` implementation so it does not trap on boundary-equivalent finite inputs (e.g., 360.0 due to float rounding) by normalizing the input longitude into [0, 360) before validation and lookup.",
+      "reqIds": [
+        "REQ-44"
+      ],
       "status": "pending"
     }
   ],

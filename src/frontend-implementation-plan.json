@@ -1,109 +1,54 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Revert typography by removing Lovalina font integration and usage",
+  "title": "Normalize/validate lunar longitude and prevent premature Tomorrow nakshatra queries",
   "requirements": [
     {
-      "id": "REQ-39",
-      "summary": "Remove Lovalina font registration and Tailwind font family configuration so the app no longer depends on Lovalina font files.",
+      "id": "REQ-42",
+      "summary": "Normalize and validate lunar longitude to backend-accepted domain [0, 360) in the frontend query layer before calling determineNakshatra.",
       "acceptanceCriteria": [
-        "`frontend/src/index.css` no longer contains an `@font-face` block for `font-family: 'Lovalina'` or any references to `/assets/fonts/lovalina/...`.",
-        "`frontend/tailwind.config.js` no longer defines a `fontFamily.lovalina` entry.",
-        "The frontend builds successfully without requiring any Lovalina font files to exist."
+        "`isValidLongitude` treats 360 as invalid (valid range is >= 0 and < 360), matching backend expectations.",
+        "Before calling `actor.determineNakshatra`, the frontend normalizes any computed longitude to the [0, 360) range (e.g., 360 becomes 0; negatives wrap into range).",
+        "The app does not show the \"Error loading Nakshatra data\" state due to a frontend-sent boundary value (e.g., 360) that the backend rejects.",
+        "User-facing error text remains in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
           "operation": "modify",
-          "description": "Remove the Lovalina-related `@font-face` declaration and any references/commentary mentioning Lovalina or `/assets/fonts/lovalina` so global styles match the pre-font-change setup."
+          "description": "Update `isValidLongitude` to enforce the strict domain (>= 0 and < 360). Add a shared `normalizeLongitude` helper that maps any finite number into [0, 360) (e.g., 360 -> 0; negative values wrap)."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Remove the `extend.fontFamily.lovalina` entry (and any other Lovalina mentions, if present) so Tailwind no longer generates `font-lovalina` utilities or references the Lovalina family."
+          "description": "Harden the determineNakshatra query layer: accept a possibly-null/undefined longitude input, normalize any finite longitude into [0, 360) before eligibility checks and before calling `actor.determineNakshatra`, and key the query by the normalized value to avoid boundary-related cache inconsistencies."
+        },
+        {
+          "path": "frontend/src/hooks/useNakshatraNow.ts",
+          "operation": "modify",
+          "description": "Ensure the Today flow uses the same normalization/validation semantics as the query layer (e.g., normalize immediately after computing longitude and validate the normalized value) to prevent boundary-equivalent values from causing invalid/error UI states."
         }
       ]
     },
     {
-      "id": "REQ-40",
-      "summary": "Revert UI typography by removing `font-lovalina` class usage from the header brand and key page titles.",
+      "id": "REQ-43",
+      "summary": "Disable Tomorrow determineNakshatra query until tomorrow’s longitude is computed and validated for the selected city/timezone, avoiding placeholder requests.",
       "acceptanceCriteria": [
-        "`frontend/src/components/layout/AppHeader.tsx` brand title \"Daily Nakshatra\" no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/TodayPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/TomorrowPage.tsx` hero title no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/KnowledgeBasePage.tsx` page title no longer uses the `font-lovalina` Tailwind class.",
-        "`frontend/src/pages/NakshatraDetailPage.tsx` page title no longer uses the `font-lovalina` Tailwind class."
+        "When `tomorrowLongitude` is `null`/not yet computed, no backend request is sent from TomorrowPage (the query remains disabled).",
+        "TomorrowPage does not pass a placeholder longitude (e.g., 0) that could incorrectly trigger a backend call before the correct target time computation is ready.",
+        "TomorrowPage continues to show a loading skeleton state while computing longitude/initializing actor, and only shows backend error UI after a real eligible query fails.",
+        "User-facing error text remains in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Remove `font-lovalina` from the brand title styling so it uses the default typography (pre-Lovalina behavior)."
-        },
-        {
-          "path": "frontend/src/pages/TodayPage.tsx",
-          "operation": "modify",
-          "description": "Remove `font-lovalina` from the hero title styling so it uses the default typography (pre-Lovalina behavior)."
-        },
-        {
           "path": "frontend/src/pages/TomorrowPage.tsx",
           "operation": "modify",
-          "description": "Remove `font-lovalina` from the hero title styling so it uses the default typography (pre-Lovalina behavior)."
+          "description": "Remove placeholder longitude usage (`tomorrowLongitude ?? 0`). Pass `tomorrowLongitude` through as null until computed, rely on the query’s eligibility gating, and keep showing the existing loading skeleton while longitude/actor are not ready. Validate using normalized longitude semantics (normalize first, then validate) so boundary-equivalent computed values do not trigger premature invalid/error states."
         },
         {
-          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Remove `font-lovalina` from the page title styling so it uses the default typography (pre-Lovalina behavior)."
-        },
-        {
-          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
-          "operation": "modify",
-          "description": "Remove `font-lovalina` from the page title styling so it uses the default typography (pre-Lovalina behavior)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-41",
-      "summary": "Eliminate any remaining Lovalina references (classes, font name, asset paths) throughout the frontend to fully match pre-font-change typography and avoid missing-font requests.",
-      "acceptanceCriteria": [
-        "A repository-wide search finds no remaining occurrences of `font-lovalina`, `Lovalina`, or `/assets/fonts/lovalina` in frontend source/config files.",
-        "The app renders with the normal/default font stack (no custom Lovalina typography) and there are no missing-font 404s in the browser network panel."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Double-check and remove any remaining string occurrences of `Lovalina` or `/assets/fonts/lovalina` (including comments) so repo-wide searches do not find them after the revert."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Ensure there are no remaining references to `Lovalina` or `lovalina` font-family entries so repo-wide searches do not find them and builds do not rely on removed font utilities."
-        },
-        {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
-        },
-        {
-          "path": "frontend/src/pages/TodayPage.tsx",
-          "operation": "modify",
-          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
-        },
-        {
-          "path": "frontend/src/pages/TomorrowPage.tsx",
-          "operation": "modify",
-          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
-        },
-        {
-          "path": "frontend/src/pages/KnowledgeBasePage.tsx",
-          "operation": "modify",
-          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
-        },
-        {
-          "path": "frontend/src/pages/NakshatraDetailPage.tsx",
-          "operation": "modify",
-          "description": "Verify the file contains no remaining `font-lovalina` usage after the revert (and remove if any other occurrences exist)."
+          "description": "Ensure the hook’s `enabled` gating remains false when the provided longitude is null/undefined (or otherwise not eligible), so TomorrowPage cannot issue premature requests before longitude computation/validation completes."
         }
       ]
     }

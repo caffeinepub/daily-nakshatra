@@ -1,84 +1,62 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T09:12:27.983Z",
+  "generatedAt": "2026-02-09T09:18:32.466Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 3,
-    "implemented": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-39",
-        "summary": "Remove the Lovalina font integration so the app no longer loads or registers the Lovalina font (revert to the pre-font-change setup). This includes removing the @font-face declaration for Lovalina and removing the Tailwind font family entry for Lovalina.",
+        "id": "REQ-42",
+        "summary": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
+          "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/hooks/useNakshatraNow.ts"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
+          "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/hooks/useNakshatraNow.ts"
         ]
       },
       {
-        "id": "REQ-40",
-        "summary": "Revert all UI usage of the Lovalina font classes to the default typography used before the font change by removing `font-lovalina` from all components/pages that currently apply it (App header brand title and primary page titles).",
+        "id": "REQ-43",
+        "summary": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/layout/AppHeader.tsx",
-          "frontend/src/pages/TodayPage.tsx",
           "frontend/src/pages/TomorrowPage.tsx",
-          "frontend/src/pages/KnowledgeBasePage.tsx",
-          "frontend/src/pages/NakshatraDetailPage.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/layout/AppHeader.tsx",
-          "frontend/src/pages/TodayPage.tsx",
           "frontend/src/pages/TomorrowPage.tsx",
-          "frontend/src/pages/KnowledgeBasePage.tsx",
-          "frontend/src/pages/NakshatraDetailPage.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-41",
-        "summary": "Ensure there are no remaining references to Lovalina assets/classes anywhere in the frontend codebase after the revert, so the deployed app matches the pre-font-change (Version 8) typography behavior.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/layout/AppHeader.tsx",
-          "frontend/src/pages/TodayPage.tsx",
-          "frontend/src/pages/TomorrowPage.tsx",
-          "frontend/src/pages/KnowledgeBasePage.tsx",
-          "frontend/src/pages/NakshatraDetailPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/layout/AppHeader.tsx",
-          "frontend/src/pages/TodayPage.tsx",
-          "frontend/src/pages/TomorrowPage.tsx",
-          "frontend/src/pages/KnowledgeBasePage.tsx",
-          "frontend/src/pages/NakshatraDetailPage.tsx"
-        ]
+        "id": "REQ-44",
+        "summary": "Harden the backend `determineNakshatra` implementation so it does not trap on boundary-equivalent finite inputs (e.g., 360.0 due to float rounding) by normalizing the input longitude into [0, 360) before validation and lookup.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/layout/AppHeader.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/KnowledgeBasePage.tsx",
-    "frontend/src/pages/NakshatraDetailPage.tsx",
-    "frontend/src/pages/TodayPage.tsx",
+    "frontend/src/hooks/useNakshatraNow.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
     "frontend/src/pages/TomorrowPage.tsx",
-    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

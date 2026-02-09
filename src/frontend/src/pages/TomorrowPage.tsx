@@ -3,7 +3,7 @@ import { useDetermineNakshatra } from '@/hooks/useQueries';
 import { calculateLunarLongitude } from '@/lib/astro/lunarLongitude';
 import { getTimeInTimezone, formatDateTimeInTimezone } from '@/lib/time/timezone';
 import { useCitySelection } from '@/hooks/useCitySelection';
-import { isValidLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
+import { isValidLongitude, normalizeLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,13 +36,14 @@ export default function TomorrowPage() {
 
   useEffect(() => {
     const localTime = getTimeInTimezone(targetTime, currentCity.timezone);
-    const longitude = calculateLunarLongitude(localTime);
+    const rawLongitude = calculateLunarLongitude(localTime);
+    const longitude = normalizeLongitude(rawLongitude);
     const valid = isValidLongitude(longitude);
     setTomorrowLongitude(longitude);
     setLongitudeValid(valid);
   }, [targetTime, currentCity.timezone]);
 
-  // Query backend with computed longitude
+  // Query backend with computed longitude (pass null until computed)
   const {
     data,
     isLoading,
@@ -52,14 +53,14 @@ export default function TomorrowPage() {
     isActorReady,
     isQueryEligible,
   } = useDetermineNakshatra(
-    tomorrowLongitude ?? 0,
+    tomorrowLongitude,
     currentCity.timezone,
     currentCity.name,
     selectionKey
   );
 
   // Show invalid longitude error with guidance
-  if (!longitudeValid && !isLoading) {
+  if (!longitudeValid && tomorrowLongitude !== null && !isLoading) {
     return (
       <div className="text-center py-12 space-y-4">
         <div className="flex justify-center mb-4">

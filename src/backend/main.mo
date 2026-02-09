@@ -17,7 +17,6 @@ actor {
     };
   };
 
-  // Calculate all Nakshatra boundaries programmatically
   func computeNakshatras() : [Nakshatra] {
     let namesArray : [Text] = [
       "Ashwini",
@@ -80,8 +79,8 @@ actor {
   };
 
   func validateDegree(degree : Float) : () {
-    if (degree < 0.0 or degree >= 360.0) {
-      Runtime.trap("Lunar longitude must be between 0 (inclusive) and 360 (exclusive) degrees.");
+    if (degree < 0.0) {
+      Runtime.trap("Lunar longitude must be greater or equal 0.0");
     };
   };
 
@@ -96,7 +95,10 @@ actor {
   } {
     validateDegree(lunarLongitude);
 
-    let ?nakshatra = findNakshatraByDegree(lunarLongitude) else {
+    // Bring into [0, 360) even on boundaries.
+    let normalizedLongitude = lunarLongitude % 360.0;
+
+    let ?nakshatra = findNakshatraByDegree(normalizedLongitude) else {
       Runtime.trap("No nakshatra found for given longitude");
     };
 
@@ -106,19 +108,18 @@ actor {
       case (null) { Runtime.trap("Nakshatra index not found") };
     };
 
-    let padaNum = calculatePada(lunarLongitude, nakshatra.startDegree);
+    let padaNum = calculatePada(normalizedLongitude, nakshatra.startDegree);
 
-    let remainingDegrees = nakshatra.endDegree - lunarLongitude;
+    let remainingDegrees = nakshatra.endDegree - normalizedLongitude;
     let remainingDegreesInNakshatra = Float.max(0.0, Float.min(40.0 / 3.0, remainingDegrees));
 
-    let positionInCurrentPada = (lunarLongitude - nakshatra.startDegree) % (10.0 / 3.0);
+    let positionInCurrentPada = (normalizedLongitude - nakshatra.startDegree) % (10.0 / 3.0);
     let remainingDegreesInCurrentPada = Float.max(0.0, Float.min(10.0 / 3.0, (10.0 / 3.0) - positionInCurrentPada));
-
     let degreesUntilNextPada = (10.0 / 3.0) - positionInCurrentPada;
 
     {
       nakshatraName = nakshatra.name;
-      preciseLongitude = lunarLongitude;
+      preciseLongitude = normalizedLongitude;
       nakshatraNumber;
       pada = padaNum.toNat();
       remainingDegreesInNakshatra;

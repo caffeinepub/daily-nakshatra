@@ -1,15 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 11,
   "summary": "Daily Nakshatra: a location-aware Vedic astrology app that determines the Moon’s current Nakshatra/Pada by user city and local time, presents an experiential daily interpretation, and provides a Nakshatra knowledge base with symbolism, traits, and Pada breakdowns, with optional alerts and reflective tools.",
   "architectural_notes": [
     "Use device location services for city detection with a manual override/search flow.",
     "Require a lunar ephemeris/astronomy calculation method to map time -> lunar longitude -> Nakshatra/Pada.",
     "Store Nakshatra content (snapshots, vignettes, symbolism/traits, pada micro-descriptions) in a structured content database for retrieval by Nakshatra/Pada."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Minimal moon-and-star logo mark, flat vector style with warm parchment + charcoal palette (daily-nakshatra-logo.dim_512x512.png)\n- Subtle textured hero background with faint lunar mansion / star map motif, low-contrast, readable under text overlay (daily-nakshatra-hero-bg.dim_1600x900.png)",
+  "known_issues": [
+    "City selector issue: user cannot change selected city from New York to another city (\"select your city\" tab appears stuck).",
+    "Nakshatra computation appears not to correspond to the selected city/location (data mismatch).",
+    "Current position (GPS-based location detection) is still not working; user reports it failing and requests bug fixes."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-the-core-app-navigation-and-pages-for-daily-nakshatra-1-today-view-showing-the-current-nakshatra-pada-for-the-selected-city-time-and-the-daily-interpretation-sections-2-knowledge-base-list-of-all-nakshatras-and-3-nakshatra-detail-page-with-symbolism-mythology-core-traits-and-pada-breakdown",
@@ -72,6 +75,110 @@
       "title": "Generate and include static visual assets to support the theme: a simple app logo mark and a subtle hero/background illustration, and render them from the frontend as static assets (do not serve images through the backend).",
       "reqIds": [
         "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-city-selection-state-so-changing-the-city-in-the-city-picker-immediately-updates-the-selected-city-everywhere-it-is-displayed-used-e-g-header-label-and-local-time-today-view-computations-without-requiring-a-page-refresh",
+      "title": "Fix city selection state so changing the city in the City Picker immediately updates the selected city everywhere it is displayed/used (e.g., header label and local time, Today view computations) without requiring a page refresh.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-localstorage-backed-city-selection-is-synchronized-across-multiple-concurrent-hook-instances-within-the-same-tab-e-g-citypicker-and-appheader-both-calling-usecityselection-so-updates-propagate-reliably-even-when-the-browser-storage-event-does-not-fire-in-the-same-document",
+      "title": "Ensure localStorage-backed city selection is synchronized across multiple concurrent hook instances within the same tab (e.g., CityPicker and AppHeader both calling useCitySelection), so updates propagate reliably even when the browser 'storage' event does not fire in the same document.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-small-ux-affordance-in-the-city-picker-list-to-make-it-clear-which-city-is-currently-selected-e-g-different-button-variant-style-for-the-active-city-while-keeping-all-existing-search-and-dialog-behaviors-intact",
+      "title": "Add a small UX affordance in the City Picker list to make it clear which city is currently selected (e.g., different button variant/style for the active city), while keeping all existing search and dialog behaviors intact.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-localstorage-backed-city-selection-so-changing-the-city-in-the-city-picker-immediately-updates-all-ui-that-depends-on-the-selected-city-e-g-appheader-city-label-local-time-and-any-today-view-computations-without-requiring-a-page-refresh-including-when-multiple-components-in-the-same-tab-use-the-city-selection-hook",
+      "title": "Fix localStorage-backed city selection so changing the city in the City Picker immediately updates all UI that depends on the selected city (e.g., AppHeader city label/local time and any Today view computations) without requiring a page refresh, including when multiple components in the same tab use the city selection hook.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-localstorage-synchronization-hook-used-for-city-selection-so-it-reacts-to-localstorage-changes-that-occur-within-the-same-document-tab-not-just-across-tabs-and-so-it-keeps-hook-instances-in-sync-when-one-instance-writes-a-new-value",
+      "title": "Update the localStorage synchronization hook used for city selection so it reacts to localStorage changes that occur within the same document/tab (not just across tabs), and so it keeps hook instances in sync when one instance writes a new value.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-harden-city-selection-persistence-by-validating-the-stored-selected-city-object-when-reading-from-localstorage-and-falling-back-to-the-default-city-if-the-stored-value-is-missing-required-fields-or-is-not-a-valid-option-e-g-missing-invalid-timezone-string",
+      "title": "Harden city selection persistence by validating the stored selected city object when reading from localStorage and falling back to the default city if the stored value is missing required fields or is not a valid option (e.g., missing/invalid timezone string).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-city-picker-list-clearly-indicate-which-city-is-currently-selected-and-ensure-selecting-the-already-selected-city-does-not-cause-confusing-behavior-it-should-remain-selected-and-the-dialog-should-close-normally",
+      "title": "In the City Picker list, clearly indicate which city is currently selected and ensure selecting the already-selected city does not cause confusing behavior (it should remain selected and the dialog should close normally).",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-lunar-longitude-computation-used-on-the-today-view-so-it-is-derived-from-the-selected-city-s-time-context-timezone-rather-than-only-from-the-browser-s-default-environment-so-changing-the-selected-city-results-in-a-corresponding-change-in-the-computed-longitude-when-applicable-and-the-returned-nakshatra-pada",
+      "title": "Update the lunar-longitude computation used on the Today view so it is derived from the selected city’s time context (timezone) rather than only from the browser’s default environment, so changing the selected city results in a corresponding change in the computed longitude (when applicable) and the returned Nakshatra/Pada.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-react-query-caching-does-not-prevent-updates-when-the-selected-city-changes-by-including-the-selected-city-s-identity-at-minimum-timezone-optionally-name-in-the-determinenakshatra-query-key-and-or-explicitly-invalidating-refetching-the-query-on-city-change",
+      "title": "Ensure React Query caching does not prevent updates when the selected city changes by including the selected city’s identity (at minimum timezone; optionally name) in the determineNakshatra query key and/or explicitly invalidating/refetching the query on city change.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-lightweight-user-facing-explanation-on-the-today-page-for-how-location-affects-the-result-timezone-local-time-context-written-in-english-to-reduce-confusion-when-users-expect-large-differences-between-cities",
+      "title": "Add a lightweight, user-facing explanation on the Today page for how location affects the result (timezone/local-time context), written in English, to reduce confusion when users expect large differences between cities.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-working-use-current-position-flow-that-uses-browser-geolocation-navigator-geolocation-to-detect-the-user-s-latitude-longitude-and-set-the-app-s-selected-location-accordingly-while-keeping-the-existing-manual-city-picker-selection-as-a-fallback",
+      "title": "Implement a working “Use Current Position” flow that uses browser geolocation (navigator.geolocation) to detect the user’s latitude/longitude and set the app’s selected location accordingly, while keeping the existing manual City Picker selection as a fallback.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-city-selection-model-validation-so-a-geolocation-derived-selection-can-be-persisted-in-localstorage-and-reloaded-safely-even-though-it-may-not-be-one-of-the-predefined-entries-in-frontend-src-data-cities-ts",
+      "title": "Update the city selection model/validation so a geolocation-derived selection can be persisted in localStorage and reloaded safely even though it may not be one of the predefined entries in frontend/src/data/cities.ts.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-setting-a-location-from-geolocation-derive-and-store-a-timezone-identifier-in-a-way-that-does-not-require-external-apis-e-g-use-the-device-resolved-iana-timezone-via-intl-datetimeformat-resolvedoptions-timezone-and-ensure-today-page-calculations-use-that-timezone-for-local-time-context",
+      "title": "When setting a location from geolocation, derive and store a timezone identifier in a way that does not require external APIs (e.g., use the device-resolved IANA timezone via Intl.DateTimeFormat().resolvedOptions().timeZone), and ensure Today page calculations use that timezone for local-time context.",
+      "reqIds": [
+        "REQ-22"
       ],
       "version": 1
     }

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Moon, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CityPicker from '../city/CityPicker';
 import AlertsToggle from '../alerts/AlertsToggle';

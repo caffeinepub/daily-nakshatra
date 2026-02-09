@@ -1,8 +1,9 @@
 import { useNakshatraNow } from '@/hooks/useNakshatraNow';
+import { useCitySelection } from '@/hooks/useCitySelection';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Moon } from 'lucide-react';
+import { Moon, MapPin } from 'lucide-react';
 import DailyInterpretationBlocks from '@/components/today/DailyInterpretationBlocks';
 import TransitionTimes from '@/components/nakshatra/TransitionTimes';
 import NakshatraChangeBanner from '@/components/alerts/NakshatraChangeBanner';
@@ -12,6 +13,7 @@ import { getNakshatraSlug } from '@/lib/nakshatra';
 
 export default function TodayPage() {
   const { data, isLoading, error } = useNakshatraNow();
+  const { currentCity } = useCitySelection();
 
   if (error) {
     return (
@@ -75,6 +77,12 @@ export default function TodayPage() {
               <p className="text-sm text-muted-foreground">
                 Lunar longitude: {data.preciseLongitude.toFixed(3)}°
               </p>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
+                <MapPin className="h-4 w-4" />
+                <span>
+                  Calculated for {currentCity.name}'s local time ({currentCity.timezone})
+                </span>
+              </div>
               <Link to="/nakshatra/$slug" params={{ slug: getNakshatraSlug(data.nakshatraName) }}>
                 <Button variant="outline" size="sm">
                   Learn More About {data.nakshatraName}

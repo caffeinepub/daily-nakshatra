@@ -1,5 +1,7 @@
 /**
- * Calculates an approximate lunar longitude for a given UTC timestamp.
+ * Calculates an approximate lunar longitude for a given date.
+ * The date parameter should represent the local time in the desired timezone
+ * (obtained via getCurrentTimeInTimezone for city-specific calculations).
  * This is a simplified calculation for demonstration purposes.
  * In production, use a proper astronomical library like astronomia or swiss ephemeris.
  */

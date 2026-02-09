@@ -3,6 +3,7 @@ export interface City {
   timezone: string;
   lat?: number;
   lng?: number;
+  isGeolocation?: boolean; // Flag to identify geolocation-derived cities
 }
 
 export const cities: City[] = [

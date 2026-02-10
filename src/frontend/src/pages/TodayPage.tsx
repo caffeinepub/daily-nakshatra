@@ -13,6 +13,7 @@ import ResonanceSection from '@/components/today/ResonanceSection';
 import TransitionTimes from '@/components/nakshatra/TransitionTimes';
 import NakshatraChangeBanner from '@/components/alerts/NakshatraChangeBanner';
 import RequireAuth from '@/components/auth/RequireAuth';
+import ConnectionFailedScreen from '@/components/errors/ConnectionFailedScreen';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { getNakshatraSlug } from '@/lib/nakshatra';
@@ -22,14 +23,14 @@ export default function TodayPage() {
     data,
     isLoading,
     error,
-    refetch,
     isRefetching,
     isLongitudeValid,
     recomputeLongitude,
     isActorReady,
-    isQueryEligible,
     actorInitStatus,
+    actorInitError,
     retryActorInitialization,
+    forceRefetch,
   } = useNakshatraNow();
   const { currentCity } = useCitySelection();
   const { identity } = useInternetIdentity();
@@ -41,26 +42,11 @@ export default function TodayPage() {
   // Actor initialization failed
   if (actorInitStatus === 'error') {
     return (
-      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
-        <div className="flex justify-center mb-6">
-          <AlertCircle className="h-12 w-12 text-destructive" />
-        </div>
-        <p className="text-foreground text-lg font-sans tracking-wide">Connection failed</p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Unable to connect to the service. Please try again.
-        </p>
-        <Button
-          onClick={() => {
-            retryActorInitialization();
-          }}
-          disabled={isRefetching}
-          variant="ghost"
-          className="gap-2 mt-4"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Retry Connection
-        </Button>
-      </div>
+      <ConnectionFailedScreen
+        error={actorInitError}
+        onRetry={retryActorInitialization}
+        isRetrying={isRefetching}
+      />
     );
   }
 
@@ -76,11 +62,9 @@ export default function TodayPage() {
           The lunar position cannot be determined at this moment. Wait, then try again.
         </p>
         <Button
-          onClick={() => {
+          onClick={async () => {
             recomputeLongitude();
-            if (isQueryEligible) {
-              refetch();
-            }
+            await forceRefetch();
           }}
           disabled={isRefetching}
           variant="ghost"
@@ -114,9 +98,9 @@ export default function TodayPage() {
           The reading cannot be completed. Wait, then try again.
         </p>
         <Button
-          onClick={() => {
+          onClick={async () => {
             recomputeLongitude();
-            refetch();
+            await forceRefetch();
           }}
           disabled={isRefetching}
           variant="ghost"
@@ -148,7 +132,7 @@ export default function TodayPage() {
       <div
         className="relative overflow-hidden min-h-[500px] md:min-h-[600px] flex flex-col"
         style={{
-          backgroundImage: `url("${import.meta.env.BASE_URL}assets/Untitled design (33).png")`,
+          backgroundImage: `url("/assets/Untitled design (33).png")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -173,7 +157,7 @@ export default function TodayPage() {
             <Glyph type="circle" className="h-12 w-12 md:h-16 md:w-16 text-primary" />
           </div>
           <h2 className="text-3xl md:text-5xl font-sans tracking-wider">Current Nakshatra Placement</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
+          <p className="text-white max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
             Where the Moon rests now
           </p>
         </div>

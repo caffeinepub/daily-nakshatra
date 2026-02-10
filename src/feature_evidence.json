@@ -2,10 +2,15 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-today-page-flow-so-users-are-not-blocked-by-the-unable-to-proceed-error-state-or-an-indefinite-loading-state-when-the-nakshatra-reading-cannot-be-fetched-the-page-must-always-provide-a-clear-actionable-recovery-path-retry-reload-and-should-successfully-proceed-to-show-the-current-nakshatra-when-the-backend-becomes-available-again",
-      "featureTitle": "Fix the Today page flow so users are not blocked by the \"Unable to proceed\" error state or an indefinite loading state when the nakshatra reading cannot be fetched; the page must always provide a clear, actionable recovery path (retry/reload) and should successfully proceed to show the current nakshatra when the backend becomes available again.",
+      "featureId": "feature-fix-frontend-actor-initialization-so-anonymous-users-do-not-fail-to-connect-ensure-the-react-query-key-used-by-useactor-does-not-include-undefined-when-there-is-no-internet-identity-so-it-matches-useactorinitstatus-and-ensure-an-anonymous-actor-can-be-created-without-errors",
+      "featureTitle": "Fix frontend actor initialization so anonymous users do not fail to connect: ensure the React Query key used by `useActor` does not include `undefined` when there is no Internet Identity (so it matches `useActorInitStatus`), and ensure an anonymous actor can be created without errors.",
       "files": [
-        "frontend/src/pages/TodayPage.tsx"
+        "frontend/src/hooks/actorQueryKey.ts",
+        "frontend/src/hooks/useActorInitStatus.ts",
+        "frontend/src/hooks/useActorStable.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useUserLogs.ts",
+        "frontend/src/hooks/useUserProfile.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,16 +21,37 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-3"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-harden-actor-initialization-so-it-cannot-silently-prevent-the-app-from-proceeding-ensure-failures-during-actor-setup-including-any-access-control-initialization-are-caught-and-surfaced-to-the-ui-and-do-not-block-creation-of-a-usable-actor-when-possible-e-g-when-an-optional-secret-admin-token-is-absent",
-      "featureTitle": "Harden actor initialization so it cannot silently prevent the app from proceeding: ensure failures during actor setup (including any access-control initialization) are caught and surfaced to the UI, and do not block creation of a usable actor when possible (e.g., when an optional secret/admin token is absent).",
+      "featureId": "feature-prevent-actor-initialization-from-failing-due-to-missing-admin-token-only-call-initializeaccesscontrolwithsecret-when-the-caffeineadmintoken-url-parameter-is-present-and-non-empty-do-not-call-it-with-an-empty-string",
+      "featureTitle": "Prevent actor initialization from failing due to missing admin token: only call `_initializeAccessControlWithSecret` when the `caffeineAdminToken` URL parameter is present and non-empty; do not call it with an empty string.",
       "files": [
         "frontend/src/hooks/useActorInitStatus.ts",
-        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useActorStable.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-improve-the-connection-failure-ux-for-actor-initialization-errors-keep-the-existing-english-headline-body-text-and-additionally-render-a-collapsible-secondary-error-detail-area-that-shows-a-safe-developer-oriented-message-derived-from-the-actor-init-error-e-g-error-name-message-to-help-diagnose-deployment-agent-issues",
+      "featureTitle": "Improve the connection failure UX for actor initialization errors: keep the existing English headline/body text, and additionally render a collapsible/secondary error detail area that shows a safe, developer-oriented message derived from the actor init error (e.g., error name/message) to help diagnose deployment/agent issues.",
+      "files": [
+        "frontend/src/components/errors/ConnectionFailedScreen.tsx",
+        "frontend/src/lib/diagnostics/sanitizeError.ts",
+        "frontend/src/pages/TodayPage.tsx",
         "frontend/src/pages/TomorrowPage.tsx"
       ],
       "components": [
@@ -37,7 +63,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-5"
       ],
       "confidence": "high"
     }

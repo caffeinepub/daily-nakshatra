@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Today page “Unable to proceed”/infinite loading bug so users can recover from nakshatra fetch or actor initialization failures and proceed without a full refresh.
+**Goal:** Fix actor initialization so anonymous users can connect reliably, avoid failing initialization when no admin token is provided, and improve the connection-failure diagnostics without changing the primary message.
 
 **Planned changes:**
-- Update Today page loading/error flow to avoid indefinite skeleton/loading states and replace blocking “Unable to proceed” states with clear messaging and a working retry/reload action.
-- Ensure Today page retry actions trigger a real re-attempt to fetch the current nakshatra and proceed to render results once the backend becomes available again (without requiring a full page refresh).
-- Harden actor initialization in the frontend to catch and surface setup/access-control init failures, expose distinct “loading” vs “failed” states, and allow user-triggered re-initialization attempts when possible.
-- Update backend access-control initialization so missing/empty optional secret token input does not trap and does not prevent normal (non-admin) usage or subsequent public method calls (e.g., determineNakshatra).
+- Update frontend actor initialization to use a stable React Query key for anonymous users (no `undefined` element) and ensure anonymous actor creation does not error solely due to missing Internet Identity.
+- Change frontend initialization flow to call `_initializeAccessControlWithSecret` only when the `caffeineAdminToken` URL parameter is present and non-empty, and ensure retry works without a page reload after token changes.
+- Enhance the existing “Connection failed” screen on Today/Tomorrow by adding a secondary, collapsible error-details area that safely displays a sanitized developer-oriented message from the initialization error.
+- Add defensive backend behavior so `_initializeAccessControlWithSecret` does not trap when called with an empty or invalid secret, and does not break public/anonymous method usage.
 
-**User-visible outcome:** If loading the current nakshatra fails or prerequisites aren’t ready, users see a clear explanation and a reliable retry/reload option; once recovery succeeds, the Today page displays the nakshatra without needing to manually refresh the entire page.
+**User-visible outcome:** Logged-out users can load Today and Tomorrow without seeing “Connection failed” when the backend is reachable; if initialization does fail, users still see the same primary message plus optional error details, and “Retry Connection” works without reloading.

@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useActorStable } from './useActorStable';
 import type { CheckInEntry, SleepLogEntry, DreamLogEntry, BirthChartData } from '@/backend';
 
 export function useGetAllLogs() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActorStable();
 
   const query = useQuery({
     queryKey: ['allLogs'],
@@ -22,7 +22,7 @@ export function useGetAllLogs() {
 }
 
 export function useGetLogsByDay(dayOfYear: bigint | null) {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActorStable();
 
   return useQuery({
     queryKey: ['logsByDay', dayOfYear?.toString()],
@@ -37,7 +37,7 @@ export function useGetLogsByDay(dayOfYear: bigint | null) {
 }
 
 export function useGetLogsByNakshatra(nakshatra: string | null) {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActorStable();
 
   return useQuery({
     queryKey: ['logsByNakshatra', nakshatra],
@@ -52,7 +52,7 @@ export function useGetLogsByNakshatra(nakshatra: string | null) {
 }
 
 export function useGetNakshatraPatterns() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActorStable();
 
   return useQuery({
     queryKey: ['nakshatraPatterns'],
@@ -66,7 +66,7 @@ export function useGetNakshatraPatterns() {
 }
 
 export function useSaveCheckIn() {
-  const { actor } = useActor();
+  const { actor } = useActorStable();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -89,7 +89,7 @@ export function useSaveCheckIn() {
 }
 
 export function useSaveSleepLog() {
-  const { actor } = useActor();
+  const { actor } = useActorStable();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -106,7 +106,7 @@ export function useSaveSleepLog() {
 }
 
 export function useSaveDreamLog() {
-  const { actor } = useActor();
+  const { actor } = useActorStable();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -123,7 +123,7 @@ export function useSaveDreamLog() {
 }
 
 export function useGetCurrentDayOfYear() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActorStable();
 
   return useQuery({
     queryKey: ['currentDayOfYear'],

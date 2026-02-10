@@ -1,57 +1,46 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T00:36:10.486Z",
-  "summary": "The diff adds frontend-side prerequisite/error handling around actor initialization and nakshatra queries (including a new `useActorInitStatus` hook and new error/Retry UI in Today/Tomorrow pages). However, there is no clear evidence of the required backend access-control change, and key parts of actor initialization hardening and “not-eligible” recovery UX are not demonstrably implemented from the provided diff summary.",
+  "generatedAt": "2026-02-10T01:28:54.374Z",
+  "summary": "REQ-3/4/5 appear implemented via a stable actor query key builder, a new useActorStable hook that supports anonymous actor creation and only calls _initializeAccessControlWithSecret when a non-empty caffeineAdminToken is present, and a new ConnectionFailedScreen that preserves the existing English copy while adding collapsible sanitized error details. Backend REQ-6 cannot be confirmed from the provided backend/main.mo truncation.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Update the backend access-control initialization path so missing/empty optional secret token input does not trap and does not prevent normal, non-admin usage from proceeding.",
-      "reason": "Although `backend/main.mo` is modified, the diff excerpt does not show any change to the access-control initialization method/endpoint or any logic handling empty/missing secrets; therefore the AC about not trapping and allowing subsequent public calls is not evidenced.",
+      "id": "REQ-6",
+      "requirement": "Ensure the backend access-control initialization method does not trap when called without a valid secret (defensive behavior): if `_initializeAccessControlWithSecret` is invoked with an empty or invalid secret, it must not trap; it should either no-op or return an error that the frontend can handle gracefully.",
+      "reason": "backend/main.mo is shown only as an early truncated excerpt and does not include any evidence of changes to `_initializeAccessControlWithSecret` (or equivalent authorization initialization) to prevent trapping on empty/invalid secrets, so implementation cannot be verified from the diff summary.",
       "evidence": [
-        "backend/main.mo (truncated excerpt shows accessControlState init and include MixinAuthorization but no secret/optional-token handling changes)"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Harden actor initialization so failures during actor setup are caught and surfaced to the UI, do not block creation of a usable actor when possible, and allow retry to trigger a new initialization attempt.",
-      "reason": "The diff adds a wrapper hook (`useActorInitStatus`) that reads React Query state and provides an invalidate/refetch retry, but it does not show changes to the actual actor initialization logic (e.g., catching failures inside actor setup or ensuring an actor is still created when optional access-control init fails). Also, `useActor` (the actor hook itself) is not shown as modified, so it’s unclear whether actor creation is hardened as required.",
-      "evidence": [
-        "frontend/src/hooks/useActorInitStatus.ts (only reads query state and invalidates/refetches)",
-        "frontend/src/hooks/useQueries.ts (uses `useActorInitStatus` but does not change actor creation behavior)"
-      ]
-    },
-    {
-      "id": "REQ-1",
-      "requirement": "When prerequisites are missing (e.g., actor not ready / query not eligible), the Today page must not remain stuck on a skeleton indefinitely; it should show a clear message explaining what is missing and offer a recovery action.",
-      "reason": "The Today page shows explicit UIs for actor initialization failure (`actorInitStatus === 'error'`) and invalid longitude, but the diff excerpt does not show a dedicated UI for the \"not eligible\" / \"actor still loading but never succeeds\" case (i.e., `enabled: isQueryEligible` prevents querying and could still leave the page in a loading/skeleton path). No timeout or explicit 'missing prerequisite' message is evidenced in the provided snippet.",
-      "evidence": [
-        "frontend/src/pages/TodayPage.tsx (truncated; shows actorInitStatus error UI and invalid-longitude UI but not a distinct not-eligible/prerequisite-missing state)"
+        "backend/main.mo (truncated excerpt does not show _initializeAccessControlWithSecret implementation)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added similar actor-init failure and retry UI handling to TomorrowPage.",
-      "reason": "The BuildRequest is specifically about fixing the Today page blocking bug and related recovery/error handling; extending the same UI pattern to TomorrowPage is not explicitly requested.",
+      "description": "Broad UI/layout/typography changes across multiple frontend pages/components (spacing, centered layouts, typography, removing /style-system route, footer version indicator, various copy/style adjustments) not requested as part of the actor initialization/connection fix.",
+      "reason": "BuildRequest non-goals explicitly avoid changing UI content unrelated to connection/initialization; the diff summary indicates multiple unrelated UI/layout updates beyond the connection failure UX changes requested in REQ-5.",
       "evidence": [
-        "frontend/src/pages/TomorrowPage.tsx (adds actorInitStatus === 'error' UI with Retry Connection button)"
+        "frontend-file-summaries.txt (describes changes to App.tsx, AppLayout.tsx, AppHeader.tsx, KnowledgeBasePage.tsx, NakshatraDetailPage.tsx, multiple nakshatra/today components, AlertsToggle, NakshatraChangeBanner, CityPicker, etc.)"
       ]
     },
     {
-      "description": "Introduced additional diagnostics logging and longitude normalization/validation helpers in the nakshatra query hook.",
-      "reason": "The BuildRequest focuses on unblocking the Today page and hardening actor/access-control initialization. Adding `logNakshatraQueryFailure`-style diagnostics is not explicitly requested (even if it may help debugging).",
+      "description": "New behavior that invalidates/refetches all non-actor queries whenever an actor is created/changes.",
+      "reason": "The BuildRequest focuses on stabilizing actor initialization and retry behavior; invalidating/refetching all other queries on actor change is additional behavior not explicitly requested and could have side effects.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts (imports and uses `logNakshatraQueryFailure`, `isValidLongitude`, `normalizeLongitude`)"
+        "frontend/src/hooks/useActorStable.ts (useEffect invalidates/refetches queries where predicate returns !query.queryKey.includes('actor'))"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.74,
   "changed_files": [
     "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/components/errors/ConnectionFailedScreen.tsx",
+    "frontend/src/hooks/actorQueryKey.ts",
     "frontend/src/hooks/useActorInitStatus.ts",
+    "frontend/src/hooks/useActorStable.ts",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useUserLogs.ts",
+    "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/lib/diagnostics/sanitizeError.ts",
     "frontend/src/pages/TodayPage.tsx",
     "frontend/src/pages/TomorrowPage.tsx",
     "project_state.json"

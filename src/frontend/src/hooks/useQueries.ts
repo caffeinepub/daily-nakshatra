@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useActorStable } from './useActorStable';
 import { useActorInitStatus } from './useActorInitStatus';
 import { logNakshatraQueryFailure, isValidLongitude, normalizeLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
 
@@ -9,8 +9,9 @@ export function useDetermineNakshatra(
   cityName: string,
   selectionKey: number
 ) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching } = useActorStable();
   const actorInitStatus = useActorInitStatus();
+  const queryClient = useQueryClient();
 
   // Normalize longitude if provided
   const normalizedLongitude = lunarLongitude !== null ? normalizeLongitude(lunarLongitude) : null;
@@ -18,8 +19,10 @@ export function useDetermineNakshatra(
   const isActorReady = !!actor && !isFetching && actorInitStatus.isSuccess;
   const isQueryEligible = isActorReady && isLongitudeValid && normalizedLongitude !== null;
 
+  const queryKey = ['nakshatra', normalizedLongitude, cityTimezone, cityName, selectionKey];
+
   const query = useQuery({
-    queryKey: ['nakshatra', normalizedLongitude, cityTimezone, cityName, selectionKey],
+    queryKey,
     queryFn: async () => {
       const context = {
         lunarLongitude: normalizedLongitude!,
@@ -51,6 +54,14 @@ export function useDetermineNakshatra(
     retry: 2,
   });
 
+  // Custom refetch that clears error state and forces a fresh attempt
+  const forceRefetch = async () => {
+    // Reset the query to clear error state
+    queryClient.resetQueries({ queryKey });
+    // Then refetch
+    return query.refetch();
+  };
+
   return {
     ...query,
     isActorReady,
@@ -59,5 +70,6 @@ export function useDetermineNakshatra(
     actorInitStatus: actorInitStatus.status,
     actorInitError: actorInitStatus.error,
     retryActorInitialization: actorInitStatus.retryActorInitialization,
+    forceRefetch,
   };
 }

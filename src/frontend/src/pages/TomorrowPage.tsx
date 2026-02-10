@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Glyph from '@/components/glyphs/Glyph';
 import { MapPin, RefreshCw, Clock, AlertCircle } from 'lucide-react';
 import DailyInterpretationBlocks from '@/components/today/DailyInterpretationBlocks';
+import ConnectionFailedScreen from '@/components/errors/ConnectionFailedScreen';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { getNakshatraSlug } from '@/lib/nakshatra';
@@ -43,12 +44,12 @@ export default function TomorrowPage() {
     data,
     isLoading,
     error,
-    refetch,
     isRefetching,
     isActorReady,
-    isQueryEligible,
     actorInitStatus,
+    actorInitError,
     retryActorInitialization,
+    forceRefetch,
   } = useDetermineNakshatra(
     tomorrowLongitude,
     currentCity.timezone,
@@ -59,26 +60,11 @@ export default function TomorrowPage() {
   // Actor initialization failed
   if (actorInitStatus === 'error') {
     return (
-      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
-        <div className="flex justify-center mb-6">
-          <AlertCircle className="h-12 w-12 text-destructive" />
-        </div>
-        <p className="text-foreground text-lg font-sans tracking-wide">Connection failed</p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Unable to connect to the service. Please try again.
-        </p>
-        <Button
-          onClick={() => {
-            retryActorInitialization();
-          }}
-          disabled={isRefetching}
-          variant="ghost"
-          className="gap-2 mt-4"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Retry Connection
-        </Button>
-      </div>
+      <ConnectionFailedScreen
+        error={actorInitError}
+        onRetry={retryActorInitialization}
+        isRetrying={isRefetching}
+      />
     );
   }
 
@@ -94,11 +80,9 @@ export default function TomorrowPage() {
           Tomorrow's lunar position cannot be determined. Wait, then try again.
         </p>
         <Button
-          onClick={() => {
+          onClick={async () => {
             setViewingTimeAnchor(new Date());
-            if (isQueryEligible) {
-              refetch();
-            }
+            await forceRefetch();
           }}
           disabled={isRefetching}
           variant="ghost"
@@ -120,7 +104,7 @@ export default function TomorrowPage() {
     );
   }
 
-  // Backend query error (only when actor is ready)
+  // Backend query error (only when actor is ready and query is eligible)
   if (error && isActorReady) {
     return (
       <div className="text-center py-20 space-y-6 max-w-md mx-auto">
@@ -129,12 +113,12 @@ export default function TomorrowPage() {
         </div>
         <p className="text-foreground text-lg font-sans tracking-wide">Unable to proceed</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          The reading cannot be completed. Wait, then try again.
+          Tomorrow's reading cannot be completed. Wait, then try again.
         </p>
         <Button
-          onClick={() => {
+          onClick={async () => {
             setViewingTimeAnchor(new Date());
-            refetch();
+            await forceRefetch();
           }}
           disabled={isRefetching}
           variant="ghost"
@@ -156,34 +140,47 @@ export default function TomorrowPage() {
     );
   }
 
-  const shouldShowLoading = isLoading || actorInitStatus === 'loading' || !isActorReady || tomorrowLongitude === null;
-
+  const shouldShowLoading = isLoading || actorInitStatus === 'loading' || !isActorReady;
   const formattedTargetTime = formatDateTimeInTimezone(targetTime, currentCity.timezone);
 
   return (
     <div className="space-y-16">
-      {/* Hero */}
+      {/* Altar Hero */}
       <div
-        className="relative overflow-hidden"
+        className="relative overflow-hidden min-h-[500px] md:min-h-[600px] flex flex-col"
         style={{
-          backgroundImage: `url(${encodeURI('/assets/Uploaded Screen Shot 2026-02-09 at 12.47.13 PM.png')})`,
+          backgroundImage: `url("/assets/Untitled design (34).png")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-background/85" />
-        <div className="relative px-8 py-24 text-center space-y-8">
-          <div className="flex items-center justify-center mb-8">
-            <Glyph type="moon" className="h-16 w-16 text-primary" />
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background/90" />
+        
+        {/* Circular motif */}
+        <div 
+          className="absolute inset-0 flex items-end justify-center opacity-10 pb-32"
+          style={{
+            backgroundImage: 'url(/assets/generated/altar-circle-motif.dim_1200x1200.png)',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center bottom',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+        
+        {/* Content positioned in lower third */}
+        <div className="relative flex-1 flex flex-col justify-end px-8 pb-16 md:pb-20 text-center space-y-6">
+          <div className="flex items-center justify-center mb-4">
+            <Glyph type="moon" className="h-12 w-12 md:h-16 md:w-16 text-primary" />
           </div>
-          <h2 className="text-4xl md:text-5xl font-sans tracking-wider">Tomorrow's Nakshatra Placement</h2>
-          <p className="text-muted-foreground max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
-            Where the Moon will rest tomorrow
+          <h2 className="text-3xl md:text-5xl font-sans tracking-wider">Tomorrow's Nakshatra</h2>
+          <p className="text-white max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
+            Where the Moon will rest
           </p>
         </div>
       </div>
 
-      {/* Tomorrow's Nakshatra */}
+      {/* Tomorrow's Nakshatra - Centered Altar */}
       {shouldShowLoading ? (
         <div className="space-y-6 text-center max-w-xl mx-auto py-12">
           <Skeleton className="h-16 w-64 mx-auto" />
@@ -205,7 +202,6 @@ export default function TomorrowPage() {
           </div>
 
           <div className="space-y-4 text-sm text-muted-foreground">
-            <p className="tracking-wide">Longitude: {data.preciseLongitude.toFixed(3)}°</p>
             <div className="flex items-center justify-center gap-2 text-xs">
               <Clock className="h-3.5 w-3.5" />
               <span className="tracking-wide">{formattedTargetTime}</span>

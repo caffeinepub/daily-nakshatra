@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useActorStable } from './useActorStable';
 import type { UserProfile, BirthChartData } from '@/backend';
 
 export function useGetCallerUserProfile() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActorStable();
 
   const query = useQuery<UserProfile | null>({
     queryKey: ['currentUserProfile'],
@@ -23,7 +23,7 @@ export function useGetCallerUserProfile() {
 }
 
 export function useSaveCallerUserProfile() {
-  const { actor } = useActor();
+  const { actor } = useActorStable();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -38,7 +38,7 @@ export function useSaveCallerUserProfile() {
 }
 
 export function useSaveBirthChart() {
-  const { actor } = useActor();
+  const { actor } = useActorStable();
   const queryClient = useQueryClient();
 
   return useMutation({

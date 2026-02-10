@@ -1,52 +1,97 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Unblock Today page by surfacing actor/query prerequisite failures with reliable retry",
+  "title": "Stabilize actor initialization for anonymous access and improve connection-failure diagnostics",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Ensure Today page never gets stuck (indefinite skeleton or unrecoverable 'Unable to proceed') when nakshatra reading cannot be fetched, and always offers a working recovery action that can succeed without a full refresh once backend recovers.",
+      "id": "REQ-3",
+      "summary": "Replace the immutable useActor usage with a stable-key actor hook that supports anonymous actor creation without undefined query-key elements.",
       "acceptanceCriteria": [
-        "When the backend query for the current nakshatra fails, the Today page shows an error state with an actionable button that reliably triggers a new attempt (not a no-op).",
-        "When the app cannot query because prerequisites are missing (e.g., actor not ready / query not eligible), the Today page does not remain stuck on a skeleton indefinitely; it shows a clear message explaining what is missing and offers a recovery action.",
-        "After recovery (e.g., successful retry), the Today page proceeds to display nakshatra data without requiring a full page refresh."
+        "When logged out (no Internet Identity), the actor initialization query uses a stable key (no `undefined` element) and does not enter an error state solely due to missing identity.",
+        "The Today and Tomorrow pages no longer show the “Connection failed” screen for anonymous users if the backend is reachable."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/TodayPage.tsx",
-          "operation": "modify",
-          "description": "Replace the unconditional skeleton fallback for \"not actor ready / not query eligible\" with explicit prerequisite-aware UI states: (1) actor initialization failed (show clear message + Retry actor init button), (2) actor still initializing (show loading plus, after a short timeout, a \"still connecting\" message with Retry/Reload action), and (3) query eligible but backend call failed (keep existing error state but ensure the button triggers an actual refetch attempt). Use existing shadcn-ui Button/Skeleton primitives to keep UI consistent—verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/actorQueryKey.ts",
+          "operation": "create",
+          "description": "Add a shared helper to build the actor React Query key with no `undefined` element (e.g., anonymous key is just ['actor'], authenticated key is ['actor', principalString]) so useActorInitStatus and the new actor hook stay in sync."
         },
         {
-          "path": "frontend/src/hooks/useNakshatraNow.ts",
-          "operation": "modify",
-          "description": "Plumb through any newly-exposed actor prerequisite status from the underlying nakshatra query hook so TodayPage can distinguish \"actor loading\" vs \"actor failed\" vs \"query ineligible\" and can invoke a unified recovery action (retry actor init + retry nakshatra query)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Harden actor initialization handling on the frontend by surfacing initialization failures to the UI, distinguishing loading vs failure, and enabling user-triggered retries without editing immutable actor/auth hooks.",
-      "acceptanceCriteria": [
-        "If access-control initialization fails during actor creation, the app still obtains an actor instance when it is safe to do so, and the failure is reported (e.g., via error state/toast/log) instead of leaving the app unable to proceed.",
-        "The actor hook exposes enough state to distinguish between \"actor still loading\" vs \"actor failed\" so pages can render an appropriate error UI instead of indefinite loading.",
-        "Retrying actor initialization (via a user action such as reload/retry) results in a new initialization attempt."
-      ],
-      "file_operations": [
+          "path": "frontend/src/hooks/useActorStable.ts",
+          "operation": "create",
+          "description": "Create a new actor hook that mirrors useActor behavior but uses the shared stable query key from actorQueryKey.ts and always supports anonymous actor creation via createActorWithConfig() without requiring an identity."
+        },
         {
           "path": "frontend/src/hooks/useActorInitStatus.ts",
-          "operation": "create",
-          "description": "Add a wrapper hook that derives actor initialization status and error information without modifying immutable files by reading the React Query state for the existing actor query key, and provide a user-invokable retry function that invalidates/refetches the actor query. Keep the API minimal (status, error, retry) so pages and query hooks can render correct prerequisite/error states."
+          "operation": "modify",
+          "description": "Refactor to use the shared actorQueryKey.ts helper to ensure it always inspects the same stable actor query key used by the new actor hook."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update nakshatra query hook(s) to use the new actor-init status wrapper (instead of relying solely on actor presence + isFetching) so callers can distinguish actor loading vs actor failure. Expose additional state (e.g., actorInitStatus/actorInitError) plus a retryActorInitialization action; ensure these states are used to compute query eligibility and prevent \"enabled=false\" from producing an indefinite loading UX."
+          "description": "Switch imports/usage from the immutable useActor hook to useActorStable so determineNakshatra queries rely on the stable-key actor initialization behavior."
+        },
+        {
+          "path": "frontend/src/hooks/useUserLogs.ts",
+          "operation": "modify",
+          "description": "Switch imports/usage from the immutable useActor hook to useActorStable so logs queries/mutations do not depend on the buggy actor initialization query key."
+        },
+        {
+          "path": "frontend/src/hooks/useUserProfile.ts",
+          "operation": "modify",
+          "description": "Switch imports/usage from the immutable useActor hook to useActorStable so profile queries/mutations do not depend on the buggy actor initialization query key."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Only perform access-control initialization when a non-empty caffeineAdminToken URL param is present, and ensure retry re-runs initialization after URL param changes.",
+      "acceptanceCriteria": [
+        "If `caffeineAdminToken` is absent, actor initialization completes without calling `_initializeAccessControlWithSecret`.",
+        "If `caffeineAdminToken` is present and non-empty, `_initializeAccessControlWithSecret` is called once during actor creation and actor initialization succeeds when the token is valid.",
+        "The “Retry Connection” button successfully retries actor initialization after adding/removing the admin token param."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useActorStable.ts",
+          "operation": "modify",
+          "description": "Update actor creation flow to read the caffeineAdminToken URL parameter and call _initializeAccessControlWithSecret only when the parameter is present and non-empty (do not call with an empty string). Ensure the queryFn reads the current URL param on each refetch so the existing retry behavior re-applies changes after adding/removing the param."
+        },
+        {
+          "path": "frontend/src/hooks/useActorInitStatus.ts",
+          "operation": "modify",
+          "description": "Ensure retryActorInitialization invalidates/refetches the same stable actor query key so retry reliably re-runs actor creation after URL param changes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Enhance the Connection failed screen on Today and Tomorrow with a collapsible error-details section showing sanitized actor-init error info, without changing the existing English headline/body copy.",
+      "acceptanceCriteria": [
+        "On the actor initialization failure screen (Today and Tomorrow), the primary user-facing text remains in English and unchanged: “Connection failed” and “Unable to connect to the service. Please try again.”",
+        "A secondary UI element shows error details (sanitized string) when an initialization error exists, without crashing if the error is not an `Error` instance.",
+        "Retry still works and does not require a page reload."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/diagnostics/sanitizeError.ts",
+          "operation": "create",
+          "description": "Add a small utility to derive a safe developer-oriented error detail string (e.g., from unknown values: Error, objects, strings) for display without throwing."
+        },
+        {
+          "path": "frontend/src/components/errors/ConnectionFailedScreen.tsx",
+          "operation": "create",
+          "description": "Create a reusable ConnectionFailedScreen component that preserves the exact existing primary English headline/body copy and adds a collapsible/secondary error detail area using shadcn-ui primitives (compose existing components; do not edit frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/TodayPage.tsx",
+          "operation": "modify",
+          "description": "Replace the inline actor-init error UI with ConnectionFailedScreen, pass through actorInitError for sanitized details, and keep the existing Retry Connection behavior wired to retryActorInitialization (no page reload required)."
         },
         {
           "path": "frontend/src/pages/TomorrowPage.tsx",
           "operation": "modify",
-          "description": "Adjust Tomorrow page usage of the nakshatra query hook to match the updated return shape (actor init status/error and retry action), ensuring no regressions and maintaining consistent recoverable error/loading behavior. Use existing shadcn-ui Button/Skeleton primitives—verify the component's usage instructions before implementing."
+          "description": "Replace the inline actor-init error UI with ConnectionFailedScreen, pass through actorInitError for sanitized details, and keep the existing Retry Connection behavior wired to retryActorInitialization (no page reload required)."
         }
       ]
     }

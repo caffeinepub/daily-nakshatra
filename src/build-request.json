@@ -1,70 +1,88 @@
 {
   "kind": "build_request",
-  "title": "Fix Today page 'Unable to proceed' blocking bug",
+  "title": "Fix actor initialization causing “Connection failed” service connection error",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Fix the Today page flow so users are not blocked by the \"Unable to proceed\" error state or an indefinite loading state when the nakshatra reading cannot be fetched; the page must always provide a clear, actionable recovery path (retry/reload) and should successfully proceed to show the current nakshatra when the backend becomes available again.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "please fix the unable to proceed bug"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When the backend query for the current nakshatra fails, the Today page shows an error state with an actionable button that reliably triggers a new attempt (not a no-op).",
-        "When the app cannot query because prerequisites are missing (e.g., actor not ready / query not eligible), the Today page does not remain stuck on a skeleton indefinitely; it shows a clear message explaining what is missing and offers a recovery action.",
-        "After recovery (e.g., successful retry), the Today page proceeds to display nakshatra data without requiring a full page refresh."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Harden actor initialization so it cannot silently prevent the app from proceeding: ensure failures during actor setup (including any access-control initialization) are caught and surfaced to the UI, and do not block creation of a usable actor when possible (e.g., when an optional secret/admin token is absent).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "please fix the unable to proceed bug"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If access-control initialization fails during actor creation, the app still obtains an actor instance when it is safe to do so, and the failure is reported (e.g., via error state/toast/log) instead of leaving the app unable to proceed.",
-        "The actor hook exposes enough state to distinguish between \"actor still loading\" vs \"actor failed\" so pages can render an appropriate error UI instead of indefinite loading.",
-        "Retrying actor initialization (via a user action such as reload/retry) results in a new initialization attempt."
-      ]
-    },
-    {
       "id": "REQ-3",
-      "text": "Update the backend access-control initialization path (the method invoked by the frontend during actor setup) so that missing/empty optional secret token input does not trap and does not prevent normal, non-admin usage from proceeding.",
+      "text": "Fix frontend actor initialization so anonymous users do not fail to connect: ensure the React Query key used by `useActor` does not include `undefined` when there is no Internet Identity (so it matches `useActorInitStatus`), and ensure an anonymous actor can be created without errors.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "please fix this bug: Connection failed\n\nUnable to connect to the service. Please try again."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When logged out (no Internet Identity), the actor initialization query uses a stable key (no `undefined` element) and does not enter an error state solely due to missing identity.",
+        "The Today and Tomorrow pages no longer show the “Connection failed” screen for anonymous users if the backend is reachable."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Prevent actor initialization from failing due to missing admin token: only call `_initializeAccessControlWithSecret` when the `caffeineAdminToken` URL parameter is present and non-empty; do not call it with an empty string.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "please fix this bug: Connection failed\n\nUnable to connect to the service. Please try again."
+        ]
+      },
+      "acceptanceCriteria": [
+        "If `caffeineAdminToken` is absent, actor initialization completes without calling `_initializeAccessControlWithSecret`.",
+        "If `caffeineAdminToken` is present and non-empty, `_initializeAccessControlWithSecret` is called once during actor creation and actor initialization succeeds when the token is valid.",
+        "The “Retry Connection” button successfully retries actor initialization after adding/removing the admin token param."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Improve the connection failure UX for actor initialization errors: keep the existing English headline/body text, and additionally render a collapsible/secondary error detail area that shows a safe, developer-oriented message derived from the actor init error (e.g., error name/message) to help diagnose deployment/agent issues.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Connection failed\n\nUnable to connect to the service. Please try again."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On the actor initialization failure screen (Today and Tomorrow), the primary user-facing text remains in English and unchanged: “Connection failed” and “Unable to connect to the service. Please try again.”",
+        "A secondary UI element shows error details (sanitized string) when an initialization error exists, without crashing if the error is not an `Error` instance.",
+        "Retry still works and does not require a page reload."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Ensure the backend access-control initialization method does not trap when called without a valid secret (defensive behavior): if `_initializeAccessControlWithSecret` is invoked with an empty or invalid secret, it must not trap; it should either no-op or return an error that the frontend can handle gracefully.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-3"
         ],
         "quotes": [
-          "please fix the unable to proceed bug"
+          "please fix this bug: Connection failed\n\nUnable to connect to the service. Please try again."
         ]
       },
       "acceptanceCriteria": [
-        "Calling the backend access-control initialization method with an empty or missing secret does not trap and does not break subsequent calls to public methods like determineNakshatra.",
-        "Normal users (non-admin) can load the Today page and successfully call determineNakshatra without requiring any admin token."
+        "Calling `_initializeAccessControlWithSecret(\"\")` does not trap the canister.",
+        "If the secret is invalid, the canister remains usable for public methods (e.g., `determineNakshatra`) and does not block anonymous access due to a trap during initialization."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (read-only UI component sources must be composed, not edited).",
-    "Do not edit immutable frontend hook files listed in SYSTEM_CONTEXT (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx)."
+    "Do not edit files under `frontend/src/components/ui` (compose them instead).",
+    "Do not modify immutable paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`.",
+    "Backend must remain a single Motoko actor in `backend/main.mo`; only add `backend/migration.mo` if state schema changes (not expected for this fix)."
   ],
   "nonGoals": [
-    "No new features beyond fixing the blocking 'Unable to proceed' bug and related recovery/error handling.",
-    "No third-party authentication providers beyond Internet Identity.",
-    "No new real-time communication features (e.g., WebSockets)."
+    "Adding new authentication providers beyond Internet Identity.",
+    "Implementing real-time connectivity mechanisms (WebSockets, sockets, etc.).",
+    "Changing nakshatra calculation logic or UI content unrelated to connection/initialization."
   ],
   "imageRequirements": {
     "required": [],

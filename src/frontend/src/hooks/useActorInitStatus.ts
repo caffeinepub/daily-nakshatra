@@ -1,7 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from './useInternetIdentity';
-
-const ACTOR_QUERY_KEY = 'actor';
+import { buildActorQueryKey } from './actorQueryKey';
 
 export type ActorInitStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -9,8 +8,12 @@ export function useActorInitStatus() {
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
 
+  // Build the stable query key that matches useActorStable
+  const principalString = identity?.getPrincipal().toString();
+  const actorQueryKey = buildActorQueryKey(principalString);
+
   // Read the actor query state without creating a new query
-  const actorQueryState = queryClient.getQueryState([ACTOR_QUERY_KEY, identity?.getPrincipal().toString()]);
+  const actorQueryState = queryClient.getQueryState(actorQueryKey);
 
   const status: ActorInitStatus = actorQueryState
     ? actorQueryState.status === 'pending'
@@ -25,16 +28,17 @@ export function useActorInitStatus() {
   const error = actorQueryState?.error;
 
   const retryActorInitialization = () => {
-    queryClient.invalidateQueries({ queryKey: [ACTOR_QUERY_KEY] });
-    queryClient.refetchQueries({ queryKey: [ACTOR_QUERY_KEY] });
+    // Invalidate and refetch using the stable key
+    queryClient.invalidateQueries({ queryKey: actorQueryKey });
+    queryClient.refetchQueries({ queryKey: actorQueryKey });
   };
 
   return {
     status,
     error,
-    isLoading: status === 'loading',
-    isError: status === 'error',
-    isSuccess: status === 'success',
     retryActorInitialization,
+    isSuccess: status === 'success',
+    isError: status === 'error',
+    isLoading: status === 'loading',
   };
 }

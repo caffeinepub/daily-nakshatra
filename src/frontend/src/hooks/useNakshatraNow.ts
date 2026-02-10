@@ -1,59 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useDetermineNakshatra } from './useQueries';
 import { calculateLunarLongitude } from '@/lib/astro/lunarLongitude';
-import { getCurrentTimeInTimezone } from '@/lib/time/timezone';
+import { getTimeInTimezone } from '@/lib/time/timezone';
 import { useCitySelection } from './useCitySelection';
 import { isValidLongitude, normalizeLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
 
-const POLL_INTERVAL = 60000; // 1 minute
-
 export function useNakshatraNow() {
   const { currentCity, selectionKey } = useCitySelection();
-  
-  const [currentLongitude, setCurrentLongitude] = useState<number>(() => {
-    const cityTime = getCurrentTimeInTimezone(currentCity.timezone);
-    const longitude = calculateLunarLongitude(cityTime);
-    return normalizeLongitude(longitude);
-  });
-
-  const [isLongitudeValid, setIsLongitudeValid] = useState<boolean>(() => 
-    isValidLongitude(currentLongitude)
-  );
-
-  const query = useDetermineNakshatra(currentLongitude, currentCity.timezone, currentCity.name, selectionKey);
-
-  const recomputeLongitude = () => {
-    const cityTime = getCurrentTimeInTimezone(currentCity.timezone);
-    const rawLongitude = calculateLunarLongitude(cityTime);
-    const longitude = normalizeLongitude(rawLongitude);
-    const valid = isValidLongitude(longitude);
-    
-    if (!valid) {
-      console.warn('[useNakshatraNow] Invalid longitude computed', {
-        rawLongitude,
-        normalizedLongitude: longitude,
-        city: currentCity.name,
-        timezone: currentCity.timezone,
-        cityTime: cityTime.toISOString(),
-      });
-    }
-    
-    setCurrentLongitude(longitude);
-    setIsLongitudeValid(valid);
-  };
+  const [currentLongitude, setCurrentLongitude] = useState<number | null>(null);
+  const [longitudeValid, setLongitudeValid] = useState(true);
+  const [computeKey, setComputeKey] = useState(0);
 
   useEffect(() => {
-    // Update immediately when city changes or selection key changes
-    recomputeLongitude();
-    
-    // Set up polling interval
-    const interval = setInterval(recomputeLongitude, POLL_INTERVAL);
+    const localTime = getTimeInTimezone(new Date(), currentCity.timezone);
+    const rawLongitude = calculateLunarLongitude(localTime);
+    const longitude = normalizeLongitude(rawLongitude);
+    const valid = isValidLongitude(longitude);
+    setCurrentLongitude(longitude);
+    setLongitudeValid(valid);
+  }, [currentCity.timezone, selectionKey, computeKey]);
 
-    return () => clearInterval(interval);
-  }, [currentCity.timezone, currentCity.name, selectionKey]);
+  const recomputeLongitude = () => {
+    setComputeKey((prev) => prev + 1);
+  };
+
+  const queryResult = useDetermineNakshatra(
+    currentLongitude,
+    currentCity.timezone,
+    currentCity.name,
+    selectionKey
+  );
 
   return {
-    ...query,
+    ...queryResult,
+    isLongitudeValid: longitudeValid,
     recomputeLongitude,
   };
 }

@@ -34,8 +34,8 @@
   "frontend/src/pages/ProfileSettingsPage.tsx": "Profile page with centered narrow layout, increased form spacing, custom glyphs, and Inter sans-serif typography for all headings and labels.",
   "frontend/src/components/today/DailyGuidanceModules.tsx": "Daily guidance accordion using custom glyphs (awareness, sleep, social, creative, ritual), renamed to \"Guidance\", with slower ceremonial reveal animations.",
   "frontend/src/pages/VisualStyleSystemPage.tsx": "New visual style system reference page documenting color palette, typography, glyphs, spacing, motion rules, and example layouts (altar and descent) with live UI examples.",
-  "frontend/index.html": "HTML entry point with dark class on root element and Inter font loaded from Google Fonts.",
-  "frontend/src/lib/appVersion.ts": "Exports APP_VERSION constant set to 'Version 20' for production release tracking.",
+  "frontend/index.html": "HTML entry point with dark class on root element, Inter font loaded from Google Fonts, and cache-control meta tags to prevent stale HTML serving after deployment.",
+  "frontend/src/lib/appVersion.ts": "Exports APP_VERSION constant set to 'Version 22' for production release tracking.",
   "frontend/src/hooks/useActorInitStatus.ts": "Hook that exposes actor initialization status using the stable query key from actorQueryKey.ts and provides a retry function.",
   "frontend/src/hooks/useActor.ts": "Actor initialization hook with safe runtime access to optional access-control initialization method, wrapped in try-catch to prevent production build failures from TypeScript type mismatches.",
   "frontend/src/hooks/actorQueryKey.ts": "Shared helper that builds stable actor query keys with no undefined elements for both anonymous and authenticated users.",
@@ -43,5 +43,6 @@
   "frontend/src/hooks/useUserLogs.ts": "React Query hooks for user logs (check-ins, sleep logs, dream logs) that use useActorStable instead of useActor.",
   "frontend/src/hooks/useUserProfile.ts": "React Query hooks for user profile management that use useActorStable instead of useActor.",
   "frontend/src/lib/diagnostics/sanitizeError.ts": "Utility that safely converts unknown error values into displayable strings without throwing.",
-  "frontend/src/components/errors/ConnectionFailedScreen.tsx": "Reusable connection failure screen with collapsible error details, preserving exact English copy and supporting retry without page reload."
+  "frontend/src/components/errors/ConnectionFailedScreen.tsx": "Reusable connection failure screen with collapsible error details, preserving exact English copy and supporting retry without page reload.",
+  "frontend/src/main.tsx": "Application entry point with QueryClientProvider and InternetIdentityProvider, now logging APP_VERSION on boot and attaching it to root element as data attribute for deployment verification."
 }

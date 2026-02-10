@@ -1,97 +1,41 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Stabilize actor initialization for anonymous access and improve connection-failure diagnostics",
+  "title": "Go-live Version 22 (frontend release label + production cache-safety)",
   "requirements": [
     {
-      "id": "REQ-3",
-      "summary": "Replace the immutable useActor usage with a stable-key actor hook that supports anonymous actor creation without undefined query-key elements.",
+      "id": "REQ-1",
+      "summary": "Update the UI version label to display \"Version 22\" via the existing APP_VERSION constant used by AppLayout footer.",
       "acceptanceCriteria": [
-        "When logged out (no Internet Identity), the actor initialization query uses a stable key (no `undefined` element) and does not enter an error state solely due to missing identity.",
-        "The Today and Tomorrow pages no longer show the “Connection failed” screen for anonymous users if the backend is reachable."
+        "`frontend/src/lib/appVersion.ts` exports `APP_VERSION = 'Version 22'` (exact string).",
+        "The footer in the running app displays \"Version 22\" (via `AppLayout`)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/actorQueryKey.ts",
-          "operation": "create",
-          "description": "Add a shared helper to build the actor React Query key with no `undefined` element (e.g., anonymous key is just ['actor'], authenticated key is ['actor', principalString]) so useActorInitStatus and the new actor hook stay in sync."
-        },
-        {
-          "path": "frontend/src/hooks/useActorStable.ts",
-          "operation": "create",
-          "description": "Create a new actor hook that mirrors useActor behavior but uses the shared stable query key from actorQueryKey.ts and always supports anonymous actor creation via createActorWithConfig() without requiring an identity."
-        },
-        {
-          "path": "frontend/src/hooks/useActorInitStatus.ts",
+          "path": "frontend/src/lib/appVersion.ts",
           "operation": "modify",
-          "description": "Refactor to use the shared actorQueryKey.ts helper to ensure it always inspects the same stable actor query key used by the new actor hook."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Switch imports/usage from the immutable useActor hook to useActorStable so determineNakshatra queries rely on the stable-key actor initialization behavior."
-        },
-        {
-          "path": "frontend/src/hooks/useUserLogs.ts",
-          "operation": "modify",
-          "description": "Switch imports/usage from the immutable useActor hook to useActorStable so logs queries/mutations do not depend on the buggy actor initialization query key."
-        },
-        {
-          "path": "frontend/src/hooks/useUserProfile.ts",
-          "operation": "modify",
-          "description": "Switch imports/usage from the immutable useActor hook to useActorStable so profile queries/mutations do not depend on the buggy actor initialization query key."
+          "description": "Update `APP_VERSION` to the exact string `Version 22` so AppLayout footer reflects the deployed release."
         }
       ]
     },
     {
-      "id": "REQ-4",
-      "summary": "Only perform access-control initialization when a non-empty caffeineAdminToken URL param is present, and ensure retry re-runs initialization after URL param changes.",
+      "id": "REQ-2",
+      "summary": "Prepare the frontend build to reliably serve Version 22 immediately after deployment by reducing the chance of stale HTML/asset caching, so users receive the new release without a hard refresh.",
       "acceptanceCriteria": [
-        "If `caffeineAdminToken` is absent, actor initialization completes without calling `_initializeAccessControlWithSecret`.",
-        "If `caffeineAdminToken` is present and non-empty, `_initializeAccessControlWithSecret` is called once during actor creation and actor initialization succeeds when the token is valid.",
-        "The “Retry Connection” button successfully retries actor initialization after adding/removing the admin token param."
+        "After deployment completes, the production (live) app loads successfully without requiring a hard refresh.",
+        "The live app footer displays \"Version 22\" confirming the new frontend assets are serving.",
+        "Backend canister upgrade completes without trapping and the app can initialize its actor connection on the live environment."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useActorStable.ts",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Update actor creation flow to read the caffeineAdminToken URL parameter and call _initializeAccessControlWithSecret only when the parameter is present and non-empty (do not call with an empty string). Ensure the queryFn reads the current URL param on each refetch so the existing retry behavior re-applies changes after adding/removing the param."
+          "description": "Add standard cache-control meta tags (e.g., no-cache / no-store / must-revalidate plus pragma/expires) to reduce the likelihood of browsers serving a stale HTML shell after go-live, helping the new hashed JS/CSS assets load without requiring a user hard refresh."
         },
         {
-          "path": "frontend/src/hooks/useActorInitStatus.ts",
+          "path": "frontend/src/main.tsx",
           "operation": "modify",
-          "description": "Ensure retryActorInitialization invalidates/refetches the same stable actor query key so retry reliably re-runs actor creation after URL param changes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Enhance the Connection failed screen on Today and Tomorrow with a collapsible error-details section showing sanitized actor-init error info, without changing the existing English headline/body copy.",
-      "acceptanceCriteria": [
-        "On the actor initialization failure screen (Today and Tomorrow), the primary user-facing text remains in English and unchanged: “Connection failed” and “Unable to connect to the service. Please try again.”",
-        "A secondary UI element shows error details (sanitized string) when an initialization error exists, without crashing if the error is not an `Error` instance.",
-        "Retry still works and does not require a page reload."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/lib/diagnostics/sanitizeError.ts",
-          "operation": "create",
-          "description": "Add a small utility to derive a safe developer-oriented error detail string (e.g., from unknown values: Error, objects, strings) for display without throwing."
-        },
-        {
-          "path": "frontend/src/components/errors/ConnectionFailedScreen.tsx",
-          "operation": "create",
-          "description": "Create a reusable ConnectionFailedScreen component that preserves the exact existing primary English headline/body copy and adds a collapsible/secondary error detail area using shadcn-ui primitives (compose existing components; do not edit frontend/src/components/ui). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/TodayPage.tsx",
-          "operation": "modify",
-          "description": "Replace the inline actor-init error UI with ConnectionFailedScreen, pass through actorInitError for sanitized details, and keep the existing Retry Connection behavior wired to retryActorInitialization (no page reload required)."
-        },
-        {
-          "path": "frontend/src/pages/TomorrowPage.tsx",
-          "operation": "modify",
-          "description": "Replace the inline actor-init error UI with ConnectionFailedScreen, pass through actorInitError for sanitized details, and keep the existing Retry Connection behavior wired to retryActorInitialization (no page reload required)."
+          "description": "Add a lightweight runtime release marker (e.g., log APP_VERSION once on boot and/or attach it to a non-sensitive global like a data attribute) to help verify that the live environment is serving Version 22 assets during post-deploy checks."
         }
       ]
     }

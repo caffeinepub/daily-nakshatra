@@ -3,47 +3,35 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Connection failed: Unable to connect to the service. Please try again."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-frontend-actor-initialization-so-anonymous-users-do-not-fail-to-connect-ensure-the-react-query-key-used-by-useactor-does-not-include-undefined-when-there-is-no-internet-identity-so-it-matches-useactorinitstatus-and-ensure-an-anonymous-actor-can-be-created-without-errors",
-      "title": "Fix frontend actor initialization so anonymous users do not fail to connect: ensure the React Query key used by `useActor` does not include `undefined` when there is no Internet Identity (so it matches `useActorInitStatus`), and ensure an anonymous actor can be created without errors.",
+      "id": "feature-update-the-app-s-displayed-version-label-to-version-22-so-the-ui-reflects-the-deployed-release",
+      "title": "Update the app’s displayed version label to \"Version 22\" so the UI reflects the deployed release.",
       "reqIds": [
-        "REQ-3"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-prevent-actor-initialization-from-failing-due-to-missing-admin-token-only-call-initializeaccesscontrolwithsecret-when-the-caffeineadmintoken-url-parameter-is-present-and-non-empty-do-not-call-it-with-an-empty-string",
-      "title": "Prevent actor initialization from failing due to missing admin token: only call `_initializeAccessControlWithSecret` when the `caffeineAdminToken` URL parameter is present and non-empty; do not call it with an empty string.",
+      "id": "feature-deploy-version-22-to-the-live-internet-computer-canister-s-so-end-users-receive-this-release-when-loading-the-production-url",
+      "title": "Deploy Version 22 to the live Internet Computer canister(s) so end users receive this release when loading the production URL.",
       "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-the-connection-failure-ux-for-actor-initialization-errors-keep-the-existing-english-headline-body-text-and-additionally-render-a-collapsible-secondary-error-detail-area-that-shows-a-safe-developer-oriented-message-derived-from-the-actor-init-error-e-g-error-name-message-to-help-diagnose-deployment-agent-issues",
-      "title": "Improve the connection failure UX for actor initialization errors: keep the existing English headline/body text, and additionally render a collapsible/secondary error detail area that shows a safe, developer-oriented message derived from the actor init error (e.g., error name/message) to help diagnose deployment/agent issues.",
-      "reqIds": [
-        "REQ-5"
+        "REQ-2"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-4",
-      "summary": "Ensure the backend access-control initialization method does not trap when called without a valid secret (defensive behavior): if `_initializeAccessControlWithSecret` is invoked with an empty or invalid secret, it must not trap; it should either no-op or return an error that the frontend can handle gracefully.",
-      "reqIds": [
-        "REQ-6"
-      ],
+      "id": "AR-1",
+      "summary": "Deploy Version 22 to production (go live)",
+      "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Fix actor initialization causing “Connection failed” service connection error",
+  "projectName": "Deploy Version 22 to production (go live)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

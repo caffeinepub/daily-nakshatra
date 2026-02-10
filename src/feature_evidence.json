@@ -2,15 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-frontend-actor-initialization-so-anonymous-users-do-not-fail-to-connect-ensure-the-react-query-key-used-by-useactor-does-not-include-undefined-when-there-is-no-internet-identity-so-it-matches-useactorinitstatus-and-ensure-an-anonymous-actor-can-be-created-without-errors",
-      "featureTitle": "Fix frontend actor initialization so anonymous users do not fail to connect: ensure the React Query key used by `useActor` does not include `undefined` when there is no Internet Identity (so it matches `useActorInitStatus`), and ensure an anonymous actor can be created without errors.",
+      "featureId": "feature-update-the-app-s-displayed-version-label-to-version-22-so-the-ui-reflects-the-deployed-release",
+      "featureTitle": "Update the app’s displayed version label to \"Version 22\" so the UI reflects the deployed release.",
       "files": [
-        "frontend/src/hooks/actorQueryKey.ts",
-        "frontend/src/hooks/useActorInitStatus.ts",
-        "frontend/src/hooks/useActorStable.ts",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/hooks/useUserLogs.ts",
-        "frontend/src/hooks/useUserProfile.ts"
+        "frontend/src/lib/appVersion.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -21,16 +16,15 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-prevent-actor-initialization-from-failing-due-to-missing-admin-token-only-call-initializeaccesscontrolwithsecret-when-the-caffeineadmintoken-url-parameter-is-present-and-non-empty-do-not-call-it-with-an-empty-string",
-      "featureTitle": "Prevent actor initialization from failing due to missing admin token: only call `_initializeAccessControlWithSecret` when the `caffeineAdminToken` URL parameter is present and non-empty; do not call it with an empty string.",
+      "featureId": "feature-deploy-version-22-to-the-live-internet-computer-canister-s-so-end-users-receive-this-release-when-loading-the-production-url",
+      "featureTitle": "Deploy Version 22 to the live Internet Computer canister(s) so end users receive this release when loading the production URL.",
       "files": [
-        "frontend/src/hooks/useActorInitStatus.ts",
-        "frontend/src/hooks/useActorStable.ts"
+        "frontend/index.html"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -41,29 +35,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-improve-the-connection-failure-ux-for-actor-initialization-errors-keep-the-existing-english-headline-body-text-and-additionally-render-a-collapsible-secondary-error-detail-area-that-shows-a-safe-developer-oriented-message-derived-from-the-actor-init-error-e-g-error-name-message-to-help-diagnose-deployment-agent-issues",
-      "featureTitle": "Improve the connection failure UX for actor initialization errors: keep the existing English headline/body text, and additionally render a collapsible/secondary error detail area that shows a safe, developer-oriented message derived from the actor init error (e.g., error name/message) to help diagnose deployment/agent issues.",
-      "files": [
-        "frontend/src/components/errors/ConnectionFailedScreen.tsx",
-        "frontend/src/lib/diagnostics/sanitizeError.ts",
-        "frontend/src/pages/TodayPage.tsx",
-        "frontend/src/pages/TomorrowPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
+        "REQ-2"
       ],
       "confidence": "high"
     }

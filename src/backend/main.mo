@@ -11,8 +11,6 @@ import Map "mo:core/Map";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
-// No migration file needed, as there is no persisted state to migrate.
-
 actor {
   type Nakshatra = {
     name : Text;
@@ -79,9 +77,13 @@ actor {
   let dreamLogEntries = Map.empty<Principal, List.List<DreamLogEntry>>();
   let birthCharts = Map.empty<Principal, BirthChartData>();
   let userProfiles = Map.empty<Principal, UserProfile>();
-  let accessControlState = AccessControl.initState();
+
+  // Initialize access control state
+  let accessControlState : AccessControl.AccessControlState = AccessControl.initState();
 
   include MixinAuthorization(accessControlState);
+
+  // User Profile Management
 
   public type UserProfile = {
     name : Text;
@@ -490,4 +492,3 @@ actor {
     };
   };
 };
-

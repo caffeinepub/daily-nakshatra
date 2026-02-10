@@ -47,6 +47,8 @@ export default function TomorrowPage() {
     isRefetching,
     isActorReady,
     isQueryEligible,
+    actorInitStatus,
+    retryActorInitialization,
   } = useDetermineNakshatra(
     tomorrowLongitude,
     currentCity.timezone,
@@ -54,7 +56,34 @@ export default function TomorrowPage() {
     selectionKey
   );
 
-  if (!longitudeValid && tomorrowLongitude !== null && !isLoading) {
+  // Actor initialization failed
+  if (actorInitStatus === 'error') {
+    return (
+      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <AlertCircle className="h-12 w-12 text-destructive" />
+        </div>
+        <p className="text-foreground text-lg font-sans tracking-wide">Connection failed</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Unable to connect to the service. Please try again.
+        </p>
+        <Button
+          onClick={() => {
+            retryActorInitialization();
+          }}
+          disabled={isRefetching}
+          variant="ghost"
+          className="gap-2 mt-4"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Retry Connection
+        </Button>
+      </div>
+    );
+  }
+
+  // Invalid longitude
+  if (!longitudeValid && tomorrowLongitude !== null && !isLoading && actorInitStatus !== 'loading') {
     return (
       <div className="text-center py-20 space-y-6 max-w-md mx-auto">
         <div className="flex justify-center mb-6">
@@ -91,15 +120,22 @@ export default function TomorrowPage() {
     );
   }
 
-  if (error && isQueryEligible) {
+  // Backend query error (only when actor is ready)
+  if (error && isActorReady) {
     return (
       <div className="text-center py-20 space-y-6 max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <AlertCircle className="h-12 w-12 text-muted-foreground" />
+        </div>
         <p className="text-foreground text-lg font-sans tracking-wide">Unable to proceed</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           The reading cannot be completed. Wait, then try again.
         </p>
         <Button
-          onClick={() => refetch()}
+          onClick={() => {
+            setViewingTimeAnchor(new Date());
+            refetch();
+          }}
           disabled={isRefetching}
           variant="ghost"
           className="gap-2 mt-4"
@@ -120,7 +156,7 @@ export default function TomorrowPage() {
     );
   }
 
-  const shouldShowLoading = isLoading || !isActorReady || !isQueryEligible || tomorrowLongitude === null;
+  const shouldShowLoading = isLoading || actorInitStatus === 'loading' || !isActorReady || tomorrowLongitude === null;
 
   const formattedTargetTime = formatDateTimeInTimezone(targetTime, currentCity.timezone);
 

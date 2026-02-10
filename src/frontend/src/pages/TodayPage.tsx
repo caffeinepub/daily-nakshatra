@@ -28,6 +28,8 @@ export default function TodayPage() {
     recomputeLongitude,
     isActorReady,
     isQueryEligible,
+    actorInitStatus,
+    retryActorInitialization,
   } = useNakshatraNow();
   const { currentCity } = useCitySelection();
   const { identity } = useInternetIdentity();
@@ -36,7 +38,34 @@ export default function TodayPage() {
   const isAuthenticated = !!identity;
   const showResonance = isAuthenticated && userProfile?.isPremium;
 
-  if (!isLongitudeValid && !isLoading) {
+  // Actor initialization failed
+  if (actorInitStatus === 'error') {
+    return (
+      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <AlertCircle className="h-12 w-12 text-destructive" />
+        </div>
+        <p className="text-foreground text-lg font-sans tracking-wide">Connection failed</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Unable to connect to the service. Please try again.
+        </p>
+        <Button
+          onClick={() => {
+            retryActorInitialization();
+          }}
+          disabled={isRefetching}
+          variant="ghost"
+          className="gap-2 mt-4"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Retry Connection
+        </Button>
+      </div>
+    );
+  }
+
+  // Invalid longitude
+  if (!isLongitudeValid && !isLoading && actorInitStatus !== 'loading') {
     return (
       <div className="text-center py-20 space-y-6 max-w-md mx-auto">
         <div className="flex justify-center mb-6">
@@ -73,14 +102,26 @@ export default function TodayPage() {
     );
   }
 
-  if (error && isQueryEligible) {
+  // Backend query error (only when actor is ready and query is eligible)
+  if (error && isActorReady) {
     return (
       <div className="text-center py-20 space-y-6 max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <AlertCircle className="h-12 w-12 text-muted-foreground" />
+        </div>
         <p className="text-foreground text-lg font-sans tracking-wide">Unable to proceed</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           The reading cannot be completed. Wait, then try again.
         </p>
-        <Button onClick={() => refetch()} disabled={isRefetching} variant="ghost" className="gap-2 mt-4">
+        <Button
+          onClick={() => {
+            recomputeLongitude();
+            refetch();
+          }}
+          disabled={isRefetching}
+          variant="ghost"
+          className="gap-2 mt-4"
+        >
           {isRefetching ? (
             <>
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -97,7 +138,7 @@ export default function TodayPage() {
     );
   }
 
-  const shouldShowLoading = isLoading || !isActorReady || !isQueryEligible;
+  const shouldShowLoading = isLoading || actorInitStatus === 'loading' || !isActorReady;
 
   return (
     <div className="space-y-16">

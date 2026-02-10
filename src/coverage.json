@@ -1,22 +1,22 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T00:26:28.031Z",
+  "generatedAt": "2026-02-10T00:36:10.489Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
+    "total": 3,
     "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Today page hero background image so the new asset \"Untitled design (33).png\" reliably loads and renders as the hero background in the \"Current Nakshatra Placement\" section (no broken image/404), including handling special characters in the filename (spaces/parentheses) and ensuring the file is present in the correct frontend static assets location.",
+        "summary": "Fix the Today page flow so users are not blocked by the \"Unable to proceed\" error state or an indefinite loading state when the nakshatra reading cannot be fetched; the page must always provide a clear, actionable recovery path (retry/reload) and should successfully proceed to show the current nakshatra when the backend becomes available again.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/assets/Untitled design (33).png",
-          "frontend/src/pages/TodayPage.tsx"
+          "frontend/src/pages/TodayPage.tsx",
+          "frontend/src/hooks/useNakshatraNow.ts"
         ],
         "matchedFiles": [
           "frontend/src/pages/TodayPage.tsx"
@@ -24,23 +24,38 @@
       },
       {
         "id": "REQ-2",
-        "summary": "Reposition the hero overlay text content in the Today page hero (glyph, \"Current Nakshatra Placement\" heading, and subtitle) so it sits in the bottom lower third of the hero image area instead of centered, while keeping it readable (spacing/padding) across mobile and desktop.",
+        "summary": "Harden actor initialization so it cannot silently prevent the app from proceeding: ensure failures during actor setup (including any access-control initialization) are caught and surfaced to the UI, and do not block creation of a usable actor when possible (e.g., when an optional secret/admin token is absent).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/TodayPage.tsx"
+          "frontend/src/hooks/useActorInitStatus.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/TomorrowPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/TodayPage.tsx"
+          "frontend/src/hooks/useActorInitStatus.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/TomorrowPage.tsx"
         ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Update the backend access-control initialization path (the method invoked by the frontend during actor setup) so that missing/empty optional secret token input does not trap and does not prevent normal, non-admin usage from proceeding.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/hooks/useActorInitStatus.ts",
+    "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/TodayPage.tsx",
+    "frontend/src/pages/TomorrowPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

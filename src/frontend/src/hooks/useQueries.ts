@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useActor } from './useActor';
+import { useActorInitStatus } from './useActorInitStatus';
 import { logNakshatraQueryFailure, isValidLongitude, normalizeLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
 
 export function useDetermineNakshatra(
@@ -9,11 +10,12 @@ export function useDetermineNakshatra(
   selectionKey: number
 ) {
   const { actor, isFetching } = useActor();
+  const actorInitStatus = useActorInitStatus();
 
   // Normalize longitude if provided
   const normalizedLongitude = lunarLongitude !== null ? normalizeLongitude(lunarLongitude) : null;
   const isLongitudeValid = normalizedLongitude !== null && isValidLongitude(normalizedLongitude);
-  const isActorReady = !!actor && !isFetching;
+  const isActorReady = !!actor && !isFetching && actorInitStatus.isSuccess;
   const isQueryEligible = isActorReady && isLongitudeValid && normalizedLongitude !== null;
 
   const query = useQuery({
@@ -54,5 +56,8 @@ export function useDetermineNakshatra(
     isActorReady,
     isLongitudeValid,
     isQueryEligible,
+    actorInitStatus: actorInitStatus.status,
+    actorInitError: actorInitStatus.error,
+    retryActorInitialization: actorInitStatus.retryActorInitialization,
   };
 }

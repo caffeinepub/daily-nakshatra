@@ -2,7 +2,7 @@
   "frontend/src/App.tsx": "Main application component with TanStack Router (without /style-system route), wrapped in ThemeProvider defaulting to dark mode and QueryClientProvider.",
   "frontend/src/components/layout/AppLayout.tsx": "Root layout with centered narrow measure, increased vertical spacing, footer with caffeine.ai attribution and Draft Version 12 indicator.",
   "frontend/src/components/layout/AppHeader.tsx": "Application header with moon glyph, navigation links, city picker, alerts toggle, and login button using Inter sans-serif typography.",
-  "frontend/src/pages/TodayPage.tsx": "Today page with altar-like centered composition, hero background image properly resolved using BASE_URL with quoted URL for special characters, hero text positioned in lower third with gradient overlay for contrast, and Inter sans-serif typography throughout.",
+  "frontend/src/pages/TodayPage.tsx": "Today page with altar-like centered composition, now with explicit actor initialization failure handling showing \"Connection failed\" with retry button, and improved error states that distinguish actor failures from query failures.",
   "frontend/src/pages/KnowledgeBasePage.tsx": "Knowledge Base list with centered layout, increased negative space, searchable grid displaying all 27 Nakshatras with Inter sans-serif typography.",
   "frontend/src/pages/NakshatraDetailPage.tsx": "Nakshatra detail page with centered descent layout, generous spacing, and Inter sans-serif typography for all headings.",
   "frontend/src/components/nakshatra/NakshatraListItem.tsx": "Card component for displaying Nakshatra summary in the Knowledge Base list with type-safe Link using params prop for dynamic routing.",
@@ -12,10 +12,10 @@
   "frontend/src/components/city/CityPicker.tsx": "Dialog component with \"Use Current Position\" button for geolocation, searchable city list for manual selection, loading states, error handling with English messages, and visual indication of selected city.",
   "frontend/src/components/alerts/AlertsToggle.tsx": "Alerts toggle switch using custom bell glyph instead of lucide icons, with restrained labeling and smaller scale.",
   "frontend/src/components/alerts/NakshatraChangeBanner.tsx": "Nakshatra change banner using custom shift glyph, restrained omen-like copy (\"Shift\"), solid background (no gradient), and dismissible X button.",
-  "frontend/src/hooks/useQueries.ts": "React Query hook for calling backend determineNakshatra with normalization of longitude to [0, 360) before validation and backend calls, accepting nullable longitude input, and returning actor-readiness and query-eligibility flags alongside the standard query result.",
+  "frontend/src/hooks/useQueries.ts": "Updated nakshatra query hook to use actor init status wrapper, exposing actorInitStatus, actorInitError, and retryActorInitialization for proper prerequisite-aware error handling.",
   "frontend/src/hooks/useCitySelection.ts": "Hook managing city selection state with localStorage persistence, validation for both predefined and geolocation-derived cities, timezone verification, reactive local time display, and selectionKey refresh token for forcing downstream updates.",
   "frontend/src/hooks/useLocalStorage.ts": "Generic localStorage hook with same-tab synchronization via in-memory subscriber registry and cross-tab sync via storage events, with deduplication to prevent update loops.",
-  "frontend/src/hooks/useNakshatraNow.ts": "Hook that polls lunar longitude calculation with normalization and validation tracking, exposing all query result properties including isLongitudeValid, isActorReady, isQueryEligible flags, and a recomputeLongitude action for proper loading/error state handling.",
+  "frontend/src/hooks/useNakshatraNow.ts": "Hook that polls lunar longitude calculation with normalization and validation tracking, now passing through actor init status and retry capabilities from the updated query hook.",
   "frontend/src/hooks/useNakshatraAlerts.ts": "Hook managing alert state, detecting Nakshatra changes, and showing/dismissing banner.",
   "frontend/src/lib/astro/lunarLongitude.ts": "Calculates approximate lunar longitude from a Date object representing local time in the desired timezone context.",
   "frontend/src/lib/time/timezone.ts": "Utility functions for timezone formatting, getting current time in a specific timezone, getting arbitrary instant time in a timezone, and formatting date-time displays for city-based lunar calculations.",
@@ -26,7 +26,7 @@
   "frontend/src/index.css": "Global styles with black background (OKLCH 0.10) and bone white text (OKLCH 0.98) for dark mode, Inter font applied globally including headings.",
   "frontend/tailwind.config.js": "Tailwind configuration with Inter as primary sans-serif font for both sans and serif families.",
   "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts": "Diagnostics helper providing standardized console logging for Nakshatra query failures, strict longitude validation enforcing [0, 360) domain, and a normalizeLongitude helper that maps any finite number into the backend-accepted range.",
-  "frontend/src/pages/TomorrowPage.tsx": "Tomorrow page matching Today's centered altar composition with new uploaded screenshot as hero background, hero title \"Tomorrow's Nakshatra Placement\", and Inter sans-serif typography throughout.",
+  "frontend/src/pages/TomorrowPage.tsx": "Tomorrow page matching Today's centered altar composition, now with explicit actor initialization failure handling and improved error states that distinguish actor failures from query failures.",
   "frontend/public/assets/fonts/lovalina/Lovalina.woff2": "Self-hosted Lovalina font file in WOFF2 format for modern browsers.",
   "frontend/public/assets/fonts/lovalina/Lovalina.woff": "Self-hosted Lovalina font file in WOFF format for broader browser compatibility.",
   "frontend/src/components/glyphs/Glyph.tsx": "Custom monochrome SVG glyph system providing high-contrast symbolic marks (moon, circle, awareness, sleep, social, creative, ritual, bell, shift) for ritualistic UI.",
@@ -35,5 +35,6 @@
   "frontend/src/components/today/DailyGuidanceModules.tsx": "Daily guidance accordion using custom glyphs (awareness, sleep, social, creative, ritual), renamed to \"Guidance\", with slower ceremonial reveal animations.",
   "frontend/src/pages/VisualStyleSystemPage.tsx": "New visual style system reference page documenting color palette, typography, glyphs, spacing, motion rules, and example layouts (altar and descent) with live UI examples.",
   "frontend/index.html": "HTML entry point with dark class on root element and Inter font loaded from Google Fonts.",
-  "frontend/src/lib/appVersion.ts": "Exports APP_VERSION constant set to 'Draft Version 12' for version tracking."
+  "frontend/src/lib/appVersion.ts": "Exports APP_VERSION constant set to 'Draft Version 12' for version tracking.",
+  "frontend/src/hooks/useActorInitStatus.ts": "New hook that exposes actor initialization status (idle/loading/success/error) and provides a retry function by reading React Query state without creating duplicate queries."
 }

@@ -4,21 +4,21 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "New image update did not work (image failed to apply/render as expected)"
+    "Users encounter an \"unable to proceed\" bug that prevents continuing/progressing."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-today-page-hero-background-image-so-the-new-asset-untitled-design-33-png-reliably-loads-and-renders-as-the-hero-background-in-the-current-nakshatra-placement-section-no-broken-image-404-including-handling-special-characters-in-the-filename-spaces-parentheses-and-ensuring-the-file-is-present-in-the-correct-frontend-static-assets-location",
-      "title": "Fix the Today page hero background image so the new asset \"Untitled design (33).png\" reliably loads and renders as the hero background in the \"Current Nakshatra Placement\" section (no broken image/404), including handling special characters in the filename (spaces/parentheses) and ensuring the file is present in the correct frontend static assets location.",
+      "id": "feature-fix-the-today-page-flow-so-users-are-not-blocked-by-the-unable-to-proceed-error-state-or-an-indefinite-loading-state-when-the-nakshatra-reading-cannot-be-fetched-the-page-must-always-provide-a-clear-actionable-recovery-path-retry-reload-and-should-successfully-proceed-to-show-the-current-nakshatra-when-the-backend-becomes-available-again",
+      "title": "Fix the Today page flow so users are not blocked by the \"Unable to proceed\" error state or an indefinite loading state when the nakshatra reading cannot be fetched; the page must always provide a clear, actionable recovery path (retry/reload) and should successfully proceed to show the current nakshatra when the backend becomes available again.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-reposition-the-hero-overlay-text-content-in-the-today-page-hero-glyph-current-nakshatra-placement-heading-and-subtitle-so-it-sits-in-the-bottom-lower-third-of-the-hero-image-area-instead-of-centered-while-keeping-it-readable-spacing-padding-across-mobile-and-desktop",
-      "title": "Reposition the hero overlay text content in the Today page hero (glyph, \"Current Nakshatra Placement\" heading, and subtitle) so it sits in the bottom lower third of the hero image area instead of centered, while keeping it readable (spacing/padding) across mobile and desktop.",
+      "id": "feature-harden-actor-initialization-so-it-cannot-silently-prevent-the-app-from-proceeding-ensure-failures-during-actor-setup-including-any-access-control-initialization-are-caught-and-surfaced-to-the-ui-and-do-not-block-creation-of-a-usable-actor-when-possible-e-g-when-an-optional-secret-admin-token-is-absent",
+      "title": "Harden actor initialization so it cannot silently prevent the app from proceeding: ensure failures during actor setup (including any access-control initialization) are caught and surfaced to the UI, and do not block creation of a usable actor when possible (e.g., when an optional secret/admin token is absent).",
       "reqIds": [
         "REQ-2"
       ],
@@ -27,13 +27,15 @@
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Position overlay text in the bottom lower third of the image",
-      "reqIds": [],
+      "id": "AR-3",
+      "summary": "Update the backend access-control initialization path (the method invoked by the frontend during actor setup) so that missing/empty optional secret token input does not trap and does not prevent normal, non-admin usage from proceeding.",
+      "reqIds": [
+        "REQ-3"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix Today hero image loading and move hero text to bottom lower third",
+  "projectName": "Fix Today page 'Unable to proceed' blocking bug",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

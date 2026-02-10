@@ -1,47 +1,59 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T00:26:28.028Z",
-  "summary": "The diff shows a change in TodayPage.tsx to set the hero background image using a BASE_URL-prefixed path with the filename quoted (to handle spaces/parentheses). However, the diff does not show the new image asset being added to the repository/static assets, and the truncated TodayPage diff does not provide clear evidence that the hero overlay text was moved to the bottom lower third and remains responsive/readable.",
+  "generatedAt": "2026-02-10T00:36:10.486Z",
+  "summary": "The diff adds frontend-side prerequisite/error handling around actor initialization and nakshatra queries (including a new `useActorInitStatus` hook and new error/Retry UI in Today/Tomorrow pages). However, there is no clear evidence of the required backend access-control change, and key parts of actor initialization hardening and “not-eligible” recovery UX are not demonstrably implemented from the provided diff summary.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Ensure the new hero background image asset \"Untitled design (33).png\" is present in the correct frontend static assets location so it reliably loads in dev and production (no 404).",
-      "reason": "The code references the asset path, but the diff shows no added files and no evidence the PNG was placed under the expected static assets directory. Without the asset addition/move, the request can still 404 in dev/prod.",
+      "id": "REQ-3",
+      "requirement": "Update the backend access-control initialization path so missing/empty optional secret token input does not trap and does not prevent normal, non-admin usage from proceeding.",
+      "reason": "Although `backend/main.mo` is modified, the diff excerpt does not show any change to the access-control initialization method/endpoint or any logic handling empty/missing secrets; therefore the AC about not trapping and allowing subsequent public calls is not evidenced.",
       "evidence": [
-        "File diff summary: Added files = none",
-        "frontend/src/pages/TodayPage.tsx (references `assets/Untitled design (33).png`)"
+        "backend/main.mo (truncated excerpt shows accessControlState init and include MixinAuthorization but no secret/optional-token handling changes)"
       ]
     },
     {
       "id": "REQ-2",
-      "requirement": "Reposition the hero overlay text (glyph, heading, subtitle) to the bottom lower third of the hero image area with responsive padding and readability (overlay/scrim).",
-      "reason": "TodayPage.tsx is truncated after the backgroundImage style; the provided snippet does not include the overlay text container/layout classes, so the lower-third positioning and responsive readability cannot be verified from the diff evidence.",
+      "requirement": "Harden actor initialization so failures during actor setup are caught and surfaced to the UI, do not block creation of a usable actor when possible, and allow retry to trigger a new initialization attempt.",
+      "reason": "The diff adds a wrapper hook (`useActorInitStatus`) that reads React Query state and provides an invalidate/refetch retry, but it does not show changes to the actual actor initialization logic (e.g., catching failures inside actor setup or ensuring an actor is still created when optional access-control init fails). Also, `useActor` (the actor hook itself) is not shown as modified, so it’s unclear whether actor creation is hardened as required.",
       "evidence": [
-        "frontend/src/pages/TodayPage.tsx (truncated before overlay text layout is shown)"
+        "frontend/src/hooks/useActorInitStatus.ts (only reads query state and invalidates/refetches)",
+        "frontend/src/hooks/useQueries.ts (uses `useActorInitStatus` but does not change actor creation behavior)"
+      ]
+    },
+    {
+      "id": "REQ-1",
+      "requirement": "When prerequisites are missing (e.g., actor not ready / query not eligible), the Today page must not remain stuck on a skeleton indefinitely; it should show a clear message explaining what is missing and offer a recovery action.",
+      "reason": "The Today page shows explicit UIs for actor initialization failure (`actorInitStatus === 'error'`) and invalid longitude, but the diff excerpt does not show a dedicated UI for the \"not eligible\" / \"actor still loading but never succeeds\" case (i.e., `enabled: isQueryEligible` prevents querying and could still leave the page in a loading/skeleton path). No timeout or explicit 'missing prerequisite' message is evidenced in the provided snippet.",
+      "evidence": [
+        "frontend/src/pages/TodayPage.tsx (truncated; shows actorInitStatus error UI and invalid-longitude UI but not a distinct not-eligible/prerequisite-missing state)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Updates to project tracking/metadata (project_state.json new_feature_requests statuses) unrelated to the UI bugfix requirements.",
-      "reason": "The BuildRequest only asks for a UI bugfix (hero image loading + text positioning). Modifying project_state.json is not requested as part of implementation.",
+      "description": "Added similar actor-init failure and retry UI handling to TomorrowPage.",
+      "reason": "The BuildRequest is specifically about fixing the Today page blocking bug and related recovery/error handling; extending the same UI pattern to TomorrowPage is not explicitly requested.",
       "evidence": [
-        "project_state.json"
+        "frontend/src/pages/TomorrowPage.tsx (adds actorInitStatus === 'error' UI with Retry Connection button)"
       ]
     },
     {
-      "description": "Updating/adding narrative claims in frontend-file-summaries.txt about multiple pages/components and typography/behavior changes beyond the requested Today hero changes.",
-      "reason": "Non-goals explicitly say not to redesign other sections beyond the hero image loading and hero text positioning; the summary text claims broader changes (e.g., typography throughout, multiple pages/components). Even if only documentation, it introduces unrequested scope in the recorded summaries.",
+      "description": "Introduced additional diagnostics logging and longitude normalization/validation helpers in the nakshatra query hook.",
+      "reason": "The BuildRequest focuses on unblocking the Today page and hardening actor/access-control initialization. Adding `logNakshatraQueryFailure`-style diagnostics is not explicitly requested (even if it may help debugging).",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/src/hooks/useQueries.ts (imports and uses `logNakshatraQueryFailure`, `isValidLongitude`, `normalizeLongitude`)"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/hooks/useActorInitStatus.ts",
+    "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/TodayPage.tsx",
+    "frontend/src/pages/TomorrowPage.tsx",
     "project_state.json"
   ]
 }

@@ -1,34 +1,47 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T09:18:32.463Z",
-  "summary": "The diff implements longitude normalization/validation in the frontend query layer, disables Tomorrow backend queries until a computed/validated longitude exists, and normalizes backend inputs into [0, 360) to avoid boundary traps. Overall the changes align with REQ-42/43/44 based on the provided diff excerpts.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-10T00:26:28.028Z",
+  "summary": "The diff shows a change in TodayPage.tsx to set the hero background image using a BASE_URL-prefixed path with the filename quoted (to handle spaces/parentheses). However, the diff does not show the new image asset being added to the repository/static assets, and the truncated TodayPage diff does not provide clear evidence that the hero overlay text was moved to the bottom lower third and remains responsive/readable.",
+  "missing_requirements": [
     {
-      "description": "Added a diagnostics/logging helper for Nakshatra query failures (standardized console.warn logging with categories and context).",
-      "reason": "BuildRequest focuses on preventing invalid/boundary longitude requests and hardening backend normalization; it does not explicitly request adding a diagnostics/logging module, though it is related to debugging the failure.",
+      "id": "REQ-1",
+      "requirement": "Ensure the new hero background image asset \"Untitled design (33).png\" is present in the correct frontend static assets location so it reliably loads in dev and production (no 404).",
+      "reason": "The code references the asset path, but the diff shows no added files and no evidence the PNG was placed under the expected static assets directory. Without the asset addition/move, the request can still 404 in dev/prod.",
       "evidence": [
-        "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
-        "frontend/src/hooks/useQueries.ts"
+        "File diff summary: Added files = none",
+        "frontend/src/pages/TodayPage.tsx (references `assets/Untitled design (33).png`)"
       ]
     },
     {
-      "description": "Added a dedicated TomorrowPage UI state for invalid computed longitude with retry guidance and a Retry button.",
-      "reason": "REQ-43 specifies keeping loading skeletons while computing and only showing backend error UI after eligible query fails; it does not explicitly require introducing a new invalid-longitude error screen (even though it is plausibly supportive of the fix).",
+      "id": "REQ-2",
+      "requirement": "Reposition the hero overlay text (glyph, heading, subtitle) to the bottom lower third of the hero image area with responsive padding and readability (overlay/scrim).",
+      "reason": "TodayPage.tsx is truncated after the backgroundImage style; the provided snippet does not include the overlay text container/layout classes, so the lower-third positioning and responsive readability cannot be verified from the diff evidence.",
       "evidence": [
-        "frontend/src/pages/TomorrowPage.tsx"
+        "frontend/src/pages/TodayPage.tsx (truncated before overlay text layout is shown)"
       ]
     }
   ],
-  "confidence": 0.78,
+  "hallucinated_features": [
+    {
+      "description": "Updates to project tracking/metadata (project_state.json new_feature_requests statuses) unrelated to the UI bugfix requirements.",
+      "reason": "The BuildRequest only asks for a UI bugfix (hero image loading + text positioning). Modifying project_state.json is not requested as part of implementation.",
+      "evidence": [
+        "project_state.json"
+      ]
+    },
+    {
+      "description": "Updating/adding narrative claims in frontend-file-summaries.txt about multiple pages/components and typography/behavior changes beyond the requested Today hero changes.",
+      "reason": "Non-goals explicitly say not to redesign other sections beyond the hero image loading and hero text positioning; the summary text claims broader changes (e.g., typography throughout, multiple pages/components). Even if only documentation, it introduces unrequested scope in the recorded summaries.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/hooks/useNakshatraNow.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
-    "frontend/src/pages/TomorrowPage.tsx",
+    "frontend/src/pages/TodayPage.tsx",
     "project_state.json"
   ]
 }

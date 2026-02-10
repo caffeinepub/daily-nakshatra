@@ -8,7 +8,46 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const Time = IDL.Int;
+export const DreamLogEntry = IDL.Record({
+  'dreamNotes' : IDL.Opt(IDL.Text),
+  'dayOfYear' : IDL.Nat,
+  'timestamp' : Time,
+  'nakshatra' : IDL.Text,
+});
+export const SleepLogEntry = IDL.Record({
+  'dayOfYear' : IDL.Nat,
+  'sleepNotes' : IDL.Opt(IDL.Text),
+  'timestamp' : Time,
+  'nakshatra' : IDL.Text,
+});
+export const CheckInEntry = IDL.Record({
+  'restlessness' : IDL.Opt(IDL.Nat),
+  'dayOfYear' : IDL.Nat,
+  'mood' : IDL.Opt(IDL.Text),
+  'timestamp' : Time,
+  'nakshatra' : IDL.Text,
+  'energy' : IDL.Opt(IDL.Nat),
+});
+export const BirthChartData = IDL.Record({
+  'moonNakshatra' : IDL.Text,
+  'birthDate' : IDL.Text,
+  'atmakarakaNakshatra' : IDL.Text,
+});
+export const UserProfile = IDL.Record({
+  'isPremium' : IDL.Bool,
+  'name' : IDL.Text,
+  'email' : IDL.Opt(IDL.Text),
+});
+
 export const idlService = IDL.Service({
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'determineNakshatra' : IDL.Func(
       [IDL.Float64],
       [
@@ -24,12 +63,120 @@ export const idlService = IDL.Service({
       ],
       ['query'],
     ),
+  'getAllLogs' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'dreamLogs' : IDL.Vec(DreamLogEntry),
+          'sleepLogs' : IDL.Vec(SleepLogEntry),
+          'checkIns' : IDL.Vec(CheckInEntry),
+          'birthChart' : IDL.Opt(BirthChartData),
+        }),
+      ],
+      ['query'],
+    ),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getCurrentDayOfYearForCaller' : IDL.Func([], [IDL.Nat], ['query']),
+  'getLogsByDay' : IDL.Func(
+      [IDL.Nat],
+      [
+        IDL.Record({
+          'dreamLogs' : IDL.Vec(DreamLogEntry),
+          'sleepLogs' : IDL.Vec(SleepLogEntry),
+          'checkIns' : IDL.Vec(CheckInEntry),
+        }),
+      ],
+      ['query'],
+    ),
+  'getLogsByNakshatra' : IDL.Func(
+      [IDL.Text],
+      [
+        IDL.Record({
+          'dreamLogs' : IDL.Vec(DreamLogEntry),
+          'sleepLogs' : IDL.Vec(SleepLogEntry),
+          'checkIns' : IDL.Vec(CheckInEntry),
+        }),
+      ],
+      ['query'],
+    ),
+  'getNakshtaraPatterns' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'checkInPatterns' : IDL.Vec(IDL.Tuple(IDL.Text, CheckInEntry)),
+          'dreamPatterns' : IDL.Vec(IDL.Tuple(IDL.Text, DreamLogEntry)),
+          'sleepLogPatterns' : IDL.Vec(IDL.Tuple(IDL.Text, SleepLogEntry)),
+        }),
+      ],
+      ['query'],
+    ),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'saveBirthChart' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveCheckIn' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Text,
+        IDL.Opt(IDL.Text),
+        IDL.Opt(IDL.Nat),
+        IDL.Opt(IDL.Nat),
+      ],
+      [],
+      [],
+    ),
+  'saveDreamLog' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
+  'saveSleepLog' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const Time = IDL.Int;
+  const DreamLogEntry = IDL.Record({
+    'dreamNotes' : IDL.Opt(IDL.Text),
+    'dayOfYear' : IDL.Nat,
+    'timestamp' : Time,
+    'nakshatra' : IDL.Text,
+  });
+  const SleepLogEntry = IDL.Record({
+    'dayOfYear' : IDL.Nat,
+    'sleepNotes' : IDL.Opt(IDL.Text),
+    'timestamp' : Time,
+    'nakshatra' : IDL.Text,
+  });
+  const CheckInEntry = IDL.Record({
+    'restlessness' : IDL.Opt(IDL.Nat),
+    'dayOfYear' : IDL.Nat,
+    'mood' : IDL.Opt(IDL.Text),
+    'timestamp' : Time,
+    'nakshatra' : IDL.Text,
+    'energy' : IDL.Opt(IDL.Nat),
+  });
+  const BirthChartData = IDL.Record({
+    'moonNakshatra' : IDL.Text,
+    'birthDate' : IDL.Text,
+    'atmakarakaNakshatra' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({
+    'isPremium' : IDL.Bool,
+    'name' : IDL.Text,
+    'email' : IDL.Opt(IDL.Text),
+  });
+  
   return IDL.Service({
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'determineNakshatra' : IDL.Func(
         [IDL.Float64],
         [
@@ -45,6 +192,75 @@ export const idlFactory = ({ IDL }) => {
         ],
         ['query'],
       ),
+    'getAllLogs' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'dreamLogs' : IDL.Vec(DreamLogEntry),
+            'sleepLogs' : IDL.Vec(SleepLogEntry),
+            'checkIns' : IDL.Vec(CheckInEntry),
+            'birthChart' : IDL.Opt(BirthChartData),
+          }),
+        ],
+        ['query'],
+      ),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getCurrentDayOfYearForCaller' : IDL.Func([], [IDL.Nat], ['query']),
+    'getLogsByDay' : IDL.Func(
+        [IDL.Nat],
+        [
+          IDL.Record({
+            'dreamLogs' : IDL.Vec(DreamLogEntry),
+            'sleepLogs' : IDL.Vec(SleepLogEntry),
+            'checkIns' : IDL.Vec(CheckInEntry),
+          }),
+        ],
+        ['query'],
+      ),
+    'getLogsByNakshatra' : IDL.Func(
+        [IDL.Text],
+        [
+          IDL.Record({
+            'dreamLogs' : IDL.Vec(DreamLogEntry),
+            'sleepLogs' : IDL.Vec(SleepLogEntry),
+            'checkIns' : IDL.Vec(CheckInEntry),
+          }),
+        ],
+        ['query'],
+      ),
+    'getNakshtaraPatterns' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'checkInPatterns' : IDL.Vec(IDL.Tuple(IDL.Text, CheckInEntry)),
+            'dreamPatterns' : IDL.Vec(IDL.Tuple(IDL.Text, DreamLogEntry)),
+            'sleepLogPatterns' : IDL.Vec(IDL.Tuple(IDL.Text, SleepLogEntry)),
+          }),
+        ],
+        ['query'],
+      ),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'saveBirthChart' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveCheckIn' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Nat),
+          IDL.Opt(IDL.Nat),
+        ],
+        [],
+        [],
+      ),
+    'saveDreamLog' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
+    'saveSleepLog' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
   });
 };
 

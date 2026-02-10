@@ -10,7 +10,43 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface BirthChartData {
+  'moonNakshatra' : string,
+  'birthDate' : string,
+  'atmakarakaNakshatra' : string,
+}
+export interface CheckInEntry {
+  'restlessness' : [] | [bigint],
+  'dayOfYear' : bigint,
+  'mood' : [] | [string],
+  'timestamp' : Time,
+  'nakshatra' : string,
+  'energy' : [] | [bigint],
+}
+export interface DreamLogEntry {
+  'dreamNotes' : [] | [string],
+  'dayOfYear' : bigint,
+  'timestamp' : Time,
+  'nakshatra' : string,
+}
+export interface SleepLogEntry {
+  'dayOfYear' : bigint,
+  'sleepNotes' : [] | [string],
+  'timestamp' : Time,
+  'nakshatra' : string,
+}
+export type Time = bigint;
+export interface UserProfile {
+  'isPremium' : boolean,
+  'name' : string,
+  'email' : [] | [string],
+}
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
 export interface _SERVICE {
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'determineNakshatra' : ActorMethod<
     [number],
     {
@@ -23,6 +59,52 @@ export interface _SERVICE {
       'degreesUntilNextPada' : number,
     }
   >,
+  'getAllLogs' : ActorMethod<
+    [],
+    {
+      'dreamLogs' : Array<DreamLogEntry>,
+      'sleepLogs' : Array<SleepLogEntry>,
+      'checkIns' : Array<CheckInEntry>,
+      'birthChart' : [] | [BirthChartData],
+    }
+  >,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getCurrentDayOfYearForCaller' : ActorMethod<[], bigint>,
+  'getLogsByDay' : ActorMethod<
+    [bigint],
+    {
+      'dreamLogs' : Array<DreamLogEntry>,
+      'sleepLogs' : Array<SleepLogEntry>,
+      'checkIns' : Array<CheckInEntry>,
+    }
+  >,
+  'getLogsByNakshatra' : ActorMethod<
+    [string],
+    {
+      'dreamLogs' : Array<DreamLogEntry>,
+      'sleepLogs' : Array<SleepLogEntry>,
+      'checkIns' : Array<CheckInEntry>,
+    }
+  >,
+  'getNakshtaraPatterns' : ActorMethod<
+    [],
+    {
+      'checkInPatterns' : Array<[string, CheckInEntry]>,
+      'dreamPatterns' : Array<[string, DreamLogEntry]>,
+      'sleepLogPatterns' : Array<[string, SleepLogEntry]>,
+    }
+  >,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'saveBirthChart' : ActorMethod<[string, string, string], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveCheckIn' : ActorMethod<
+    [bigint, string, [] | [string], [] | [bigint], [] | [bigint]],
+    undefined
+  >,
+  'saveDreamLog' : ActorMethod<[bigint, string, [] | [string]], undefined>,
+  'saveSleepLog' : ActorMethod<[bigint, string, [] | [string]], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

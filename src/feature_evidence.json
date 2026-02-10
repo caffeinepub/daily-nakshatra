@@ -2,41 +2,40 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-prevent-any-backend-determinenakshatra-call-from-being-issued-with-an-out-of-range-or-boundary-invalid-lunar-longitude-by-normalizing-and-validating-the-longitude-to-the-backend-accepted-domain-0-360-in-the-frontend-query-layer",
-      "featureTitle": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
+      "featureId": "feature-fix-the-today-page-hero-background-image-so-the-new-asset-untitled-design-33-png-reliably-loads-and-renders-as-the-hero-background-in-the-current-nakshatra-placement-section-no-broken-image-404-including-handling-special-characters-in-the-filename-spaces-parentheses-and-ensuring-the-file-is-present-in-the-correct-frontend-static-assets-location",
+      "featureTitle": "Fix the Today page hero background image so the new asset \"Untitled design (33).png\" reliably loads and renders as the hero background in the \"Current Nakshatra Placement\" section (no broken image/404), including handling special characters in the filename (spaces/parentheses) and ensuring the file is present in the correct frontend static assets location.",
       "files": [
-        "frontend/src/hooks/useNakshatraNow.ts",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts"
+        "frontend/src/pages/TodayPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-42"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-eliminate-premature-or-placeholder-backend-requests-on-the-tomorrow-page-by-ensuring-the-determinenakshatra-query-is-disabled-until-the-tomorrow-longitude-has-been-computed-and-validated-for-the-selected-city-timezone-context",
-      "featureTitle": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
+      "featureId": "feature-reposition-the-hero-overlay-text-content-in-the-today-page-hero-glyph-current-nakshatra-placement-heading-and-subtitle-so-it-sits-in-the-bottom-lower-third-of-the-hero-image-area-instead-of-centered-while-keeping-it-readable-spacing-padding-across-mobile-and-desktop",
+      "featureTitle": "Reposition the hero overlay text content in the Today page hero (glyph, \"Current Nakshatra Placement\" heading, and subtitle) so it sits in the bottom lower third of the hero image area instead of centered, while keeping it readable (spacing/padding) across mobile and desktop.",
       "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/TomorrowPage.tsx"
+        "frontend/src/pages/TodayPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-43"
+        "REQ-2"
       ],
       "confidence": "high"
     }

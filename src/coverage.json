@@ -1,62 +1,46 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T09:18:32.466Z",
+  "generatedAt": "2026-02-10T00:26:28.031Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 2,
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-42",
-        "summary": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
+        "id": "REQ-1",
+        "summary": "Fix the Today page hero background image so the new asset \"Untitled design (33).png\" reliably loads and renders as the hero background in the \"Current Nakshatra Placement\" section (no broken image/404), including handling special characters in the filename (spaces/parentheses) and ensuring the file is present in the correct frontend static assets location.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useNakshatraNow.ts"
+          "frontend/public/assets/Untitled design (33).png",
+          "frontend/src/pages/TodayPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useNakshatraNow.ts"
+          "frontend/src/pages/TodayPage.tsx"
         ]
       },
       {
-        "id": "REQ-43",
-        "summary": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
+        "id": "REQ-2",
+        "summary": "Reposition the hero overlay text content in the Today page hero (glyph, \"Current Nakshatra Placement\" heading, and subtitle) so it sits in the bottom lower third of the hero image area instead of centered, while keeping it readable (spacing/padding) across mobile and desktop.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/TomorrowPage.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/TodayPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/TomorrowPage.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/TodayPage.tsx"
         ]
-      },
-      {
-        "id": "REQ-44",
-        "summary": "Harden the backend `determineNakshatra` implementation so it does not trap on boundary-equivalent finite inputs (e.g., 360.0 due to float rounding) by normalizing the input longitude into [0, 360) before validation and lookup.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useNakshatraNow.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
-    "frontend/src/pages/TomorrowPage.tsx",
+    "frontend/src/pages/TodayPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

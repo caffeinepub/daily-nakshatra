@@ -1,78 +1,117 @@
-import { Link, useRouterState } from '@tanstack/react-router';
+import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import CityPicker from '@/components/city/CityPicker';
+import AlertsToggle from '@/components/alerts/AlertsToggle';
+import LoginButton from '@/components/auth/LoginButton';
+import Glyph from '@/components/glyphs/Glyph';
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import CityPicker from '../city/CityPicker';
-import AlertsToggle from '../alerts/AlertsToggle';
 import { useCitySelection } from '@/hooks/useCitySelection';
-import { useState } from 'react';
 
 export default function AppHeader() {
-  const routerState = useRouterState();
-  const currentPath = routerState.location.pathname;
-  const { currentCity, localTime } = useCitySelection();
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
+  const { currentCity } = useCitySelection();
 
   return (
-    <header className="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 max-w-6xl">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <img
-              src="/assets/generated/daily-nakshatra-logo.dim_512x512.png"
-              alt="Daily Nakshatra"
-              className="h-10 w-10 transition-transform group-hover:scale-105"
-            />
-            <div className="flex flex-col">
-              <h1 className="text-xl tracking-tight">Daily Nakshatra</h1>
-              <p className="text-xs text-muted-foreground">Lunar Wisdom for Today</p>
-            </div>
+    <header className="border-b border-border/30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="container mx-auto px-6 py-6 max-w-4xl">
+        <div className="flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-70 transition-opacity">
+            <Glyph type="moon" className="h-7 w-7 text-primary" />
+            <h1 className="text-xl font-sans tracking-wider">Daily Nakshatra</h1>
           </Link>
 
-          <nav className="flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-8">
             <Link
               to="/"
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
-                currentPath === '/' ? 'text-foreground' : 'text-muted-foreground'
-              }`}
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
             >
               Today
             </Link>
             <Link
               to="/tomorrow"
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
-                currentPath === '/tomorrow' ? 'text-foreground' : 'text-muted-foreground'
-              }`}
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
             >
               Tomorrow
             </Link>
             <Link
               to="/knowledge"
-              className={`text-sm font-medium transition-colors hover:text-foreground ${
-                currentPath.startsWith('/knowledge') || currentPath.startsWith('/nakshatra')
-                  ? 'text-foreground'
-                  : 'text-muted-foreground'
-              }`}
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
             >
-              Knowledge Base
+              Knowledge
             </Link>
-
-            <div className="flex items-center gap-2 ml-4 pl-4 border-l border-border/40">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCityPickerOpen(true)}
-                className="gap-2 text-xs"
-              >
-                <MapPin className="h-3.5 w-3.5" />
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">{currentCity.name}</span>
-                  <span className="text-muted-foreground">{localTime}</span>
-                </div>
-              </Button>
-              <AlertsToggle />
-            </div>
+            <Link
+              to="/history"
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
+            >
+              History
+            </Link>
+            <Link
+              to="/profile"
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
+            >
+              Profile
+            </Link>
           </nav>
+
+          <div className="flex items-center gap-4">
+            <AlertsToggle />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setCityPickerOpen(true)} 
+              className="gap-2 text-xs"
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{currentCity.name}</span>
+            </Button>
+            <LoginButton />
+          </div>
         </div>
+
+        {/* Mobile Navigation */}
+        <nav className="flex md:hidden items-center gap-6 mt-6 overflow-x-auto pb-2">
+          <Link
+            to="/"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            Today
+          </Link>
+          <Link
+            to="/tomorrow"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            Tomorrow
+          </Link>
+          <Link
+            to="/knowledge"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            Knowledge
+          </Link>
+          <Link
+            to="/history"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            History
+          </Link>
+          <Link
+            to="/profile"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            Profile
+          </Link>
+        </nav>
       </div>
 
       <CityPicker open={cityPickerOpen} onOpenChange={setCityPickerOpen} />

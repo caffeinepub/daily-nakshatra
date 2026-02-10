@@ -1,54 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Normalize/validate lunar longitude and prevent premature Tomorrow nakshatra queries",
+  "title": "Fix Today hero image asset resolution and move hero text to lower third",
   "requirements": [
     {
-      "id": "REQ-42",
-      "summary": "Normalize and validate lunar longitude to backend-accepted domain [0, 360) in the frontend query layer before calling determineNakshatra.",
+      "id": "REQ-1",
+      "summary": "Ensure the Today hero background image \"Untitled design (33).png\" is present in frontend static assets and referenced in a production-safe way that handles special characters in the filename.",
       "acceptanceCriteria": [
-        "`isValidLongitude` treats 360 as invalid (valid range is >= 0 and < 360), matching backend expectations.",
-        "Before calling `actor.determineNakshatra`, the frontend normalizes any computed longitude to the [0, 360) range (e.g., 360 becomes 0; negatives wrap into range).",
-        "The app does not show the \"Error loading Nakshatra data\" state due to a frontend-sent boundary value (e.g., 360) that the backend rejects.",
-        "User-facing error text remains in English."
+        "On the Today page, the hero section displays the intended background image (not the previous image, not a blank background).",
+        "The browser network tab shows the hero image request returns 200 (no 404) and no console errors related to loading the hero image.",
+        "The solution works in both development and production builds (static asset resolution is correct)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/diagnostics/nakshatraDiagnostics.ts",
-          "operation": "modify",
-          "description": "Update `isValidLongitude` to enforce the strict domain (>= 0 and < 360). Add a shared `normalizeLongitude` helper that maps any finite number into [0, 360) (e.g., 360 -> 0; negative values wrap)."
+          "path": "frontend/public/assets/Untitled design (33).png",
+          "operation": "create",
+          "description": "Add the provided image asset to the correct static public assets location so it is served at runtime (ensure filename matches exactly, including spaces/parentheses)."
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/pages/TodayPage.tsx",
           "operation": "modify",
-          "description": "Harden the determineNakshatra query layer: accept a possibly-null/undefined longitude input, normalize any finite longitude into [0, 360) before eligibility checks and before calling `actor.determineNakshatra`, and key the query by the normalized value to avoid boundary-related cache inconsistencies."
-        },
-        {
-          "path": "frontend/src/hooks/useNakshatraNow.ts",
-          "operation": "modify",
-          "description": "Ensure the Today flow uses the same normalization/validation semantics as the query layer (e.g., normalize immediately after computing longitude and validate the normalized value) to prevent boundary-equivalent values from causing invalid/error UI states."
+          "description": "Update the hero backgroundImage to build the URL using the app's base URL (import.meta.env.BASE_URL) and wrap the URL in quotes inside CSS url(...), ensuring the path is safely encoded so spaces/parentheses resolve correctly in dev and production."
         }
       ]
     },
     {
-      "id": "REQ-43",
-      "summary": "Disable Tomorrow determineNakshatra query until tomorrow’s longitude is computed and validated for the selected city/timezone, avoiding placeholder requests.",
+      "id": "REQ-2",
+      "summary": "Move the Today hero overlay text block to the bottom lower third of the hero image while keeping it readable and responsive.",
       "acceptanceCriteria": [
-        "When `tomorrowLongitude` is `null`/not yet computed, no backend request is sent from TomorrowPage (the query remains disabled).",
-        "TomorrowPage does not pass a placeholder longitude (e.g., 0) that could incorrectly trigger a backend call before the correct target time computation is ready.",
-        "TomorrowPage continues to show a loading skeleton state while computing longitude/initializing actor, and only shows backend error UI after a real eligible query fails.",
-        "User-facing error text remains in English."
+        "The hero text block is visually located in the lower third of the hero area (not vertically centered).",
+        "Text remains readable against the background (overlay/scrim still provides sufficient contrast).",
+        "Layout remains responsive: on small screens the text does not overflow or clip and maintains appropriate bottom padding."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/TomorrowPage.tsx",
+          "path": "frontend/src/pages/TodayPage.tsx",
           "operation": "modify",
-          "description": "Remove placeholder longitude usage (`tomorrowLongitude ?? 0`). Pass `tomorrowLongitude` through as null until computed, rely on the query’s eligibility gating, and keep showing the existing loading skeleton while longitude/actor are not ready. Validate using normalized longitude semantics (normalize first, then validate) so boundary-equivalent computed values do not trigger premature invalid/error states."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Ensure the hook’s `enabled` gating remains false when the provided longitude is null/undefined (or otherwise not eligible), so TomorrowPage cannot issue premature requests before longitude computation/validation completes."
+          "description": "Adjust hero layout to a fixed/min height and reposition the overlay content using flex alignment (e.g., justify-end) and responsive bottom padding so the glyph, heading, and subtitle sit in the lower third; keep/adjust scrim (e.g., gradient overlay) to maintain contrast across mobile and desktop."
         }
       ]
     }

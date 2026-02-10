@@ -4,6 +4,8 @@ import TodayPage from './pages/TodayPage';
 import TomorrowPage from './pages/TomorrowPage';
 import KnowledgeBasePage from './pages/KnowledgeBasePage';
 import NakshatraDetailPage from './pages/NakshatraDetailPage';
+import HistoryInsightsPage from './pages/HistoryInsightsPage';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -35,7 +37,26 @@ const nakshatraDetailRoute = createRoute({
   component: NakshatraDetailPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, tomorrowRoute, knowledgeBaseRoute, nakshatraDetailRoute]);
+const historyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/history',
+  component: HistoryInsightsPage,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/profile',
+  component: ProfileSettingsPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  tomorrowRoute,
+  knowledgeBaseRoute,
+  nakshatraDetailRoute,
+  historyRoute,
+  profileRoute,
+]);
 
 const router = createRouter({ routeTree });
 
@@ -47,7 +68,7 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <RouterProvider router={router} />
       <Toaster />
     </ThemeProvider>

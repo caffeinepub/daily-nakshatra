@@ -1,43 +1,50 @@
 import { useNakshatraNow } from '@/hooks/useNakshatraNow';
 import { useCitySelection } from '@/hooks/useCitySelection';
+import { useInternetIdentity } from '@/hooks/useInternetIdentity';
+import { useGetCallerUserProfile } from '@/hooks/useUserProfile';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Moon, MapPin, RefreshCw, AlertCircle } from 'lucide-react';
+import Glyph from '@/components/glyphs/Glyph';
+import { MapPin, RefreshCw, AlertCircle } from 'lucide-react';
 import DailyInterpretationBlocks from '@/components/today/DailyInterpretationBlocks';
+import DailyGuidanceModules from '@/components/today/DailyGuidanceModules';
+import DailyLogsPanel from '@/components/today/DailyLogsPanel';
+import ResonanceSection from '@/components/today/ResonanceSection';
 import TransitionTimes from '@/components/nakshatra/TransitionTimes';
 import NakshatraChangeBanner from '@/components/alerts/NakshatraChangeBanner';
+import RequireAuth from '@/components/auth/RequireAuth';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { getNakshatraSlug } from '@/lib/nakshatra';
 
 export default function TodayPage() {
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    refetch, 
-    isRefetching, 
-    isLongitudeValid, 
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+    isLongitudeValid,
     recomputeLongitude,
     isActorReady,
-    isQueryEligible 
+    isQueryEligible,
   } = useNakshatraNow();
   const { currentCity } = useCitySelection();
+  const { identity } = useInternetIdentity();
+  const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
 
-  // Show invalid longitude error with guidance
+  const isAuthenticated = !!identity;
+  const showResonance = isAuthenticated && userProfile?.isPremium;
+
   if (!isLongitudeValid && !isLoading) {
     return (
-      <div className="text-center py-12 space-y-4">
-        <div className="flex justify-center mb-4">
-          <AlertCircle className="h-12 w-12 text-warning" />
+      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <AlertCircle className="h-12 w-12 text-muted-foreground" />
         </div>
-        <p className="text-warning text-lg font-medium">
-          Unable to compute lunar position
-        </p>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          The app could not calculate a valid lunar longitude for your current location and time. 
-          Please try again, or change your city/timezone selection if the issue persists.
+        <p className="text-foreground text-lg font-sans tracking-wide">Position unclear</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          The lunar position cannot be determined at this moment. Wait, then try again.
         </p>
         <Button
           onClick={() => {
@@ -47,18 +54,18 @@ export default function TodayPage() {
             }
           }}
           disabled={isRefetching}
-          variant="outline"
-          className="gap-2"
+          variant="ghost"
+          className="gap-2 mt-4"
         >
           {isRefetching ? (
             <>
               <RefreshCw className="h-4 w-4 animate-spin" />
-              Retrying...
+              Recalculating
             </>
           ) : (
             <>
               <RefreshCw className="h-4 w-4" />
-              Retry
+              Try Again
             </>
           )}
         </Button>
@@ -66,31 +73,23 @@ export default function TodayPage() {
     );
   }
 
-  // Show backend error only when query was eligible and failed
   if (error && isQueryEligible) {
     return (
-      <div className="text-center py-12 space-y-4">
-        <p className="text-destructive text-lg font-medium">
-          Error loading Nakshatra data. Please try again.
+      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
+        <p className="text-foreground text-lg font-sans tracking-wide">Unable to proceed</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          The reading cannot be completed. Wait, then try again.
         </p>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Click Retry below. If the error persists, try changing your city selection and try again.
-        </p>
-        <Button
-          onClick={() => refetch()}
-          disabled={isRefetching}
-          variant="outline"
-          className="gap-2"
-        >
+        <Button onClick={() => refetch()} disabled={isRefetching} variant="ghost" className="gap-2 mt-4">
           {isRefetching ? (
             <>
               <RefreshCw className="h-4 w-4 animate-spin" />
-              Retrying...
+              Recalculating
             </>
           ) : (
             <>
               <RefreshCw className="h-4 w-4" />
-              Retry
+              Try Again
             </>
           )}
         </Button>
@@ -98,84 +97,99 @@ export default function TodayPage() {
     );
   }
 
-  // Show loading while actor initializes or query is not eligible
   const shouldShowLoading = isLoading || !isActorReady || !isQueryEligible;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-16">
       <NakshatraChangeBanner />
 
-      {/* Hero Section with Background */}
+      {/* Altar Hero */}
       <div
-        className="relative rounded-2xl overflow-hidden"
+        className="relative overflow-hidden min-h-[500px] md:min-h-[600px] flex flex-col"
         style={{
-          backgroundImage: 'url(/assets/generated/daily-nakshatra-hero-bg.dim_1600x900.png)',
+          backgroundImage: `url("${import.meta.env.BASE_URL}assets/Untitled design (33).png")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-        <div className="relative px-8 py-16 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Moon className="h-8 w-8 text-primary" />
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background/90" />
+        
+        {/* Circular motif */}
+        <div 
+          className="absolute inset-0 flex items-end justify-center opacity-10 pb-32"
+          style={{
+            backgroundImage: 'url(/assets/generated/altar-circle-motif.dim_1200x1200.png)',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center bottom',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+        
+        {/* Content positioned in lower third */}
+        <div className="relative flex-1 flex flex-col justify-end px-8 pb-16 md:pb-20 text-center space-y-6">
+          <div className="flex items-center justify-center mb-4">
+            <Glyph type="circle" className="h-12 w-12 md:h-16 md:w-16 text-primary" />
           </div>
-          <h2 className="text-4xl mb-2">Today's Nakshatra</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            The Moon's current lunar mansion and its influence on this moment
+          <h2 className="text-3xl md:text-5xl font-sans tracking-wider">Current Nakshatra Placement</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
+            Where the Moon rests now
           </p>
         </div>
       </div>
 
-      {/* Current Nakshatra Card */}
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Moon className="h-5 w-5" />
-            Current Position
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {shouldShowLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-64" />
+      {/* Current Nakshatra - Centered Altar */}
+      {shouldShowLoading ? (
+        <div className="space-y-6 text-center max-w-xl mx-auto py-12">
+          <Skeleton className="h-16 w-64 mx-auto" />
+          <Skeleton className="h-8 w-32 mx-auto" />
+          <Skeleton className="h-4 w-48 mx-auto" />
+        </div>
+      ) : data ? (
+        <div className="text-center space-y-12 max-w-2xl mx-auto py-8">
+          <div className="space-y-6">
+            <h3 className="text-5xl md:text-6xl font-sans tracking-wider">{data.nakshatraName}</h3>
+            <div className="flex items-center justify-center gap-4">
+              <Badge variant="secondary" className="text-sm font-sans tracking-wide px-4 py-1">
+                Pada {data.pada}
+              </Badge>
+              <Badge variant="outline" className="text-xs font-sans tracking-wide px-3 py-1">
+                {data.nakshatraNumber} of 27
+              </Badge>
             </div>
-          ) : data ? (
-            <div className="space-y-4">
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <h3 className="text-3xl font-bold">{data.nakshatraName}</h3>
-                <Badge variant="secondary" className="text-sm">
-                  Pada {data.pada}
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  #{data.nakshatraNumber} of 27
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Lunar longitude: {data.preciseLongitude.toFixed(3)}°
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
-                <MapPin className="h-4 w-4" />
-                <span>
-                  Calculated for {currentCity.name}'s local time ({currentCity.timezone})
-                </span>
-              </div>
-              <Link to="/nakshatra/$slug" params={{ slug: getNakshatraSlug(data.nakshatraName) }}>
-                <Button variant="outline" size="sm">
-                  Learn More About {data.nakshatraName}
-                </Button>
-              </Link>
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
+          </div>
 
-      {/* Transition Times */}
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <p className="tracking-wide">Longitude: {data.preciseLongitude.toFixed(3)}°</p>
+            <div className="flex items-center justify-center gap-2 text-xs">
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="tracking-wide">
+                {currentCity.name}, {currentCity.timezone}
+              </span>
+            </div>
+          </div>
+
+          <Link to="/nakshatra/$slug" params={{ slug: getNakshatraSlug(data.nakshatraName) }}>
+            <Button variant="ghost" size="sm" className="text-xs tracking-wider">
+              Explore {data.nakshatraName}
+            </Button>
+          </Link>
+        </div>
+      ) : null}
+
       {data && <TransitionTimes data={data} />}
 
-      {/* Daily Interpretation */}
       {data && <DailyInterpretationBlocks nakshatraName={data.nakshatraName} />}
+
+      {data && <DailyGuidanceModules nakshatraName={data.nakshatraName} />}
+
+      {data && showResonance && <ResonanceSection currentNakshatra={data.nakshatraName} />}
+
+      {data && isAuthenticated && (
+        <RequireAuth>
+          <DailyLogsPanel nakshatraName={data.nakshatraName} />
+        </RequireAuth>
+      )}
     </div>
   );
 }

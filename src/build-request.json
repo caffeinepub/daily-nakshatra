@@ -1,87 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Fix intermittent 'Error loading Nakshatra data' failures on Today/Tomorrow pages",
-  "priority": "high",
+  "title": "Fix Today hero image loading and move hero text to bottom lower third",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-42",
-      "text": "Prevent any backend `determineNakshatra` call from being issued with an out-of-range or boundary-invalid lunar longitude by normalizing and validating the longitude to the backend-accepted domain [0, 360) in the frontend query layer.",
+      "id": "REQ-1",
+      "text": "Fix the Today page hero background image so the new asset \"Untitled design (33).png\" reliably loads and renders as the hero background in the \"Current Nakshatra Placement\" section (no broken image/404), including handling special characters in the filename (spaces/parentheses) and ensuring the file is present in the correct frontend static assets location.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "error loading nakshatra data. Please fix the bugs"
+          "the new image didn't work. please fix the bug"
         ]
       },
       "acceptanceCriteria": [
-        "`isValidLongitude` treats 360 as invalid (valid range is >= 0 and < 360), matching backend expectations.",
-        "Before calling `actor.determineNakshatra`, the frontend normalizes any computed longitude to the [0, 360) range (e.g., 360 becomes 0; negatives wrap into range).",
-        "The app does not show the \"Error loading Nakshatra data\" state due to a frontend-sent boundary value (e.g., 360) that the backend rejects.",
-        "User-facing error text remains in English."
+        "On the Today page, the hero section displays the intended background image (not the previous image, not a blank background).",
+        "The browser network tab shows the hero image request returns 200 (no 404) and no console errors related to loading the hero image.",
+        "The solution works in both development and production builds (static asset resolution is correct)."
       ]
     },
     {
-      "id": "REQ-43",
-      "text": "Eliminate premature or placeholder backend requests on the Tomorrow page by ensuring the determineNakshatra query is disabled until the Tomorrow longitude has been computed and validated for the selected city/timezone context.",
+      "id": "REQ-2",
+      "text": "Reposition the hero overlay text content in the Today page hero (glyph, \"Current Nakshatra Placement\" heading, and subtitle) so it sits in the bottom lower third of the hero image area instead of centered, while keeping it readable (spacing/padding) across mobile and desktop.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "error loading nakshatra data. Please fix the bugs"
+          "place the text in the bottom lower third of the image."
         ]
       },
       "acceptanceCriteria": [
-        "When `tomorrowLongitude` is `null`/not yet computed, no backend request is sent from TomorrowPage (the query remains disabled).",
-        "TomorrowPage does not pass a placeholder longitude (e.g., 0) that could incorrectly trigger a backend call before the correct target time computation is ready.",
-        "TomorrowPage continues to show a loading skeleton state while computing longitude/initializing actor, and only shows backend error UI after a real eligible query fails.",
-        "User-facing error text remains in English."
-      ]
-    },
-    {
-      "id": "REQ-44",
-      "text": "Harden the backend `determineNakshatra` implementation so it does not trap on boundary-equivalent finite inputs (e.g., 360.0 due to float rounding) by normalizing the input longitude into [0, 360) before validation and lookup.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "error loading nakshatra data. Please fix the bugs"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend normalizes `lunarLongitude` into the [0, 360) range at the start of `determineNakshatra` (e.g., 360.0 maps to 0.0) before any range checks and nakshatra lookup.",
-        "For any finite input longitude, `determineNakshatra` returns a valid nakshatra result and does not trap due solely to a 360-boundary equivalent value.",
-        "No changes violate the single-actor architecture (all logic remains in `backend/main.mo`)."
+        "The hero text block is visually located in the lower third of the hero area (not vertically centered).",
+        "Text remains readable against the background (overlay/scrim still provides sufficient contrast).",
+        "Layout remains responsive: on small screens the text does not overflow or clip and maintains appropriate bottom padding."
       ]
     }
   ],
   "constraints": [
-    "Frontend must not modify files under `frontend/src/components/ui` or other `frontend.immutablePaths` listed in SYSTEM_CONTEXT.",
-    "Backend must remain a single Motoko actor with logic in `backend/main.mo`; add `backend/migration.mo` only if a stable-state upgrade is required (not expected for these fixes).",
-    "Use English for any user-facing text."
+    "Do not edit files under frontend/src/components/ui (shadcn components are read-only).",
+    "Do not modify any frontend paths listed as immutable in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
+    "Backend must remain single-actor; no backend changes are required for this UI bugfix unless strictly necessary."
   ],
   "nonGoals": [
-    "Adding new app features unrelated to the Nakshatra loading failure (e.g., journaling, new datasets, new navigation).",
-    "Changing the astronomical model/algorithm beyond normalization/validation needed to stop errors.",
-    "Introducing external APIs or third-party services for moon calculations or timezone resolution."
+    "Do not redesign other sections of the Today page beyond the hero image loading and hero text positioning.",
+    "Do not add new authentication methods or external services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { Nakshatra } from '@/data/nakshatras';
@@ -11,18 +10,18 @@ interface NakshatraSectionsProps {
 
 export default function NakshatraSections({ nakshatra }: NakshatraSectionsProps) {
   return (
-    <div className="space-y-6">
-      {/* Symbolism & Mythology */}
+    <div className="space-y-12">
+      {/* Symbolism - Layer 1 */}
       <Card>
         <CardHeader>
-          <CardTitle>Symbolism & Mythology</CardTitle>
+          <CardTitle className="font-serif text-2xl tracking-wide text-center">Symbolism</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="font-semibold mb-2">Primary Symbols</h4>
-            <div className="flex flex-wrap gap-2">
+        <CardContent className="space-y-8">
+          <div className="space-y-3">
+            <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground text-center">Symbols</h4>
+            <div className="flex flex-wrap justify-center gap-3">
               {nakshatra.symbols.map((symbol) => (
-                <Badge key={symbol} variant="secondary">
+                <Badge key={symbol} variant="secondary" className="font-sans tracking-wide">
                   {symbol}
                 </Badge>
               ))}
@@ -31,110 +30,135 @@ export default function NakshatraSections({ nakshatra }: NakshatraSectionsProps)
 
           <Separator />
 
-          <div>
-            <h4 className="font-semibold mb-2">Ruling Deity</h4>
-            <p className="text-muted-foreground">{nakshatra.deity}</p>
+          <div className="space-y-3 text-center">
+            <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground">Deity</h4>
+            <p className="text-muted-foreground tracking-wide">{nakshatra.deity}</p>
           </div>
 
           <Separator />
 
-          <div>
-            <h4 className="font-semibold mb-2">Planetary Ruler</h4>
-            <p className="text-muted-foreground">{nakshatra.planetaryRuler}</p>
+          <div className="space-y-3 text-center">
+            <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground">Planetary Ruler</h4>
+            <p className="text-muted-foreground tracking-wide">{nakshatra.planetaryRuler}</p>
           </div>
 
           <Separator />
 
-          <div>
-            <h4 className="font-semibold mb-2">Elemental & Psychological Themes</h4>
-            <p className="text-muted-foreground leading-relaxed">{nakshatra.elementalThemes}</p>
+          <div className="space-y-3">
+            <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground text-center">Themes</h4>
+            <p className="text-muted-foreground leading-relaxed tracking-wide text-center prose max-w-none mx-auto">
+              {nakshatra.elementalThemes}
+            </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Core Traits & Psychological Themes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Core Traits & Psychological Themes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="font-semibold mb-2 text-green-600 dark:text-green-400">Strengths & Gifts</h4>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              {nakshatra.coreTraits.strengths.map((strength, i) => (
-                <li key={i}>{strength}</li>
-              ))}
-            </ul>
-          </div>
+      {/* Core Traits - Layer 2 */}
+      <Accordion type="single" collapsible defaultValue="traits">
+        <AccordionItem value="traits">
+          <Card>
+            <AccordionTrigger className="px-6 hover:no-underline">
+              <CardTitle className="font-serif text-2xl tracking-wide">Core Traits</CardTitle>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="space-y-8 pt-6">
+                <div className="space-y-4">
+                  <h4 className="font-sans text-sm tracking-wider uppercase text-primary text-center">Strengths</h4>
+                  <ul className="list-none space-y-2 text-muted-foreground text-center">
+                    {nakshatra.coreTraits.strengths.map((strength, i) => (
+                      <li key={i} className="text-sm tracking-wide leading-relaxed">{strength}</li>
+                    ))}
+                  </ul>
+                </div>
 
-          <Separator />
+                <Separator />
 
-          <div>
-            <h4 className="font-semibold mb-2 text-amber-600 dark:text-amber-400">Shadow Expressions</h4>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              {nakshatra.coreTraits.shadows.map((shadow, i) => (
-                <li key={i}>{shadow}</li>
-              ))}
-            </ul>
-          </div>
+                <div className="space-y-4">
+                  <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground text-center">Shadows</h4>
+                  <ul className="list-none space-y-2 text-muted-foreground text-center">
+                    {nakshatra.coreTraits.shadows.map((shadow, i) => (
+                      <li key={i} className="text-sm tracking-wide leading-relaxed">{shadow}</li>
+                    ))}
+                  </ul>
+                </div>
 
-          <Separator />
+                <Separator />
 
-          <div>
-            <h4 className="font-semibold mb-2">Relational Tendencies</h4>
-            <p className="text-muted-foreground leading-relaxed">{nakshatra.coreTraits.relational}</p>
-          </div>
+                <div className="space-y-3">
+                  <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground text-center">Relational</h4>
+                  <p className="text-muted-foreground leading-relaxed tracking-wide text-center text-sm prose max-w-none mx-auto">
+                    {nakshatra.coreTraits.relational}
+                  </p>
+                </div>
 
-          <Separator />
+                <Separator />
 
-          <div>
-            <h4 className="font-semibold mb-2">Work & Life Themes</h4>
-            <p className="text-muted-foreground leading-relaxed">{nakshatra.coreTraits.workLife}</p>
-          </div>
-        </CardContent>
-      </Card>
+                <div className="space-y-3">
+                  <h4 className="font-sans text-sm tracking-wider uppercase text-muted-foreground text-center">Work & Life</h4>
+                  <p className="text-muted-foreground leading-relaxed tracking-wide text-center text-sm prose max-w-none mx-auto">
+                    {nakshatra.coreTraits.workLife}
+                  </p>
+                </div>
+              </CardContent>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
+      </Accordion>
 
-      {/* Pada Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pada Breakdown (Micro-Energetics)</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Each Nakshatra is divided into four Padas, each with its own planetary flavor
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {nakshatra.padas.map((pada, index) => (
-              <AccordionItem key={index} value={`pada-${index + 1}`}>
-                <AccordionTrigger>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline">Pada {index + 1}</Badge>
-                    <span className="text-sm text-muted-foreground">{pada.navamsaSign}</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3 pt-2">
-                    <div>
-                      <h5 className="font-medium mb-1">Navamsa Sign</h5>
-                      <p className="text-sm text-muted-foreground">{pada.navamsaSign}</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <h5 className="font-medium mb-1">Expression</h5>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{pada.expression}</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <h5 className="font-medium mb-1">Motivation & Drive</h5>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{pada.motivation}</p>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </CardContent>
-      </Card>
+      {/* Pada Breakdown - Layer 3 */}
+      <Accordion type="single" collapsible>
+        <AccordionItem value="padas">
+          <Card>
+            <AccordionTrigger className="px-6 hover:no-underline">
+              <div className="space-y-2">
+                <CardTitle className="font-serif text-2xl tracking-wide">Pada Breakdown</CardTitle>
+                <p className="text-sm text-muted-foreground text-left tracking-wide leading-relaxed">
+                  Four quarters, each with its own planetary flavor
+                </p>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="pt-6">
+                <Accordion type="single" collapsible className="w-full">
+                  {nakshatra.padas.map((pada, index) => (
+                    <AccordionItem key={index} value={`pada-${index + 1}`}>
+                      <AccordionTrigger className="hover:no-underline">
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline" className="font-sans tracking-wide">Pada {index + 1}</Badge>
+                          <span className="text-sm text-muted-foreground tracking-wide">{pada.navamsaSign}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-6 pt-4">
+                          <div className="space-y-2">
+                            <h5 className="font-sans text-xs tracking-wider uppercase text-muted-foreground">Navamsa</h5>
+                            <p className="text-sm text-muted-foreground tracking-wide">{pada.navamsaSign}</p>
+                          </div>
+                          <Separator />
+                          <div className="space-y-2">
+                            <h5 className="font-sans text-xs tracking-wider uppercase text-muted-foreground">Expression</h5>
+                            <p className="text-sm text-muted-foreground leading-relaxed tracking-wide prose max-w-none">
+                              {pada.expression}
+                            </p>
+                          </div>
+                          <Separator />
+                          <div className="space-y-2">
+                            <h5 className="font-sans text-xs tracking-wider uppercase text-muted-foreground">Motivation</h5>
+                            <p className="text-sm text-muted-foreground leading-relaxed tracking-wide prose max-w-none">
+                              {pada.motivation}
+                            </p>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </AccordionContent>
+          </Card>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
+

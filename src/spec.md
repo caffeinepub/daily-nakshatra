@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix intermittent “Error loading Nakshatra data” failures on the Today and Tomorrow pages by preventing invalid/boundary lunar longitude values (especially 360) from triggering backend errors.
+**Goal:** Ensure the Today page hero background image reliably loads using the new asset, and move the hero overlay text to the bottom lower third for improved layout.
 
 **Planned changes:**
-- Frontend: Validate longitude using the backend-compatible domain (>= 0 and < 360), treating 360 as invalid.
-- Frontend: Normalize any computed lunar longitude into the [0, 360) range before issuing `determineNakshatra` requests (wrap negatives; map 360 to 0).
-- Frontend (Tomorrow page): Keep the `determineNakshatra` query disabled until `tomorrowLongitude` is computed and validated; avoid sending placeholder longitudes.
-- Backend: Normalize `lunarLongitude` into [0, 360) at the start of `determineNakshatra` before validation and nakshatra lookup to avoid boundary-equivalent traps.
+- Update the Today page hero background image reference to reliably resolve and load the file `Untitled design (33).png`, including addressing special characters in the filename and ensuring the asset is in the correct static location for both dev and production builds.
+- Adjust the Today page hero overlay layout so the glyph, “Current Nakshatra Placement” heading, and subtitle sit in the bottom lower third with responsive padding and maintained readability/contrast.
 
-**User-visible outcome:** Today/Tomorrow pages load Nakshatra results more reliably, avoiding the “Error loading Nakshatra data” state caused by boundary/placeholder longitude values; any user-facing error text remains in English.
+**User-visible outcome:** The Today page hero shows the intended new background image without broken loading, and the hero text appears in the lower third of the image on mobile and desktop.

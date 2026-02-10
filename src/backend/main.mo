@@ -1,8 +1,17 @@
 import Text "mo:core/Text";
 import Float "mo:core/Float";
 import Int "mo:core/Int";
+import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
+import Principal "mo:core/Principal";
 import Array "mo:core/Array";
+import List "mo:core/List";
+import Time "mo:core/Time";
+import Map "mo:core/Map";
+import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
+
+// No migration file needed, as there is no persisted state to migrate.
 
 actor {
   type Nakshatra = {
@@ -65,6 +74,50 @@ actor {
 
   let nakshatras = computeNakshatras();
 
+  let checkInEntries = Map.empty<Principal, List.List<CheckInEntry>>();
+  let sleepLogEntries = Map.empty<Principal, List.List<SleepLogEntry>>();
+  let dreamLogEntries = Map.empty<Principal, List.List<DreamLogEntry>>();
+  let birthCharts = Map.empty<Principal, BirthChartData>();
+  let userProfiles = Map.empty<Principal, UserProfile>();
+  let accessControlState = AccessControl.initState();
+
+  include MixinAuthorization(accessControlState);
+
+  public type UserProfile = {
+    name : Text;
+    email : ?Text;
+    isPremium : Bool;
+  };
+
+  type CheckInEntry = {
+    timestamp : Time.Time;
+    dayOfYear : Nat;
+    nakshatra : Text;
+    mood : ?Text;
+    energy : ?Nat;
+    restlessness : ?Nat;
+  };
+
+  type SleepLogEntry = {
+    timestamp : Time.Time;
+    dayOfYear : Nat;
+    nakshatra : Text;
+    sleepNotes : ?Text;
+  };
+
+  type DreamLogEntry = {
+    timestamp : Time.Time;
+    dayOfYear : Nat;
+    nakshatra : Text;
+    dreamNotes : ?Text;
+  };
+
+  type BirthChartData = {
+    birthDate : Text;
+    moonNakshatra : Text;
+    atmakarakaNakshatra : Text;
+  };
+
   func findNakshatraByDegree(lunarLongitude : Float) : ?Nakshatra {
     nakshatras.find(
       func(n) {
@@ -84,7 +137,47 @@ actor {
     };
   };
 
-  public query (_) func determineNakshatra(lunarLongitude : Float) : async {
+  func getCurrentDayOfYear() : Nat {
+    let currentTime = Time.now();
+    let secondsSinceEpoch = currentTime / 1_000_000_000;
+    let daysSinceEpoch = secondsSinceEpoch / 86400;
+    let currentYear = 1970 + daysSinceEpoch / 365;
+    let dayOfYear = daysSinceEpoch % 365;
+    let leapYearsSince1970 = (currentYear - 1970) / 4;
+    let adjustedDayOfYear : Int = if (leapYearsSince1970 > 0) {
+      dayOfYear + leapYearsSince1970;
+    } else {
+      dayOfYear;
+    };
+    adjustedDayOfYear.toNat();
+  };
+
+  // User Profile Management
+
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access profiles");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
+  };
+
+  // Public computational functions (available to all including guests)
+
+  public query ({ caller }) func determineNakshatra(lunarLongitude : Float) : async {
     nakshatraName : Text;
     nakshatraNumber : Nat;
     pada : Nat;
@@ -127,4 +220,274 @@ actor {
       degreesUntilNextPada;
     };
   };
+
+  public query ({ caller }) func getCurrentDayOfYearForCaller() : async Nat {
+    getCurrentDayOfYear();
+  };
+
+  // User log persistence (authenticated users only)
+
+  public shared ({ caller }) func saveCheckIn(dayOfYear : Nat, nakshatra : Text, mood : ?Text, energy : ?Nat, restlessness : ?Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save check-ins");
+    };
+
+    let newEntry = {
+      timestamp = Time.now();
+      dayOfYear;
+      nakshatra;
+      mood;
+      energy;
+      restlessness;
+    };
+    let existingEntries = switch (checkInEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<CheckInEntry>() };
+    };
+    existingEntries.add(newEntry);
+    checkInEntries.add(caller, existingEntries);
+  };
+
+  public shared ({ caller }) func saveSleepLog(dayOfYear : Nat, nakshatra : Text, sleepNotes : ?Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save sleep logs");
+    };
+
+    let newEntry = {
+      timestamp = Time.now();
+      dayOfYear;
+      nakshatra;
+      sleepNotes;
+    };
+    let existingEntries = switch (sleepLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<SleepLogEntry>() };
+    };
+    existingEntries.add(newEntry);
+    sleepLogEntries.add(caller, existingEntries);
+  };
+
+  public shared ({ caller }) func saveDreamLog(dayOfYear : Nat, nakshatra : Text, dreamNotes : ?Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save dream logs");
+    };
+
+    let newEntry = {
+      timestamp = Time.now();
+      dayOfYear;
+      nakshatra;
+      dreamNotes;
+    };
+    let existingEntries = switch (dreamLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<DreamLogEntry>() };
+    };
+    existingEntries.add(newEntry);
+    dreamLogEntries.add(caller, existingEntries);
+  };
+
+  public shared ({ caller }) func saveBirthChart(birthDate : Text, moonNakshatra : Text, atmakarakaNakshatra : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save birth charts");
+    };
+
+    let newChart = {
+      birthDate;
+      moonNakshatra;
+      atmakarakaNakshatra;
+    };
+    birthCharts.add(caller, newChart);
+  };
+
+  public query ({ caller }) func getAllLogs() : async {
+    checkIns : [CheckInEntry];
+    sleepLogs : [SleepLogEntry];
+    dreamLogs : [DreamLogEntry];
+    birthChart : ?BirthChartData;
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can retrieve logs");
+    };
+
+    let checkInsList = switch (checkInEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<CheckInEntry>() };
+    };
+    let sleepLogsList = switch (sleepLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<SleepLogEntry>() };
+    };
+    let dreamLogsList = switch (dreamLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<DreamLogEntry>() };
+    };
+
+    {
+      checkIns = checkInsList.toArray();
+      sleepLogs = sleepLogsList.toArray();
+      dreamLogs = dreamLogsList.toArray();
+      birthChart = birthCharts.get(caller);
+    };
+  };
+
+  public query ({ caller }) func getLogsByDay(dayOfYear : Nat) : async {
+    checkIns : [CheckInEntry];
+    sleepLogs : [SleepLogEntry];
+    dreamLogs : [DreamLogEntry];
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can retrieve logs");
+    };
+
+    let checkInsList = switch (checkInEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<CheckInEntry>() };
+    };
+    let sleepLogsList = switch (sleepLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<SleepLogEntry>() };
+    };
+    let dreamLogsList = switch (dreamLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<DreamLogEntry>() };
+    };
+
+    let filteredCheckIns = checkInsList.filter(
+      func(entry) {
+        entry.dayOfYear == dayOfYear;
+      }
+    );
+
+    let filteredSleepLogs = sleepLogsList.filter(
+      func(entry) {
+        entry.dayOfYear == dayOfYear;
+      }
+    );
+
+    let filteredDreamLogs = dreamLogsList.filter(
+      func(entry) {
+        entry.dayOfYear == dayOfYear;
+      }
+    );
+
+    {
+      checkIns = filteredCheckIns.toArray();
+      sleepLogs = filteredSleepLogs.toArray();
+      dreamLogs = filteredDreamLogs.toArray();
+    };
+  };
+
+  public query ({ caller }) func getLogsByNakshatra(nakshatra : Text) : async {
+    checkIns : [CheckInEntry];
+    sleepLogs : [SleepLogEntry];
+    dreamLogs : [DreamLogEntry];
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can retrieve logs");
+    };
+
+    let checkInsList = switch (checkInEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<CheckInEntry>() };
+    };
+    let sleepLogsList = switch (sleepLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<SleepLogEntry>() };
+    };
+    let dreamLogsList = switch (dreamLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<DreamLogEntry>() };
+    };
+
+    let filteredCheckIns = checkInsList.filter(
+      func(entry) {
+        entry.nakshatra == nakshatra;
+      }
+    );
+
+    let filteredSleepLogs = sleepLogsList.filter(
+      func(entry) {
+        entry.nakshatra == nakshatra;
+      }
+    );
+
+    let filteredDreamLogs = dreamLogsList.filter(
+      func(entry) {
+        entry.nakshatra == nakshatra;
+      }
+    );
+
+    {
+      checkIns = filteredCheckIns.toArray();
+      sleepLogs = filteredSleepLogs.toArray();
+      dreamLogs = filteredDreamLogs.toArray();
+    };
+  };
+
+  public query ({ caller }) func getNakshtaraPatterns() : async {
+    checkInPatterns : [(Text, CheckInEntry)];
+    sleepLogPatterns : [(Text, SleepLogEntry)];
+    dreamPatterns : [(Text, DreamLogEntry)];
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can retrieve patterns");
+    };
+
+    let checkInPatterns = List.empty<(Text, CheckInEntry)>();
+    let matchSleepPatterns = List.empty<(Text, SleepLogEntry)>();
+    let matchDreamPatterns = List.empty<(Text, DreamLogEntry)>();
+
+    let checkInsList = switch (checkInEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<CheckInEntry>() };
+    };
+    let sleepLogsList = switch (sleepLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<SleepLogEntry>() };
+    };
+    let dreamLogsList = switch (dreamLogEntries.get(caller)) {
+      case (?entries) { entries };
+      case (null) { List.empty<DreamLogEntry>() };
+    };
+
+    if (checkInsList.size() > 1) {
+      var last : CheckInEntry = checkInsList.at(0);
+      for (i in checkInsList.sliceToArray(1, checkInsList.size()).values()) {
+        let entry = i;
+        if (entry.nakshatra == last.nakshatra) {
+          checkInPatterns.add((entry.nakshatra, entry));
+        };
+        last := entry;
+      };
+    };
+
+    if (sleepLogsList.size() > 1) {
+      var last : SleepLogEntry = sleepLogsList.at(0);
+      for (i in sleepLogsList.sliceToArray(1, sleepLogsList.size()).values()) {
+        let entry = i;
+        if (entry.nakshatra == last.nakshatra) {
+          matchSleepPatterns.add((entry.nakshatra, entry));
+        };
+        last := entry;
+      };
+    };
+
+    if (dreamLogsList.size() > 1) {
+      var last : DreamLogEntry = dreamLogsList.at(0);
+      for (i in dreamLogsList.sliceToArray(1, dreamLogsList.size()).values()) {
+        let entry = i;
+        if (entry.nakshatra == last.nakshatra) {
+          matchDreamPatterns.add((entry.nakshatra, entry));
+        };
+        last := entry;
+      };
+    };
+
+    {
+      checkInPatterns = checkInPatterns.toArray();
+      sleepLogPatterns = matchSleepPatterns.toArray();
+      dreamPatterns = matchDreamPatterns.toArray();
+    };
+  };
 };
+

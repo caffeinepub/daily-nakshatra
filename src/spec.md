@@ -1,10 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Make Version 22 live by updating the UI version label and deploying the current frontend/backend to production canisters.
+**Goal:** Fix Profile/Birth Chart saving for authenticated Internet Identity users and persist Lahiri-based Moon/Atmakaraka Nakshatra results as part of saved birth chart data.
 
 **Planned changes:**
-- Update `frontend/src/lib/appVersion.ts` to export `APP_VERSION = 'Version 22'` so the app footer reflects the release.
-- Deploy/upgrade the Version 22 frontend assets and backend Motoko canister(s) to the live Internet Computer environment.
+- Update backend authorization/data-access so normal signed-in users can read/write their own `UserProfile` and `BirthChartData` without any manual/admin-only initialization, preventing “Unable to save” due to authorization traps.
+- Ensure Profile-related backend methods used by the Profile page (`getCallerUserProfile`, `saveCallerUserProfile`, `getAllLogs`, `saveBirthChart`) do not trap for a normal authenticated user; keep existing frontend error text, but log sanitized errors to console for non-auth failures.
+- Add backend deterministic Lahiri Ayanamsa-based computations to derive `moonNakshatra` and `atmakarakaNakshatra` (normalize 0–360 and map to nakshatra segments), and persist these computed values into the caller’s saved birth chart.
+- Keep the existing Profile/Birth Chart UI and flow unchanged while wiring it to the updated backend so that after saving, the form reflects persisted values returned from the backend (via refetch/invalidation).
 
-**User-visible outcome:** End users loading the production URL receive the latest release without a hard refresh, and the app footer displays “Version 22”.
+**User-visible outcome:** Signed-in users can successfully save Profile Information and Birth Chart data (showing “Saved” instead of “Unable to save”), and the app permanently stores and returns the computed Lahiri-based Moon Nakshatra and Atmakaraka Nakshatra values on refresh without requiring any new user steps.

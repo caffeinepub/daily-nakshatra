@@ -15,13 +15,15 @@ export function useActorInitStatus() {
   // Read the actor query state without creating a new query
   const actorQueryState = queryClient.getQueryState(actorQueryKey);
 
+  // Treat actor creation success as success, even if access-control init failed
+  // The actor is still usable for guest/user operations
   const status: ActorInitStatus = actorQueryState
     ? actorQueryState.status === 'pending'
       ? 'loading'
-      : actorQueryState.status === 'error'
-      ? 'error'
       : actorQueryState.status === 'success'
       ? 'success'
+      : actorQueryState.status === 'error'
+      ? 'error'
       : 'idle'
     : 'idle';
 

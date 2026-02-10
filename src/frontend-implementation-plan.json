@@ -1,41 +1,74 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Go-live Version 22 (frontend release label + production cache-safety)",
+  "title": "Fix Profile save reliability and ensure persisted Moon/Atmakaraka Nakshatra values round-trip in Profile UI",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Update the UI version label to display \"Version 22\" via the existing APP_VERSION constant used by AppLayout footer.",
+      "summary": "Improve Profile/Birth Chart save reliability for authenticated users by hardening frontend actor usage, error handling, and post-save cache refresh without changing the existing UI copy/flow.",
       "acceptanceCriteria": [
-        "`frontend/src/lib/appVersion.ts` exports `APP_VERSION = 'Version 22'` (exact string).",
-        "The footer in the running app displays \"Version 22\" (via `AppLayout`)."
+        "When signed in with Internet Identity, saving Profile Information succeeds and the success state renders (\"Saved\") instead of the destructive alert (\"Unable to save\").",
+        "When signed in with Internet Identity, saving Birth Chart succeeds and the data persists on refresh (values are returned by backend and repopulate the form).",
+        "Backend calls used by the Profile page (getCallerUserProfile, saveCallerUserProfile, getAllLogs, saveBirthChart) do not trap with authorization errors for a normal signed-in user.",
+        "If a save fails for any other reason, the frontend logs the sanitized error to console and the UI continues to show the existing \"Unable to save\" message (user-facing text remains English)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/appVersion.ts",
+          "path": "frontend/src/pages/ProfileSettingsPage.tsx",
           "operation": "modify",
-          "description": "Update `APP_VERSION` to the exact string `Version 22` so AppLayout footer reflects the deployed release."
+          "description": "Keep the existing Profile and Birth Chart UI/flow, but update the save handlers to log only sanitized errors (use sanitizeError) while preserving the existing destructive \"Unable to save\" UI. Ensure no user-facing text changes and no additional steps are introduced. Use the authorization component guidance to continue requiring sign-in for personal data. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useUserProfile.ts",
+          "operation": "modify",
+          "description": "Harden Profile/Birth Chart mutations: add onError handlers that console.error sanitized errors (sanitizeError) without changing user-facing UI, and onSuccess handlers that both invalidate and actively refetch the relevant queries (currentUserProfile and allLogs) to reduce stale UI after saves. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useUserLogs.ts",
+          "operation": "modify",
+          "description": "Ensure log queries used by Profile remain consistent and refresh after mutations by aligning query keys/invalidation behavior and (where appropriate) enabling active refetch on invalidation to immediately repopulate ProfileSettingsPage from persisted data. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Prepare the frontend build to reliably serve Version 22 immediately after deployment by reducing the chance of stale HTML/asset caching, so users receive the new release without a hard refresh.",
+      "summary": "Ensure the Profile/Birth Chart UI round-trips and persists Lahiri-based computed Moon/Atmakaraka Nakshatra values by always re-reading the saved BirthChartData and reflecting stored values in the form after save.",
       "acceptanceCriteria": [
-        "After deployment completes, the production (live) app loads successfully without requiring a hard refresh.",
-        "The live app footer displays \"Version 22\" confirming the new frontend assets are serving.",
-        "Backend canister upgrade completes without trapping and the app can initialize its actor connection on the live environment."
+        "Backend provides a deterministic computation that applies Lahiri Ayanamsa adjustment before mapping ecliptic longitude to nakshatra (0–360 normalization and nakshatra segmentation).",
+        "Backend can compute and store (persist) both moonNakshatra and atmakarakaNakshatra for the caller such that subsequent reads (e.g., via getAllLogs) return the same stored values.",
+        "Saving a birth chart results in moonNakshatra and atmakarakaNakshatra being stored even if the frontend does not change the current input flow (no new required steps introduced to the user)."
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/hooks/useUserProfile.ts",
           "operation": "modify",
-          "description": "Add standard cache-control meta tags (e.g., no-cache / no-store / must-revalidate plus pragma/expires) to reduce the likelihood of browsers serving a stale HTML shell after go-live, helping the new hashed JS/CSS assets load without requiring a user hard refresh."
+          "description": "After saveBirthChart succeeds, force an active refresh of the cached birth chart read (via allLogs invalidation + refetch) so the UI updates from persisted BirthChartData (including backend-computed moonNakshatra/atmakarakaNakshatra values) without changing the user input flow. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/main.tsx",
+          "path": "frontend/src/pages/ProfileSettingsPage.tsx",
           "operation": "modify",
-          "description": "Add a lightweight runtime release marker (e.g., log APP_VERSION once on boot and/or attach it to a non-sensitive global like a data attribute) to help verify that the live environment is serving Version 22 assets during post-deploy checks."
+          "description": "Rely on the existing useEffect that populates form fields from logs.birthChart, ensuring it correctly reflects the persisted moonNakshatra and atmakarakaNakshatra returned from the backend after a save-triggered refetch (no new UI fields/steps). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Keep ProfileSettingsPage UX unchanged while wiring the page to always display persisted BirthChartData (including stored Moon/Atmakaraka Nakshatra) via query invalidation/refetch, without modifying immutable frontend paths.",
+      "acceptanceCriteria": [
+        "ProfileSettingsPage continues to present the same Information and Birth Chart forms and the same save interactions.",
+        "After saving the birth chart, refetch/invalidation updates the on-screen Birth Chart fields to the persisted values returned from the backend.",
+        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT (hooks/useInternetIdentity.ts(x), hooks/useActor.ts, main.tsx, and components/ui sources)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ProfileSettingsPage.tsx",
+          "operation": "modify",
+          "description": "Preserve existing form layout and save interactions while ensuring the displayed Birth Chart values always come from the persisted backend read after save (via existing state sync from logs + improved refetch behavior). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useUserProfile.ts",
+          "operation": "modify",
+          "description": "Adjust React Query invalidation/refetch strategy so ProfileSettingsPage reliably reflects persisted birth chart values after saving, without touching immutable auth/actor hooks or UI library sources. Verify the component's usage instructions before implementing."
         }
       ]
     }

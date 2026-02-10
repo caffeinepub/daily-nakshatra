@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useDetermineNakshatra } from './useQueries';
 import { calculateLunarLongitude } from '@/lib/astro/lunarLongitude';
 import { getTimeInTimezone } from '@/lib/time/timezone';
@@ -31,9 +31,18 @@ export function useNakshatraNow() {
     selectionKey
   );
 
+  // Unified retry function that recomputes longitude and clears error state
+  const retryQuery = async () => {
+    // Force longitude recomputation
+    recomputeLongitude();
+    // Clear error state and refetch
+    await queryResult.forceRefetch();
+  };
+
   return {
     ...queryResult,
     isLongitudeValid: longitudeValid,
     recomputeLongitude,
+    retryQuery,
   };
 }

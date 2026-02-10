@@ -4,30 +4,30 @@ import { AlertCircle, RefreshCw, ChevronDown } from 'lucide-react';
 import { sanitizeError } from '@/lib/diagnostics/sanitizeError';
 import { useState } from 'react';
 
-interface ConnectionFailedScreenProps {
+interface UnableToProceedScreenProps {
   error?: unknown;
   onRetry: () => void;
   isRetrying?: boolean;
 }
 
-export default function ConnectionFailedScreen({
+export default function UnableToProceedScreen({
   error,
   onRetry,
   isRetrying = false,
-}: ConnectionFailedScreenProps) {
+}: UnableToProceedScreenProps) {
   const [showDetails, setShowDetails] = useState(false);
   const errorDetails = error ? sanitizeError(error) : null;
 
   return (
     <div className="text-center py-20 space-y-6 max-w-md mx-auto">
       <div className="flex justify-center mb-6">
-        <AlertCircle className="h-12 w-12 text-destructive" />
+        <AlertCircle className="h-12 w-12 text-muted-foreground" />
       </div>
       
-      <p className="text-foreground text-lg font-sans tracking-wide">Connection failed</p>
+      <p className="text-foreground text-lg font-sans tracking-wide">Unable to proceed</p>
       
       <p className="text-sm text-muted-foreground leading-relaxed">
-        Unable to connect to the service. Please check your connection and try again.
+        The reading cannot be completed. Wait, then try again.
       </p>
 
       <Button
@@ -44,7 +44,7 @@ export default function ConnectionFailedScreen({
         ) : (
           <>
             <RefreshCw className="h-4 w-4" />
-            Retry Connection
+            Try Again
           </>
         )}
       </Button>

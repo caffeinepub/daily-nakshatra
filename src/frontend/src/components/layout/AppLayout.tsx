@@ -28,7 +28,10 @@ export default function AppLayout() {
                 caffeine.ai
               </a>
             </p>
-            <p className="text-xs text-muted-foreground/60">
+            <p 
+              className="text-xs text-muted-foreground/60 font-mono"
+              data-testid="app-version"
+            >
               {APP_VERSION}
             </p>
           </div>

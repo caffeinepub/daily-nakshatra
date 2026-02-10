@@ -6,7 +6,6 @@ import { useCitySelection } from '@/hooks/useCitySelection';
 import { isValidLongitude, normalizeLongitude } from '@/lib/diagnostics/nakshatraDiagnostics';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import Glyph from '@/components/glyphs/Glyph';
 import { MapPin, RefreshCw, Clock, AlertCircle } from 'lucide-react';
 import DailyInterpretationBlocks from '@/components/today/DailyInterpretationBlocks';
 import ConnectionFailedScreen from '@/components/errors/ConnectionFailedScreen';
@@ -145,7 +144,7 @@ export default function TomorrowPage() {
 
   return (
     <div className="space-y-16">
-      {/* Altar Hero */}
+      {/* Altar Hero - Note: Do not add decorative Glyph/SVG overlays to hero sections */}
       <div
         className="relative overflow-hidden min-h-[500px] md:min-h-[600px] flex flex-col"
         style={{
@@ -157,22 +156,8 @@ export default function TomorrowPage() {
         {/* Dark overlay for contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background/90" />
         
-        {/* Circular motif */}
-        <div 
-          className="absolute inset-0 flex items-end justify-center opacity-10 pb-32"
-          style={{
-            backgroundImage: 'url(/assets/generated/altar-circle-motif.dim_1200x1200.png)',
-            backgroundSize: 'contain',
-            backgroundPosition: 'center bottom',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
-        
         {/* Content positioned in lower third */}
         <div className="relative flex-1 flex flex-col justify-end px-8 pb-16 md:pb-20 text-center space-y-6">
-          <div className="flex items-center justify-center mb-4">
-            <Glyph type="moon" className="h-12 w-12 md:h-16 md:w-16 text-primary" />
-          </div>
           <h2 className="text-3xl md:text-5xl font-sans tracking-wider">Tomorrow's Nakshatra</h2>
           <p className="text-white max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
             Where the Moon will rest

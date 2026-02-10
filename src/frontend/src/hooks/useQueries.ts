@@ -57,7 +57,7 @@ export function useDetermineNakshatra(
   // Custom refetch that clears error state and forces a fresh attempt
   const forceRefetch = async () => {
     // Reset the query to clear error state
-    queryClient.resetQueries({ queryKey });
+    await queryClient.resetQueries({ queryKey });
     // Then refetch
     return query.refetch();
   };

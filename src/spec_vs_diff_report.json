@@ -1,49 +1,51 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T02:16:45.623Z",
-  "summary": "REQ-1 is implemented by updating the exported APP_VERSION string to \"Version 22\". There is no clear evidence in the provided diff summary of the actual production Internet Computer deployment work required by REQ-2 (e.g., deployment config/scripts, canister settings, or release steps), nor evidence that the backend upgrade/init path was specifically handled for a live upgrade.",
+  "generatedAt": "2026-02-10T17:54:27.748Z",
+  "summary": "Diff adds/changes frontend hooks to use a stable actor, adds sanitized console error logging, and updates ProfileSettingsPage to refetch logs/profile after saves. Backend shows new Nakshatra data structures/helpers and a BirthChartData shape containing moonNakshatra/atmakarakaNakshatra, but the diff does not provide evidence of Lahiri-ayanamsa-based computation/persistence nor evidence that authorization no longer blocks normal authenticated callers.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Deploy Version 22 to the live Internet Computer canister(s) so end users receive this release when loading the production URL.",
-      "reason": "The diff shows code/config edits (notably frontend version constant and HTML cache headers), but no explicit deployment-related changes (e.g., dfx deploy configuration, canister IDs, CI/CD pipeline updates, or release scripts) that would demonstrate production canister deployment and upgrade behavior.",
+      "id": "REQ-1",
+      "requirement": "Fix Profile section save failures by ensuring authenticated users can successfully read/write their own UserProfile and BirthChartData without manual/admin-only access-control initialization; backend calls used by Profile page must not trap with authorization errors for a normal signed-in user.",
+      "reason": "backend/main.mo still includes AccessControl/MixinAuthorization with an initialized access-control state and notes \"No migration\"; the truncated diff does not show any removal/relaxation of authorization gating for getCallerUserProfile, saveCallerUserProfile, getAllLogs, or saveBirthChart, so there is no diff evidence that normal callers won’t hit authorization traps or require prior admin initialization.",
       "evidence": [
-        "project_state.json",
-        "frontend/index.html",
         "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Add deterministic Lahiri Ayanamsa-based computations (0–360 normalization and nakshatra segmentation) to derive Moon Nakshatra and Atmakaraka Nakshatra and persist them as part of the saved birth chart so subsequent reads return the stored values even if frontend input flow is unchanged.",
+      "reason": "backend/main.mo shows a nakshatra list and a degree-to-nakshatra lookup helper, but there is no diff evidence of Lahiri ayanamsa adjustment, 0–360 normalization, or Atmakaraka derivation logic, nor evidence that saveBirthChart computes/stores these values server-side independent of frontend inputs.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useUserProfile.ts"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Large backend logic changes related to Nakshatra computation, access control initialization, and new/expanded types and storage maps.",
-      "reason": "BuildRequest is strictly about making Version 22 live and updating the displayed version label; it explicitly lists non-goals of implementing new product features or unrelated refactors. The backend changes shown appear feature-level and not tied to the version label/deployment requirements in the request.",
+      "description": "Introduced/modified a new stable-actor hook usage pattern (useActorStable) across log/profile hooks.",
+      "reason": "BuildRequest did not ask for changing actor acquisition mechanics; it only constrained certain immutable hook paths (which were not touched) and requested save/auth fixes and Lahiri-based persistence.",
+      "evidence": [
+        "frontend/src/hooks/useUserLogs.ts",
+        "frontend/src/hooks/useUserProfile.ts"
+      ]
+    },
+    {
+      "description": "Added backend helper functions and structures unrelated/insufficiently tied to requested Lahiri persistence (e.g., calculatePada, validateDegree, getCurrentDayOfYear changes, Nakshatra module equality).",
+      "reason": "These helpers are not explicitly requested by the BuildRequest acceptance criteria (which focus on Lahiri adjustment + persistence and authorization/save success), and the diff summary does not connect them to implementing those requirements.",
       "evidence": [
         "backend/main.mo"
       ]
-    },
-    {
-      "description": "Added aggressive no-cache meta tags to the frontend HTML document.",
-      "reason": "Not explicitly requested by REQ-1/REQ-2. While it may be intended to help with caching/hard-refresh issues, the BuildRequest did not ask to change HTML caching behavior.",
-      "evidence": [
-        "frontend/index.html"
-      ]
-    },
-    {
-      "description": "Updated/introduced project tracking entries for AR-1/AR-2/AR-3 in project_state.json.",
-      "reason": "Not requested by the BuildRequest requirements or acceptance criteria; appears to be internal bookkeeping unrelated to deploying Version 22 or updating the visible version label.",
-      "evidence": [
-        "project_state.json"
-      ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.html",
-    "frontend/src/lib/appVersion.ts",
+    "frontend/src/hooks/useUserLogs.ts",
+    "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/pages/ProfileSettingsPage.tsx",
     "project_state.json"
   ]
 }

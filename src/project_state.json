@@ -1,24 +1,38 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "summary": "Astrology/birth-chart app: fix profile save failures and add Lahiri Ayanamsa-based calculations to compute and persist Moon Nakshatra and Atmakaraka Nakshatra in the user profile.",
+  "architectural_notes": [
+    "Moon Nakshatra and Atmakaraka Nakshatra should be calculated using Lahiri Ayanamsa.",
+    "Persist computed Moon Nakshatra and Atmakaraka Nakshatra values in the user profile (stored permanently).",
+    "No UI/flow changes requested; keep existing birth-chart input and profile flows unchanged."
+  ],
+  "known_issues": [
+    "Profile section save action fails with error message: 'unable to save' (user info/birth chart data not persisted)."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-app-s-displayed-version-label-to-version-22-so-the-ui-reflects-the-deployed-release",
-      "title": "Update the app’s displayed version label to \"Version 22\" so the UI reflects the deployed release.",
+      "id": "feature-fix-the-profile-section-save-failures-unable-to-save-by-ensuring-authenticated-users-can-successfully-read-and-write-their-own-userprofile-and-birthchartdata-without-requiring-any-manual-admin-only-access-control-initialization",
+      "title": "Fix the Profile section save failures (\"Unable to save\") by ensuring authenticated users can successfully read and write their own UserProfile and BirthChartData without requiring any manual/admin-only access-control initialization.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-deploy-version-22-to-the-live-internet-computer-canister-s-so-end-users-receive-this-release-when-loading-the-production-url",
-      "title": "Deploy Version 22 to the live Internet Computer canister(s) so end users receive this release when loading the production URL.",
+      "id": "feature-add-lahiri-ayanamsa-based-computations-to-derive-moon-nakshatra-and-atmakaraka-nakshatra-placements-and-persist-the-computed-results-permanently-as-part-of-the-user-s-saved-birth-chart-data",
+      "title": "Add Lahiri Ayanamsa-based computations to derive Moon Nakshatra and Atmakaraka Nakshatra placements, and persist the computed results permanently as part of the user's saved birth chart data.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-keep-the-existing-profile-and-birth-chart-ui-flow-unchanged-while-wiring-it-to-the-updated-backend-so-that-the-saved-birth-chart-always-reflects-the-persisted-moon-atmakaraka-nakshatra-values",
+      "title": "Keep the existing Profile and Birth Chart UI/flow unchanged while wiring it to the updated backend so that the saved birth chart always reflects the persisted Moon/Atmakaraka Nakshatra values.",
+      "reqIds": [
+        "REQ-3"
       ],
       "version": 1
     }
@@ -26,12 +40,18 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Deploy Version 22 to production (go live)",
+      "summary": "Fix bug in Profile section: app shows 'unable to save' and cannot save user information or birth chart data.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add Lahiri Ayanamsa-based calculations to compute Moon Nakshatra and Atmakaraka Nakshatra placements and save them permanently to the user's profile.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Deploy Version 22 to production (go live)",
+  "projectName": "Fix Profile save failures and add Lahiri-based Moon/Atmakaraka Nakshatra persistence",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

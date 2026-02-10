@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActorStable } from './useActorStable';
 import type { CheckInEntry, SleepLogEntry, DreamLogEntry, BirthChartData } from '@/backend';
+import { sanitizeError } from '@/lib/diagnostics/sanitizeError';
 
 export function useGetAllLogs() {
   const { actor, isFetching: actorFetching } = useActorStable();
@@ -80,10 +81,14 @@ export function useSaveCheckIn() {
       if (!actor) throw new Error('Actor not available');
       return actor.saveCheckIn(data.dayOfYear, data.nakshatra, data.mood, data.energy, data.restlessness);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allLogs'] });
-      queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
-      queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
+      await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
+      await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+    },
+    onError: (error: unknown) => {
+      console.error('Check-in save failed:', sanitizeError(error));
     },
   });
 }
@@ -97,10 +102,14 @@ export function useSaveSleepLog() {
       if (!actor) throw new Error('Actor not available');
       return actor.saveSleepLog(data.dayOfYear, data.nakshatra, data.sleepNotes);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allLogs'] });
-      queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
-      queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
+      await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
+      await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+    },
+    onError: (error: unknown) => {
+      console.error('Sleep log save failed:', sanitizeError(error));
     },
   });
 }
@@ -114,10 +123,14 @@ export function useSaveDreamLog() {
       if (!actor) throw new Error('Actor not available');
       return actor.saveDreamLog(data.dayOfYear, data.nakshatra, data.dreamNotes);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allLogs'] });
-      queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
-      queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
+      await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
+      await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+    },
+    onError: (error: unknown) => {
+      console.error('Dream log save failed:', sanitizeError(error));
     },
   });
 }

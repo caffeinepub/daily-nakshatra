@@ -4,7 +4,6 @@ import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from '@/hooks/useUserProfile';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import Glyph from '@/components/glyphs/Glyph';
 import { MapPin, RefreshCw, AlertCircle } from 'lucide-react';
 import DailyInterpretationBlocks from '@/components/today/DailyInterpretationBlocks';
 import DailyGuidanceModules from '@/components/today/DailyGuidanceModules';
@@ -14,6 +13,7 @@ import TransitionTimes from '@/components/nakshatra/TransitionTimes';
 import NakshatraChangeBanner from '@/components/alerts/NakshatraChangeBanner';
 import RequireAuth from '@/components/auth/RequireAuth';
 import ConnectionFailedScreen from '@/components/errors/ConnectionFailedScreen';
+import UnableToProceedScreen from '@/components/errors/UnableToProceedScreen';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { getNakshatraSlug } from '@/lib/nakshatra';
@@ -30,7 +30,7 @@ export default function TodayPage() {
     actorInitStatus,
     actorInitError,
     retryActorInitialization,
-    forceRefetch,
+    retryQuery,
   } = useNakshatraNow();
   const { currentCity } = useCitySelection();
   const { identity } = useInternetIdentity();
@@ -62,10 +62,7 @@ export default function TodayPage() {
           The lunar position cannot be determined at this moment. Wait, then try again.
         </p>
         <Button
-          onClick={async () => {
-            recomputeLongitude();
-            await forceRefetch();
-          }}
+          onClick={retryQuery}
           disabled={isRefetching}
           variant="ghost"
           className="gap-2 mt-4"
@@ -89,36 +86,11 @@ export default function TodayPage() {
   // Backend query error (only when actor is ready and query is eligible)
   if (error && isActorReady) {
     return (
-      <div className="text-center py-20 space-y-6 max-w-md mx-auto">
-        <div className="flex justify-center mb-6">
-          <AlertCircle className="h-12 w-12 text-muted-foreground" />
-        </div>
-        <p className="text-foreground text-lg font-sans tracking-wide">Unable to proceed</p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          The reading cannot be completed. Wait, then try again.
-        </p>
-        <Button
-          onClick={async () => {
-            recomputeLongitude();
-            await forceRefetch();
-          }}
-          disabled={isRefetching}
-          variant="ghost"
-          className="gap-2 mt-4"
-        >
-          {isRefetching ? (
-            <>
-              <RefreshCw className="h-4 w-4 animate-spin" />
-              Recalculating
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4" />
-              Try Again
-            </>
-          )}
-        </Button>
-      </div>
+      <UnableToProceedScreen
+        error={error}
+        onRetry={retryQuery}
+        isRetrying={isRefetching}
+      />
     );
   }
 
@@ -128,7 +100,7 @@ export default function TodayPage() {
     <div className="space-y-16">
       <NakshatraChangeBanner />
 
-      {/* Altar Hero */}
+      {/* Altar Hero - Note: Do not add decorative Glyph/SVG overlays to hero sections */}
       <div
         className="relative overflow-hidden min-h-[500px] md:min-h-[600px] flex flex-col"
         style={{
@@ -140,22 +112,8 @@ export default function TodayPage() {
         {/* Dark overlay for contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/70 to-background/90" />
         
-        {/* Circular motif */}
-        <div 
-          className="absolute inset-0 flex items-end justify-center opacity-10 pb-32"
-          style={{
-            backgroundImage: 'url(/assets/generated/altar-circle-motif.dim_1200x1200.png)',
-            backgroundSize: 'contain',
-            backgroundPosition: 'center bottom',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
-        
         {/* Content positioned in lower third */}
         <div className="relative flex-1 flex flex-col justify-end px-8 pb-16 md:pb-20 text-center space-y-6">
-          <div className="flex items-center justify-center mb-4">
-            <Glyph type="circle" className="h-12 w-12 md:h-16 md:w-16 text-primary" />
-          </div>
           <h2 className="text-3xl md:text-5xl font-sans tracking-wider">Current Nakshatra Placement</h2>
           <p className="text-white max-w-lg mx-auto text-sm tracking-wide leading-relaxed">
             Where the Moon rests now

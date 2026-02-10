@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-app-s-displayed-version-label-to-version-22-so-the-ui-reflects-the-deployed-release",
-      "featureTitle": "Update the app’s displayed version label to \"Version 22\" so the UI reflects the deployed release.",
+      "featureId": "feature-fix-the-profile-section-save-failures-unable-to-save-by-ensuring-authenticated-users-can-successfully-read-and-write-their-own-userprofile-and-birthchartdata-without-requiring-any-manual-admin-only-access-control-initialization",
+      "featureTitle": "Fix the Profile section save failures (\"Unable to save\") by ensuring authenticated users can successfully read and write their own UserProfile and BirthChartData without requiring any manual/admin-only access-control initialization.",
       "files": [
-        "frontend/src/lib/appVersion.ts"
+        "frontend/src/hooks/useUserLogs.ts",
+        "frontend/src/hooks/useUserProfile.ts",
+        "frontend/src/pages/ProfileSettingsPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -21,10 +23,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-deploy-version-22-to-the-live-internet-computer-canister-s-so-end-users-receive-this-release-when-loading-the-production-url",
-      "featureTitle": "Deploy Version 22 to the live Internet Computer canister(s) so end users receive this release when loading the production URL.",
+      "featureId": "feature-add-lahiri-ayanamsa-based-computations-to-derive-moon-nakshatra-and-atmakaraka-nakshatra-placements-and-persist-the-computed-results-permanently-as-part-of-the-user-s-saved-birth-chart-data",
+      "featureTitle": "Add Lahiri Ayanamsa-based computations to derive Moon Nakshatra and Atmakaraka Nakshatra placements, and persist the computed results permanently as part of the user's saved birth chart data.",
       "files": [
-        "frontend/index.html"
+        "frontend/src/hooks/useUserProfile.ts",
+        "frontend/src/pages/ProfileSettingsPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -36,6 +39,26 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-keep-the-existing-profile-and-birth-chart-ui-flow-unchanged-while-wiring-it-to-the-updated-backend-so-that-the-saved-birth-chart-always-reflects-the-persisted-moon-atmakaraka-nakshatra-values",
+      "featureTitle": "Keep the existing Profile and Birth Chart UI/flow unchanged while wiring it to the updated backend so that the saved birth chart always reflects the persisted Moon/Atmakaraka Nakshatra values.",
+      "files": [
+        "frontend/src/hooks/useUserProfile.ts",
+        "frontend/src/pages/ProfileSettingsPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

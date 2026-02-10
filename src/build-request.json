@@ -1,52 +1,77 @@
 {
   "kind": "build_request",
-  "title": "Deploy Version 22 to production (go live)",
+  "title": "Fix Profile save failures and add Lahiri-based Moon/Atmakaraka Nakshatra persistence",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the app’s displayed version label to \"Version 22\" so the UI reflects the deployed release.",
-      "target": "frontend",
+      "text": "Fix the Profile section save failures (\"Unable to save\") by ensuring authenticated users can successfully read and write their own UserProfile and BirthChartData without requiring any manual/admin-only access-control initialization.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages"
         ],
         "quotes": [
-          "please deploy version 22, make it go live.  Thanks!"
+          "please fix all the bugs: app unable to save information or birth chart data",
+          "the error happens in the profile section of the app.",
+          "the error message is: unable to save"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/lib/appVersion.ts` exports `APP_VERSION = 'Version 22'` (exact string).",
-        "The footer in the running app displays \"Version 22\" (via `AppLayout`)."
+        "When signed in with Internet Identity, saving Profile Information succeeds and the success state renders (\"Saved\") instead of the destructive alert (\"Unable to save\").",
+        "When signed in with Internet Identity, saving Birth Chart succeeds and the data persists on refresh (values are returned by backend and repopulate the form).",
+        "Backend calls used by the Profile page (getCallerUserProfile, saveCallerUserProfile, getAllLogs, saveBirthChart) do not trap with authorization errors for a normal signed-in user.",
+        "If a save fails for any other reason, the frontend logs the sanitized error to console and the UI continues to show the existing \"Unable to save\" message (user-facing text remains English)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Deploy Version 22 to the live Internet Computer canister(s) so end users receive this release when loading the production URL.",
+      "text": "Add Lahiri Ayanamsa-based computations to derive Moon Nakshatra and Atmakaraka Nakshatra placements, and persist the computed results permanently as part of the user's saved birth chart data.",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages"
         ],
         "quotes": [
-          "please deploy version 22, make it go live.  Thanks!"
+          "update the birth chart data to be able to calculate and save the users moon nakshatra, and atmakaraka nakshatra placments.",
+          "1.add new calculations based on the Lahiri Ayanamsa.",
+          "3.yes, the app should store these values permanently."
         ]
       },
       "acceptanceCriteria": [
-        "After deployment completes, the production (live) app loads successfully without requiring a hard refresh.",
-        "The live app footer displays \"Version 22\" confirming the new frontend assets are serving.",
-        "Backend canister upgrade completes without trapping and the app can initialize its actor connection on the live environment."
+        "Backend provides a deterministic computation that applies Lahiri Ayanamsa adjustment before mapping ecliptic longitude to nakshatra (0–360 normalization and nakshatra segmentation).",
+        "Backend can compute and store (persist) both moonNakshatra and atmakarakaNakshatra for the caller such that subsequent reads (e.g., via getAllLogs) return the same stored values.",
+        "Saving a birth chart results in moonNakshatra and atmakarakaNakshatra being stored even if the frontend does not change the current input flow (no new required steps introduced to the user)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Keep the existing Profile and Birth Chart UI/flow unchanged while wiring it to the updated backend so that the saved birth chart always reflects the persisted Moon/Atmakaraka Nakshatra values.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "no need to change either aspects, it is streamlined enough."
+        ]
+      },
+      "acceptanceCriteria": [
+        "ProfileSettingsPage continues to present the same Information and Birth Chart forms and the same save interactions.",
+        "After saving the birth chart, refetch/invalidation updates the on-screen Birth Chart fields to the persisted values returned from the backend.",
+        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT (hooks/useInternetIdentity.ts(x), hooks/useActor.ts, main.tsx, and components/ui sources)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with logic in `backend/main.mo` (no additional backend services).",
-    "Do not edit any frontend paths listed as immutable in SYSTEM_CONTEXT (compose existing UI components instead).",
-    "Use English for any user-facing text."
+    "Use English for any user-facing text.",
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Implementing new product features beyond making Version 22 live.",
-    "Refactoring unrelated frontend/backend code not required for the Version 22 release."
+    "Redesigning or restructuring the Profile/Birth Chart UX beyond what is necessary to fix saving and persist computed values.",
+    "Adding third-party authentication providers (only Internet Identity is supported).",
+    "Adding external databases or off-chain storage."
   ],
   "imageRequirements": {
     "required": [],

@@ -15,6 +15,7 @@ import Glyph from '@/components/glyphs/Glyph';
 import { Skeleton } from '@/components/ui/skeleton';
 import { nakshatras } from '@/data/nakshatras';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { sanitizeError } from '@/lib/diagnostics/sanitizeError';
 
 export default function ProfileSettingsPage() {
   return (
@@ -63,7 +64,7 @@ function ProfileSettingsContent() {
         isPremium,
       });
     } catch (error) {
-      console.error('Failed to save profile:', error);
+      console.error('Failed to save profile:', sanitizeError(error));
     }
   };
 
@@ -78,7 +79,7 @@ function ProfileSettingsContent() {
         atmakarakaNakshatra,
       });
     } catch (error) {
-      console.error('Failed to save birth chart:', error);
+      console.error('Failed to save birth chart:', sanitizeError(error));
     }
   };
 

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActorStable } from './useActorStable';
-import type { UserProfile, BirthChartData } from '@/backend';
+import type { UserProfile } from '@/backend';
+import { sanitizeError } from '@/lib/diagnostics/sanitizeError';
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActorStable();
@@ -31,8 +32,12 @@ export function useSaveCallerUserProfile() {
       if (!actor) throw new Error('Actor not available');
       return actor.saveCallerUserProfile(profile);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      await queryClient.refetchQueries({ queryKey: ['currentUserProfile'] });
+    },
+    onError: (error: unknown) => {
+      console.error('Profile save failed:', sanitizeError(error));
     },
   });
 }
@@ -46,8 +51,12 @@ export function useSaveBirthChart() {
       if (!actor) throw new Error('Actor not available');
       return actor.saveBirthChart(data.birthDate, data.moonNakshatra, data.atmakarakaNakshatra);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allLogs'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+    },
+    onError: (error: unknown) => {
+      console.error('Birth chart save failed:', sanitizeError(error));
     },
   });
 }

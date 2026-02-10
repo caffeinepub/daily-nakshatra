@@ -18,22 +18,18 @@ export function useActorStable() {
       const isAuthenticated = !!identity;
 
       // Read the caffeineAdminToken from URL on each query execution
-      // This ensures retry picks up changes after adding/removing the param
       const adminToken = getUrlParameter('caffeineAdminToken');
 
       if (!isAuthenticated) {
         // Create anonymous actor
         const actor = await createActorWithConfig();
         
-        // Only call initialization if token is present and non-empty
-        if (adminToken && adminToken.trim() !== '') {
+        // Only call initialization if token is present, non-empty, and method exists
+        if (adminToken && adminToken.trim() !== '' && actor._initializeAccessControlWithSecret) {
           try {
-            // Check if the method exists before calling
-            if ('_initializeAccessControlWithSecret' in actor && typeof actor._initializeAccessControlWithSecret === 'function') {
-              await actor._initializeAccessControlWithSecret(adminToken);
-            }
+            await actor._initializeAccessControlWithSecret(adminToken);
           } catch (error) {
-            console.warn('Access control initialization failed:', error);
+            console.warn('Access control initialization failed (anonymous):', error);
             // Don't throw - allow anonymous access to continue
           }
         }
@@ -50,15 +46,12 @@ export function useActorStable() {
 
       const actor = await createActorWithConfig(actorOptions);
       
-      // Only call initialization if token is present and non-empty
-      if (adminToken && adminToken.trim() !== '') {
+      // Only call initialization if token is present, non-empty, and method exists
+      if (adminToken && adminToken.trim() !== '' && actor._initializeAccessControlWithSecret) {
         try {
-          // Check if the method exists before calling
-          if ('_initializeAccessControlWithSecret' in actor && typeof actor._initializeAccessControlWithSecret === 'function') {
-            await actor._initializeAccessControlWithSecret(adminToken);
-          }
+          await actor._initializeAccessControlWithSecret(adminToken);
         } catch (error) {
-          console.warn('Access control initialization failed:', error);
+          console.warn('Access control initialization failed (authenticated):', error);
           // Don't throw - allow authenticated access to continue
         }
       }
@@ -68,6 +61,8 @@ export function useActorStable() {
     // Only refetch when identity changes
     staleTime: Infinity,
     enabled: true,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // When the actor changes, invalidate dependent queries

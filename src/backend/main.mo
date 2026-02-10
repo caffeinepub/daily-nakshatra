@@ -11,6 +11,8 @@ import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import Runtime "mo:core/Runtime";
 
+// No migration - access control internal state is still stored.
+
 actor {
   type Nakshatra = {
     name : Text;
@@ -134,9 +136,7 @@ actor {
   };
 
   func validateDegree(degree : Float) : () {
-    if (degree < 0.0) {
-      Runtime.trap("Lunar longitude must be greater or equal 0.0");
-    };
+    if (degree != degree) { Runtime.trap("Lunar longitude must not be NaN") };
   };
 
   func getCurrentDayOfYear() : Nat {
@@ -190,7 +190,6 @@ actor {
   } {
     validateDegree(lunarLongitude);
 
-    // Bring into [0, 360) even on boundaries.
     let normalizedLongitude = lunarLongitude % 360.0;
 
     let ?nakshatra = findNakshatraByDegree(normalizedLongitude) else {
@@ -492,4 +491,3 @@ actor {
     };
   };
 };
-

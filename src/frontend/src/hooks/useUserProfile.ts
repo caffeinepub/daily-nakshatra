@@ -34,29 +34,10 @@ export function useSaveCallerUserProfile() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      await queryClient.refetchQueries({ queryKey: ['currentUserProfile'] });
+      await queryClient.refetchQueries({ queryKey: ['currentUserProfile'], type: 'active' });
     },
     onError: (error: unknown) => {
       console.error('Profile save failed:', sanitizeError(error));
-    },
-  });
-}
-
-export function useSaveBirthChart() {
-  const { actor } = useActorStable();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: { birthDate: string; moonNakshatra: string; atmakarakaNakshatra: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.saveBirthChart(data.birthDate, data.moonNakshatra, data.atmakarakaNakshatra);
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
-      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
-    },
-    onError: (error: unknown) => {
-      console.error('Birth chart save failed:', sanitizeError(error));
     },
   });
 }

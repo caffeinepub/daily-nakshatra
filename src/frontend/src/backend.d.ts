@@ -7,6 +7,11 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface Location {
+    latitude: number;
+    cityName: string;
+    longitude: number;
+}
 export type Time = bigint;
 export interface CheckInEntry {
     restlessness?: bigint;
@@ -15,6 +20,13 @@ export interface CheckInEntry {
     timestamp: Time;
     nakshatra: string;
     energy?: bigint;
+}
+export interface BirthData {
+    moonNakshatra: string;
+    dateOfBirth: string;
+    timeOfBirth: string;
+    atmakarakaNakshatra: string;
+    location: Location;
 }
 export interface SleepLogEntry {
     dayOfYear: bigint;
@@ -28,6 +40,7 @@ export interface BirthChartData {
     atmakarakaNakshatra: string;
 }
 export interface UserProfile {
+    birthData?: BirthData;
     isPremium: boolean;
     name: string;
     email?: string;
@@ -45,6 +58,11 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    computeNakshatraData(moonLongitude: number, birthTime: string, birthLocation: Location, dob: string, timeOfBirth: string): Promise<{
+        moonNakshatra: string;
+        atmakarakaNakshatra: string;
+        calculatedLongitude?: number;
+    }>;
     determineNakshatra(lunarLongitude: number): Promise<{
         remainingDegreesInCurrentPada: number;
         preciseLongitude: number;
@@ -73,7 +91,7 @@ export interface backendInterface {
         sleepLogs: Array<SleepLogEntry>;
         checkIns: Array<CheckInEntry>;
     }>;
-    getNakshtaraPatterns(): Promise<{
+    getNakshatraPatterns(): Promise<{
         checkInPatterns: Array<[string, CheckInEntry]>;
         dreamPatterns: Array<[string, DreamLogEntry]>;
         sleepLogPatterns: Array<[string, SleepLogEntry]>;
@@ -81,6 +99,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveBirthChart(birthDate: string, moonNakshatra: string, atmakarakaNakshatra: string): Promise<void>;
+    saveBirthData(dob: string, timeOfBirth: string, location: string, moonNakshatra: string, atmakarakaNakshatra: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveCheckIn(dayOfYear: bigint, nakshatra: string, mood: string | null, energy: bigint | null, restlessness: bigint | null): Promise<void>;
     saveDreamLog(dayOfYear: bigint, nakshatra: string, dreamNotes: string | null): Promise<void>;

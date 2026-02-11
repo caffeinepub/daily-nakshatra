@@ -1,80 +1,146 @@
 {
   "kind": "build_request",
-  "title": "Fix Profile save failures and add Lahiri-based Moon/Atmakaraka Nakshatra persistence",
-  "priority": "high",
+  "title": "Fix profile persistence and add Nakshatra Calculator (Moon + Jaimini Atmakaraka) with profile save",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Profile section save failures (\"Unable to save\") by ensuring authenticated users can successfully read and write their own UserProfile and BirthChartData without requiring any manual/admin-only access-control initialization.",
-      "target": "both",
+      "text": "Fix backend persistence so saving and later fetching the caller’s user profile works reliably after login (data must survive across calls and not be lost due to non-mutating map updates).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-4",
+          "msg-14"
         ],
         "quotes": [
-          "please fix all the bugs: app unable to save information or birth chart data",
-          "the error happens in the profile section of the app.",
-          "the error message is: unable to save"
+          "The profile page is still not saving information.",
+          "Should this build *also* include fixing the existing profile‑saving issue...?\nUser: yes."
         ]
       },
       "acceptanceCriteria": [
-        "When signed in with Internet Identity, saving Profile Information succeeds and the success state renders (\"Saved\") instead of the destructive alert (\"Unable to save\").",
-        "When signed in with Internet Identity, saving Birth Chart succeeds and the data persists on refresh (values are returned by backend and repopulate the form).",
-        "Backend calls used by the Profile page (getCallerUserProfile, saveCallerUserProfile, getAllLogs, saveBirthChart) do not trap with authorization errors for a normal signed-in user.",
-        "If a save fails for any other reason, the frontend logs the sanitized error to console and the UI continues to show the existing \"Unable to save\" message (user-facing text remains English)."
+        "After a logged-in user calls saveCallerUserProfile and then refreshes the app (new query), getCallerUserProfile returns the saved values.",
+        "Saving a profile does not affect other users’ profiles.",
+        "Unauthenticated callers still receive an authorization error when calling profile APIs."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add Lahiri Ayanamsa-based computations to derive Moon Nakshatra and Atmakaraka Nakshatra placements, and persist the computed results permanently as part of the user's saved birth chart data.",
-      "target": "both",
+      "text": "Add backend support for storing birth data required by the Nakshatra Calculator: date of birth, time of birth, and location (as selected city details), along with computed results for Moon birth nakshatra and Atmakaraka birth nakshatra (Jaimini highest-degree planet).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-6"
         ],
         "quotes": [
-          "update the birth chart data to be able to calculate and save the users moon nakshatra, and atmakaraka nakshatra placments.",
-          "1.add new calculations based on the Lahiri Ayanamsa.",
-          "3.yes, the app should store these values permanently."
+          "date of birth, time of birth, and location.  Use jaimini highest degree planet."
         ]
       },
       "acceptanceCriteria": [
-        "Backend provides a deterministic computation that applies Lahiri Ayanamsa adjustment before mapping ecliptic longitude to nakshatra (0–360 normalization and nakshatra segmentation).",
-        "Backend can compute and store (persist) both moonNakshatra and atmakarakaNakshatra for the caller such that subsequent reads (e.g., via getAllLogs) return the same stored values.",
-        "Saving a birth chart results in moonNakshatra and atmakarakaNakshatra being stored even if the frontend does not change the current input flow (no new required steps introduced to the user)."
+        "There is a single persisted birth-chart record per authenticated user that includes DOB, TOB, and location (not just a date string).",
+        "The persisted record also includes both computed nakshatra names (Moon and Atmakaraka).",
+        "Existing users with previously saved birth chart data (birthDate/moonNakshatra/atmakarakaNakshatra) are handled without canister upgrade failure (add a migration if required by the state/type change)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Keep the existing Profile and Birth Chart UI/flow unchanged while wiring it to the updated backend so that the saved birth chart always reflects the persisted Moon/Atmakaraka Nakshatra values.",
-      "target": "frontend",
+      "text": "Implement Nakshatra Calculator computation in a callable API (backend query or update): given DOB, TOB, and location, compute (1) Moon birth nakshatra and (2) Atmakaraka birth nakshatra using the Jaimini method (highest-degree planet), and return both results in a single response.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-4",
+          "msg-6"
         ],
         "quotes": [
-          "no need to change either aspects, it is streamlined enough."
+          "Please also create a nakshatra calculator tab that will calculate the users moon birth nakshatra and atmakarka birth nakshatra placement",
+          "Use jaimini highest degree planet."
         ]
       },
       "acceptanceCriteria": [
-        "ProfileSettingsPage continues to present the same Information and Birth Chart forms and the same save interactions.",
-        "After saving the birth chart, refetch/invalidation updates the on-screen Birth Chart fields to the persisted values returned from the backend.",
-        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT (hooks/useInternetIdentity.ts(x), hooks/useActor.ts, main.tsx, and components/ui sources)."
+        "A single backend method accepts DOB, TOB, and location input and returns both Moon birth nakshatra and Atmakaraka birth nakshatra names.",
+        "The method is usable by the frontend Nakshatra Calculator tab to display results.",
+        "If inputs are invalid/missing, the method returns a clear error (no silent failure)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create a new frontend page as a separate navigation tab for “Nakshatra Calculator” where users can enter date of birth, time of birth, and location and then see the computed Moon birth nakshatra and Atmakaraka birth nakshatra results.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "make the nakshatra calculator a seperate tab"
+        ]
+      },
+      "acceptanceCriteria": [
+        "App routing includes a dedicated route for the Nakshatra Calculator page.",
+        "The header navigation (desktop and mobile) includes a link to the new Nakshatra Calculator tab.",
+        "The page contains inputs for date of birth, time of birth, and location selection, plus a calculate action and a results display showing both nakshatras."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Allow saving Nakshatra Calculator results into the logged-in user’s Profile: when authenticated, provide a “Save to Profile” action that persists DOB/TOB/location and the computed Moon/Atmakaraka nakshatras, and ensure the Profile page displays the saved results.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-6"
+        ],
+        "quotes": [
+          "...and saves that info in the profile tab once the user has logged in.",
+          "make the nakshatra calculator ... also have it in the profile page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When logged in, saving from the Nakshatra Calculator updates backend persisted birth-chart data and is reflected on the Profile page after save completes.",
+        "When not logged in, the calculator can still compute results, but saving is blocked with an English sign-in prompt.",
+        "The Profile page shows the stored Moon nakshatra and Atmakaraka nakshatra (and the stored DOB/TOB/location) when available."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Embed the Nakshatra Calculator UI (or an equivalent “Calculate and Save” section) inside the existing Profile page so users can compute and update their Moon/Atmakaraka nakshatras from there as well.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "make the nakshatra calculator ... also have it in the profile page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The Profile page contains a section that collects DOB/TOB/location, runs the same calculation, and can save updated results.",
+        "If a birth chart is already saved, the embedded calculator initializes its fields from the saved data.",
+        "Saving from the Profile-embedded calculator shows success/error states consistent with the existing Profile save UX."
       ]
     }
   ],
   "constraints": [
-    "Use English for any user-facing text.",
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui."
+    "Backend must remain a single Motoko actor in backend/main.mo (no multi-service architecture).",
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, and anything under frontend/src/components/ui; compose existing components instead.",
+    "Use English for all user-facing UI text.",
+    "If backend state schema changes, add/adjust backend migration according to the project’s conditional migration policy."
   ],
   "nonGoals": [
-    "Redesigning or restructuring the Profile/Birth Chart UX beyond what is necessary to fix saving and persist computed values.",
-    "Adding third-party authentication providers (only Internet Identity is supported).",
-    "Adding external databases or off-chain storage."
+    "Implementing daily forecast generation/storage (existing UI indicates the feature is coming soon).",
+    "Adding third-party ephemeris/astrology APIs or external databases/services.",
+    "Adding non-Internet-Identity authentication providers."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

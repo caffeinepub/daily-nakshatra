@@ -1,23 +1,44 @@
 import Text "mo:core/Text";
 import Float "mo:core/Float";
 import Int "mo:core/Int";
-import Iter "mo:core/Iter";
+import Time "mo:core/Time";
+import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Array "mo:core/Array";
-import List "mo:core/List";
-import Time "mo:core/Time";
-import Map "mo:core/Map";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import Runtime "mo:core/Runtime";
+import Map "mo:core/Map";
+import Nat "mo:core/Nat";
+import Migration "migration";
 
-// No migration - access control internal state is still stored.
-
+(with migration = Migration.run)
 actor {
   type Nakshatra = {
     name : Text;
     startDegree : Float;
     endDegree : Float;
+  };
+
+  type Location = {
+    cityName : Text;
+    latitude : Float;
+    longitude : Float;
+  };
+
+  type BirthData = {
+    dateOfBirth : Text;
+    timeOfBirth : Text;
+    location : Location;
+    moonNakshatra : Text;
+    atmakarakaNakshatra : Text;
+  };
+
+  type UserProfile = {
+    name : Text;
+    email : ?Text;
+    isPremium : Bool;
+    birthData : ?BirthData;
   };
 
   module Nakshatra {
@@ -78,20 +99,13 @@ actor {
   let sleepLogEntries = Map.empty<Principal, List.List<SleepLogEntry>>();
   let dreamLogEntries = Map.empty<Principal, List.List<DreamLogEntry>>();
   let birthCharts = Map.empty<Principal, BirthChartData>();
-  let userProfiles = Map.empty<Principal, UserProfile>();
+
+  let localUserProfiles = Map.empty<Principal, UserProfile>();
 
   // Initialize access control state
   let accessControlState : AccessControl.AccessControlState = AccessControl.initState();
 
   include MixinAuthorization(accessControlState);
-
-  // User Profile Management
-
-  public type UserProfile = {
-    name : Text;
-    email : ?Text;
-    isPremium : Bool;
-  };
 
   type CheckInEntry = {
     timestamp : Time.Time;
@@ -160,26 +174,98 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access profiles");
     };
-    userProfiles.get(caller);
+    localUserProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
-    userProfiles.get(user);
+    localUserProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
-    userProfiles.add(caller, profile);
+    localUserProfiles.add(caller, profile);
   };
 
-  // Public computational functions (available to all including guests)
+  // Nakshatra Calculator - Query function (no authentication required for computation)
+  public shared query func computeNakshatraData(
+    moonLongitude : Float,
+    birthTime : Text,
+    birthLocation : Location,
+    dob : Text,
+    timeOfBirth : Text
+  ) : async {
+    moonNakshatra : Text;
+    atmakarakaNakshatra : Text;
+    calculatedLongitude : ?Float;
+  } {
+    let calculatedLongitude : ?Float = null;
 
-  public query ({ caller }) func determineNakshatra(lunarLongitude : Float) : async {
+    // Moon Nakshatra calculation
+    let ?nakshatra = findNakshatraByDegree(moonLongitude) else {
+      Runtime.trap("No nakshatra found for given moon longitude");
+    };
+    let moonNakshatra = nakshatra.name;
+
+    // Atmakaraka Nakshatra calculation (using the same input for demonstration)
+    // Replace this with real logic when available
+    let ?atmakaraka = findNakshatraByDegree(moonLongitude) else {
+      Runtime.trap("No nakshatra found for given longitude");
+    };
+    let atmakarakaNakshatra = atmakaraka.name;
+
+    {
+      moonNakshatra;
+      atmakarakaNakshatra;
+      calculatedLongitude;
+    };
+  };
+
+  // Save Birth Data - Requires user authentication
+  public shared ({ caller }) func saveBirthData(
+    dob : Text,
+    timeOfBirth : Text,
+    location : Text,
+    moonNakshatra : Text,
+    atmakarakaNakshatra : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save birth data");
+    };
+
+    let existingProfile = switch (localUserProfiles.get(caller)) {
+      case (?profile) { profile };
+      case (null) {
+        Runtime.trap("Profile not found for caller: " # caller.toText());
+      };
+    };
+
+    let birthData : BirthData = {
+      dateOfBirth = dob;
+      timeOfBirth;
+      location = {
+        cityName = location;
+        latitude = 0.0; // Replace with actual latitude if available
+        longitude = 0.0; // Replace with actual longitude if available
+      };
+      moonNakshatra;
+      atmakarakaNakshatra;
+    };
+
+    let newProfile = {
+      existingProfile with
+      birthData = ?birthData
+    };
+
+    localUserProfiles.add(caller, newProfile);
+  };
+
+  // Nakshatra determination - No authentication required (public utility)
+  public query func determineNakshatra(lunarLongitude : Float) : async {
     nakshatraName : Text;
     nakshatraNumber : Nat;
     pada : Nat;
@@ -222,12 +308,12 @@ actor {
     };
   };
 
-  public query ({ caller }) func getCurrentDayOfYearForCaller() : async Nat {
+  // Get current day of year - No authentication required (public utility)
+  public query func getCurrentDayOfYearForCaller() : async Nat {
     getCurrentDayOfYear();
   };
 
-  // User log persistence (authenticated users only)
-
+  // Check-in logging - Requires user authentication
   public shared ({ caller }) func saveCheckIn(dayOfYear : Nat, nakshatra : Text, mood : ?Text, energy : ?Nat, restlessness : ?Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save check-ins");
@@ -249,6 +335,7 @@ actor {
     checkInEntries.add(caller, existingEntries);
   };
 
+  // Sleep log - Requires user authentication
   public shared ({ caller }) func saveSleepLog(dayOfYear : Nat, nakshatra : Text, sleepNotes : ?Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save sleep logs");
@@ -268,6 +355,7 @@ actor {
     sleepLogEntries.add(caller, existingEntries);
   };
 
+  // Dream log - Requires user authentication
   public shared ({ caller }) func saveDreamLog(dayOfYear : Nat, nakshatra : Text, dreamNotes : ?Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save dream logs");
@@ -287,6 +375,7 @@ actor {
     dreamLogEntries.add(caller, existingEntries);
   };
 
+  // Birth chart - Requires user authentication
   public shared ({ caller }) func saveBirthChart(birthDate : Text, moonNakshatra : Text, atmakarakaNakshatra : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save birth charts");
@@ -300,6 +389,7 @@ actor {
     birthCharts.add(caller, newChart);
   };
 
+  // Get all logs - Requires user authentication (own data only)
   public query ({ caller }) func getAllLogs() : async {
     checkIns : [CheckInEntry];
     sleepLogs : [SleepLogEntry];
@@ -331,6 +421,7 @@ actor {
     };
   };
 
+  // Get logs by day - Requires user authentication (own data only)
   public query ({ caller }) func getLogsByDay(dayOfYear : Nat) : async {
     checkIns : [CheckInEntry];
     sleepLogs : [SleepLogEntry];
@@ -378,6 +469,7 @@ actor {
     };
   };
 
+  // Get logs by nakshatra - Requires user authentication (own data only)
   public query ({ caller }) func getLogsByNakshatra(nakshatra : Text) : async {
     checkIns : [CheckInEntry];
     sleepLogs : [SleepLogEntry];
@@ -425,7 +517,8 @@ actor {
     };
   };
 
-  public query ({ caller }) func getNakshtaraPatterns() : async {
+  // Get nakshatra patterns - Requires user authentication (own data only)
+  public query ({ caller }) func getNakshatraPatterns() : async {
     checkInPatterns : [(Text, CheckInEntry)];
     sleepLogPatterns : [(Text, SleepLogEntry)];
     dreamPatterns : [(Text, DreamLogEntry)];

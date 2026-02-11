@@ -1,74 +1,93 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Profile save reliability and ensure persisted Moon/Atmakaraka Nakshatra values round-trip in Profile UI",
+  "title": "Nakshatra Calculator tab + Profile embedded calculator with save-to-profile wiring",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Improve Profile/Birth Chart save reliability for authenticated users by hardening frontend actor usage, error handling, and post-save cache refresh without changing the existing UI copy/flow.",
+      "id": "REQ-4",
+      "summary": "Add a dedicated Nakshatra Calculator page with DOB/TOB/location inputs, calculate action, and results display; wire it into routing and navigation.",
       "acceptanceCriteria": [
-        "When signed in with Internet Identity, saving Profile Information succeeds and the success state renders (\"Saved\") instead of the destructive alert (\"Unable to save\").",
-        "When signed in with Internet Identity, saving Birth Chart succeeds and the data persists on refresh (values are returned by backend and repopulate the form).",
-        "Backend calls used by the Profile page (getCallerUserProfile, saveCallerUserProfile, getAllLogs, saveBirthChart) do not trap with authorization errors for a normal signed-in user.",
-        "If a save fails for any other reason, the frontend logs the sanitized error to console and the UI continues to show the existing \"Unable to save\" message (user-facing text remains English)."
+        "App routing includes a dedicated route for the Nakshatra Calculator page.",
+        "The header navigation (desktop and mobile) includes a link to the new Nakshatra Calculator tab.",
+        "The page contains inputs for date of birth, time of birth, and location selection, plus a calculate action and a results display showing both nakshatras."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ProfileSettingsPage.tsx",
-          "operation": "modify",
-          "description": "Keep the existing Profile and Birth Chart UI/flow, but update the save handlers to log only sanitized errors (use sanitizeError) while preserving the existing destructive \"Unable to save\" UI. Ensure no user-facing text changes and no additional steps are introduced. Use the authorization component guidance to continue requiring sign-in for personal data. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "operation": "create",
+          "description": "Create the Nakshatra Calculator page UI using existing shadcn-ui building blocks (Card, Input, Label, Button, Alert) to collect DOB/TOB and a location selector (compose existing CityPicker + useCitySelection for city details). Show Moon Nakshatra and Atmakaraka Nakshatra results, and provide clear loading/error states. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/hooks/useUserProfile.ts",
-          "operation": "modify",
-          "description": "Harden Profile/Birth Chart mutations: add onError handlers that console.error sanitized errors (sanitizeError) without changing user-facing UI, and onSuccess handlers that both invalidate and actively refetch the relevant queries (currentUserProfile and allLogs) to reduce stale UI after saves. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/useNakshatraCalculator.ts",
+          "operation": "create",
+          "description": "Add React Query hooks for (a) computing nakshatra results via the backend actor and (b) saving computed birth data, including consistent error handling (English messages) and query invalidation to refresh Profile data after save. Use the core-infrastructure actor wiring via existing useActorStable. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/hooks/useUserLogs.ts",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Ensure log queries used by Profile remain consistent and refresh after mutations by aligning query keys/invalidation behavior and (where appropriate) enabling active refetch on invalidation to immediately repopulate ProfileSettingsPage from persisted data. Verify the component's usage instructions before implementing."
+          "description": "Register a new TanStack Router route for the Nakshatra Calculator page (e.g., /calculator) and add it to the route tree so it is navigable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Add a 'Nakshatra Calculator' navigation link in both desktop and mobile nav lists, consistent with existing Link usage and activeProps styling. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Ensure the Profile/Birth Chart UI round-trips and persists Lahiri-based computed Moon/Atmakaraka Nakshatra values by always re-reading the saved BirthChartData and reflecting stored values in the form after save.",
+      "id": "REQ-5",
+      "summary": "Allow saving Nakshatra Calculator inputs/results to the authenticated user's Profile and display saved DOB/TOB/location + Moon/Atmakaraka nakshatras on the Profile page; block saving for unauthenticated users with an English sign-in prompt.",
       "acceptanceCriteria": [
-        "Backend provides a deterministic computation that applies Lahiri Ayanamsa adjustment before mapping ecliptic longitude to nakshatra (0–360 normalization and nakshatra segmentation).",
-        "Backend can compute and store (persist) both moonNakshatra and atmakarakaNakshatra for the caller such that subsequent reads (e.g., via getAllLogs) return the same stored values.",
-        "Saving a birth chart results in moonNakshatra and atmakarakaNakshatra being stored even if the frontend does not change the current input flow (no new required steps introduced to the user)."
+        "When logged in, saving from the Nakshatra Calculator updates backend persisted birth-chart data and is reflected on the Profile page after save completes.",
+        "When not logged in, the calculator can still compute results, but saving is blocked with an English sign-in prompt.",
+        "The Profile page shows the stored Moon nakshatra and Atmakaraka nakshatra (and the stored DOB/TOB/location) when available."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useUserProfile.ts",
+          "path": "frontend/src/pages/NakshatraCalculatorPage.tsx",
           "operation": "modify",
-          "description": "After saveBirthChart succeeds, force an active refresh of the cached birth chart read (via allLogs invalidation + refetch) so the UI updates from persisted BirthChartData (including backend-computed moonNakshatra/atmakarakaNakshatra values) without changing the user input flow. Verify the component's usage instructions before implementing."
+          "description": "Add a 'Save to Profile' action that is enabled only when the user is authenticated (use the authorization component pattern via useInternetIdentity). When unauthenticated, keep 'Calculate' available but show an English sign-in prompt for saving (reuse existing RequireAuth messaging patterns without adding new auth providers). On successful save, show a success state and ensure relevant cached queries are invalidated/refetched so Profile reflects updates. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useNakshatraCalculator.ts",
+          "operation": "modify",
+          "description": "Implement save mutation logic that persists DOB/TOB/location and computed nakshatras, and on success invalidates/refetches the same profile-related queries used by ProfileSettingsPage (e.g., currentUserProfile and/or allLogs depending on where birth data is read). Ensure authorization failures are surfaced as clear English errors (no silent failure). Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/pages/ProfileSettingsPage.tsx",
           "operation": "modify",
-          "description": "Rely on the existing useEffect that populates form fields from logs.birthChart, ensuring it correctly reflects the persisted moonNakshatra and atmakarakaNakshatra returned from the backend after a save-triggered refetch (no new UI fields/steps). Verify the component's usage instructions before implementing."
+          "description": "Update Profile UI to display saved birth data (DOB/TOB/location) and the saved Moon/Atmakaraka nakshatra values when available. Prefer reading from the caller profile birthData when present, while keeping compatibility with any existing birthChart display already shown via logs. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Keep ProfileSettingsPage UX unchanged while wiring the page to always display persisted BirthChartData (including stored Moon/Atmakaraka Nakshatra) via query invalidation/refetch, without modifying immutable frontend paths.",
+      "id": "REQ-6",
+      "summary": "Embed a Calculate-and-Save Nakshatra Calculator section inside the Profile page that initializes from saved data and uses consistent save success/error UX.",
       "acceptanceCriteria": [
-        "ProfileSettingsPage continues to present the same Information and Birth Chart forms and the same save interactions.",
-        "After saving the birth chart, refetch/invalidation updates the on-screen Birth Chart fields to the persisted values returned from the backend.",
-        "No changes are made to immutable frontend paths listed in SYSTEM_CONTEXT (hooks/useInternetIdentity.ts(x), hooks/useActor.ts, main.tsx, and components/ui sources)."
+        "The Profile page contains a section that collects DOB/TOB/location, runs the same calculation, and can save updated results.",
+        "If a birth chart is already saved, the embedded calculator initializes its fields from the saved data.",
+        "Saving from the Profile-embedded calculator shows success/error states consistent with the existing Profile save UX."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
+          "operation": "create",
+          "description": "Create a reusable, composable calculator section component (no new route) that renders DOB/TOB inputs, a location selector (compose existing CityPicker + useCitySelection), a 'Calculate' action, results display, and (optionally) a 'Save' action. Use shadcn-ui components for layout and feedback (Card, Button, Alert) and keep all user-facing text English. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "operation": "modify",
+          "description": "Refactor the page to reuse the shared NakshatraCalculatorSection so the standalone tab and the Profile-embedded calculator stay functionally consistent (same compute logic, same result rendering). Verify the component's usage instructions before implementing."
+        },
+        {
           "path": "frontend/src/pages/ProfileSettingsPage.tsx",
           "operation": "modify",
-          "description": "Preserve existing form layout and save interactions while ensuring the displayed Birth Chart values always come from the persisted backend read after save (via existing state sync from logs + improved refetch behavior). Verify the component's usage instructions before implementing."
+          "description": "Embed the shared NakshatraCalculatorSection within the Profile page. Initialize the section from saved birth data (from profile and/or existing logs fallback). Wire calculate/save handlers to the same hooks used by the standalone calculator, and align success/error presentation with existing Profile save UX patterns (e.g., Saved/Unable to save alerts). Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/hooks/useUserProfile.ts",
           "operation": "modify",
-          "description": "Adjust React Query invalidation/refetch strategy so ProfileSettingsPage reliably reflects persisted birth chart values after saving, without touching immutable auth/actor hooks or UI library sources. Verify the component's usage instructions before implementing."
+          "description": "Extend existing profile hooks to support reading and updating birth-data-related fields as needed by the embedded calculator (query invalidation/refetch to keep Profile UI in sync after save). Keep compatibility with existing ProfileSettingsPage flows and avoid changes to immutable hook paths. Verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -8,14 +8,14 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { useGetCallerUserProfile, useSaveCallerUserProfile, useSaveBirthChart } from '@/hooks/useUserProfile';
+import { useGetCallerUserProfile, useSaveCallerUserProfile } from '@/hooks/useUserProfile';
 import { useGetAllLogs } from '@/hooks/useUserLogs';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { useGetDailyForecastEnabled } from '@/hooks/useDailyForecastSettings';
+import { CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import Glyph from '@/components/glyphs/Glyph';
 import { Skeleton } from '@/components/ui/skeleton';
-import { nakshatras } from '@/data/nakshatras';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { sanitizeError } from '@/lib/diagnostics/sanitizeError';
+import NakshatraCalculatorSection from '@/components/nakshatra/NakshatraCalculatorSection';
 
 export default function ProfileSettingsPage() {
   return (
@@ -28,16 +28,12 @@ export default function ProfileSettingsPage() {
 function ProfileSettingsContent() {
   const { data: profile, isLoading: profileLoading } = useGetCallerUserProfile();
   const { data: logs } = useGetAllLogs();
+  const { data: forecastEnabled, isLoading: forecastLoading } = useGetDailyForecastEnabled();
   const saveProfile = useSaveCallerUserProfile();
-  const saveBirthChart = useSaveBirthChart();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isPremium, setIsPremium] = useState(false);
-
-  const [birthDate, setBirthDate] = useState('');
-  const [moonNakshatra, setMoonNakshatra] = useState('');
-  const [atmakarakaNakshatra, setAtmakarakaNakshatra] = useState('');
 
   useEffect(() => {
     if (profile) {
@@ -47,14 +43,6 @@ function ProfileSettingsContent() {
     }
   }, [profile]);
 
-  useEffect(() => {
-    if (logs?.birthChart) {
-      setBirthDate(logs.birthChart.birthDate);
-      setMoonNakshatra(logs.birthChart.moonNakshatra);
-      setAtmakarakaNakshatra(logs.birthChart.atmakarakaNakshatra);
-    }
-  }, [logs]);
-
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -62,24 +50,10 @@ function ProfileSettingsContent() {
         name,
         email: email || undefined,
         isPremium,
+        birthData: profile?.birthData,
       });
     } catch (error) {
       console.error('Failed to save profile:', sanitizeError(error));
-    }
-  };
-
-  const handleBirthChartSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!birthDate || !moonNakshatra || !atmakarakaNakshatra) return;
-
-    try {
-      await saveBirthChart.mutateAsync({
-        birthDate,
-        moonNakshatra,
-        atmakarakaNakshatra,
-      });
-    } catch (error) {
-      console.error('Failed to save birth chart:', sanitizeError(error));
     }
   };
 
@@ -162,94 +136,49 @@ function ProfileSettingsContent() {
             {saveProfile.isError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-sm tracking-wide">Unable to save</AlertDescription>
+                <AlertDescription className="text-sm tracking-wide">
+                  {saveProfile.error instanceof Error && saveProfile.error.message.includes('Unauthorized')
+                    ? 'Authorization failed. Please sign in again.'
+                    : 'Unable to save'}
+                </AlertDescription>
               </Alert>
             )}
           </form>
         </CardContent>
       </Card>
 
+      <NakshatraCalculatorSection 
+        initialData={profile?.birthData}
+        showSaveButton={true}
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-3 font-sans text-2xl tracking-wide">
-            <Glyph type="circle" className="h-6 w-6 text-primary" />
-            Birth Chart
+            <Glyph type="ritual" className="h-6 w-6 text-primary" />
+            Daily Forecasts
           </CardTitle>
           <CardDescription className="text-center text-sm tracking-wide leading-relaxed">
-            Enter your natal placements to see resonance when the Moon activates them
+            Receive personalized daily nakshatra forecasts
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleBirthChartSubmit} className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="birthDate" className="text-sm tracking-wide">Birth Date</Label>
-              <Input
-                id="birthDate"
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                required
-                className="text-sm tracking-wide"
-              />
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between gap-6">
+            <div className="space-y-1">
+              <Label htmlFor="forecasts" className="text-sm tracking-wide">Enable Daily Forecasts</Label>
+              <p className="text-xs text-muted-foreground tracking-wide leading-relaxed">
+                Get daily insights based on the current nakshatra
+              </p>
             </div>
+            <Switch id="forecasts" checked={false} disabled />
+          </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="moonNakshatra" className="text-sm tracking-wide">Moon Nakshatra</Label>
-              <Select value={moonNakshatra} onValueChange={setMoonNakshatra}>
-                <SelectTrigger id="moonNakshatra" className="text-sm tracking-wide">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {nakshatras.map((n) => (
-                    <SelectItem key={n.name} value={n.name} className="text-sm tracking-wide">
-                      {n.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="atmakarakaNakshatra" className="text-sm tracking-wide">Atmakaraka Nakshatra</Label>
-              <Select value={atmakarakaNakshatra} onValueChange={setAtmakarakaNakshatra}>
-                <SelectTrigger id="atmakarakaNakshatra" className="text-sm tracking-wide">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {nakshatras.map((n) => (
-                    <SelectItem key={n.name} value={n.name} className="text-sm tracking-wide">
-                      {n.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={saveBirthChart.isPending || !birthDate || !moonNakshatra || !atmakarakaNakshatra}
-              variant="ghost"
-              className="w-full mt-6"
-            >
-              {saveBirthChart.isPending ? 'Saving...' : 'Save Chart'}
-            </Button>
-
-            {saveBirthChart.isSuccess && (
-              <Alert className="border-primary/30 bg-primary/5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <AlertDescription className="text-primary text-sm tracking-wide">
-                  Saved
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {saveBirthChart.isError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-sm tracking-wide">Unable to save</AlertDescription>
-              </Alert>
-            )}
-          </form>
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-sm tracking-wide">
+              Daily forecasts are coming soon
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     </div>

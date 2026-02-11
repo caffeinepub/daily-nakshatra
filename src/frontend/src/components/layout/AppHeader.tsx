@@ -51,6 +51,20 @@ export default function AppHeader() {
               History
             </Link>
             <Link
+              to="/calculator"
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
+            >
+              Calculator
+            </Link>
+            <Link
+              to="/forecasts"
+              className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
+              activeProps={{ className: 'text-primary' }}
+            >
+              Forecasts
+            </Link>
+            <Link
               to="/profile"
               className="text-sm font-sans tracking-wide hover:text-primary transition-colors"
               activeProps={{ className: 'text-primary' }}
@@ -103,6 +117,20 @@ export default function AppHeader() {
             activeProps={{ className: 'text-primary' }}
           >
             History
+          </Link>
+          <Link
+            to="/calculator"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            Calculator
+          </Link>
+          <Link
+            to="/forecasts"
+            className="text-sm font-sans tracking-wide hover:text-primary transition-colors whitespace-nowrap"
+            activeProps={{ className: 'text-primary' }}
+          >
+            Forecasts
           </Link>
           <Link
             to="/profile"

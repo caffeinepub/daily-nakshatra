@@ -13,6 +13,11 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const Location = IDL.Record({
+  'latitude' : IDL.Float64,
+  'cityName' : IDL.Text,
+  'longitude' : IDL.Float64,
+});
 export const Time = IDL.Int;
 export const DreamLogEntry = IDL.Record({
   'dreamNotes' : IDL.Opt(IDL.Text),
@@ -39,7 +44,15 @@ export const BirthChartData = IDL.Record({
   'birthDate' : IDL.Text,
   'atmakarakaNakshatra' : IDL.Text,
 });
+export const BirthData = IDL.Record({
+  'moonNakshatra' : IDL.Text,
+  'dateOfBirth' : IDL.Text,
+  'timeOfBirth' : IDL.Text,
+  'atmakarakaNakshatra' : IDL.Text,
+  'location' : Location,
+});
 export const UserProfile = IDL.Record({
+  'birthData' : IDL.Opt(BirthData),
   'isPremium' : IDL.Bool,
   'name' : IDL.Text,
   'email' : IDL.Opt(IDL.Text),
@@ -48,6 +61,17 @@ export const UserProfile = IDL.Record({
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'computeNakshatraData' : IDL.Func(
+      [IDL.Float64, IDL.Text, Location, IDL.Text, IDL.Text],
+      [
+        IDL.Record({
+          'moonNakshatra' : IDL.Text,
+          'atmakarakaNakshatra' : IDL.Text,
+          'calculatedLongitude' : IDL.Opt(IDL.Float64),
+        }),
+      ],
+      ['query'],
+    ),
   'determineNakshatra' : IDL.Func(
       [IDL.Float64],
       [
@@ -100,7 +124,7 @@ export const idlService = IDL.Service({
       ],
       ['query'],
     ),
-  'getNakshtaraPatterns' : IDL.Func(
+  'getNakshatraPatterns' : IDL.Func(
       [],
       [
         IDL.Record({
@@ -118,6 +142,11 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveBirthChart' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'saveBirthData' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [],
+      [],
+    ),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveCheckIn' : IDL.Func(
       [
@@ -141,6 +170,11 @@ export const idlFactory = ({ IDL }) => {
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
+  });
+  const Location = IDL.Record({
+    'latitude' : IDL.Float64,
+    'cityName' : IDL.Text,
+    'longitude' : IDL.Float64,
   });
   const Time = IDL.Int;
   const DreamLogEntry = IDL.Record({
@@ -168,7 +202,15 @@ export const idlFactory = ({ IDL }) => {
     'birthDate' : IDL.Text,
     'atmakarakaNakshatra' : IDL.Text,
   });
+  const BirthData = IDL.Record({
+    'moonNakshatra' : IDL.Text,
+    'dateOfBirth' : IDL.Text,
+    'timeOfBirth' : IDL.Text,
+    'atmakarakaNakshatra' : IDL.Text,
+    'location' : Location,
+  });
   const UserProfile = IDL.Record({
+    'birthData' : IDL.Opt(BirthData),
     'isPremium' : IDL.Bool,
     'name' : IDL.Text,
     'email' : IDL.Opt(IDL.Text),
@@ -177,6 +219,17 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'computeNakshatraData' : IDL.Func(
+        [IDL.Float64, IDL.Text, Location, IDL.Text, IDL.Text],
+        [
+          IDL.Record({
+            'moonNakshatra' : IDL.Text,
+            'atmakarakaNakshatra' : IDL.Text,
+            'calculatedLongitude' : IDL.Opt(IDL.Float64),
+          }),
+        ],
+        ['query'],
+      ),
     'determineNakshatra' : IDL.Func(
         [IDL.Float64],
         [
@@ -229,7 +282,7 @@ export const idlFactory = ({ IDL }) => {
         ],
         ['query'],
       ),
-    'getNakshtaraPatterns' : IDL.Func(
+    'getNakshatraPatterns' : IDL.Func(
         [],
         [
           IDL.Record({
@@ -247,6 +300,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveBirthChart' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'saveBirthData' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+        [],
+        [],
+      ),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveCheckIn' : IDL.Func(
         [

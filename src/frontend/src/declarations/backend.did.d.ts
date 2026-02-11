@@ -15,6 +15,13 @@ export interface BirthChartData {
   'birthDate' : string,
   'atmakarakaNakshatra' : string,
 }
+export interface BirthData {
+  'moonNakshatra' : string,
+  'dateOfBirth' : string,
+  'timeOfBirth' : string,
+  'atmakarakaNakshatra' : string,
+  'location' : Location,
+}
 export interface CheckInEntry {
   'restlessness' : [] | [bigint],
   'dayOfYear' : bigint,
@@ -29,6 +36,11 @@ export interface DreamLogEntry {
   'timestamp' : Time,
   'nakshatra' : string,
 }
+export interface Location {
+  'latitude' : number,
+  'cityName' : string,
+  'longitude' : number,
+}
 export interface SleepLogEntry {
   'dayOfYear' : bigint,
   'sleepNotes' : [] | [string],
@@ -37,6 +49,7 @@ export interface SleepLogEntry {
 }
 export type Time = bigint;
 export interface UserProfile {
+  'birthData' : [] | [BirthData],
   'isPremium' : boolean,
   'name' : string,
   'email' : [] | [string],
@@ -47,6 +60,14 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'computeNakshatraData' : ActorMethod<
+    [number, string, Location, string, string],
+    {
+      'moonNakshatra' : string,
+      'atmakarakaNakshatra' : string,
+      'calculatedLongitude' : [] | [number],
+    }
+  >,
   'determineNakshatra' : ActorMethod<
     [number],
     {
@@ -87,7 +108,7 @@ export interface _SERVICE {
       'checkIns' : Array<CheckInEntry>,
     }
   >,
-  'getNakshtaraPatterns' : ActorMethod<
+  'getNakshatraPatterns' : ActorMethod<
     [],
     {
       'checkInPatterns' : Array<[string, CheckInEntry]>,
@@ -98,6 +119,10 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveBirthChart' : ActorMethod<[string, string, string], undefined>,
+  'saveBirthData' : ActorMethod<
+    [string, string, string, string, string],
+    undefined
+  >,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveCheckIn' : ActorMethod<
     [bigint, string, [] | [string], [] | [bigint], [] | [bigint]],

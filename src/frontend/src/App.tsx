@@ -6,6 +6,8 @@ import KnowledgeBasePage from './pages/KnowledgeBasePage';
 import NakshatraDetailPage from './pages/NakshatraDetailPage';
 import HistoryInsightsPage from './pages/HistoryInsightsPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
+import DailyForecastsPage from './pages/DailyForecastsPage';
+import NakshatraCalculatorPage from './pages/NakshatraCalculatorPage';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -49,6 +51,18 @@ const profileRoute = createRoute({
   component: ProfileSettingsPage,
 });
 
+const dailyForecastsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/forecasts',
+  component: DailyForecastsPage,
+});
+
+const calculatorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/calculator',
+  component: NakshatraCalculatorPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   tomorrowRoute,
@@ -56,6 +70,8 @@ const routeTree = rootRoute.addChildren([
   nakshatraDetailRoute,
   historyRoute,
   profileRoute,
+  dailyForecastsRoute,
+  calculatorRoute,
 ]);
 
 const router = createRouter({ routeTree });

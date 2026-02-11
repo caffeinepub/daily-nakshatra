@@ -1,52 +1,81 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T17:54:27.750Z",
+  "generatedAt": "2026-02-11T01:23:21.104Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 6,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Profile section save failures (\"Unable to save\") by ensuring authenticated users can successfully read and write their own UserProfile and BirthChartData without requiring any manual/admin-only access-control initialization.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/ProfileSettingsPage.tsx",
-          "frontend/src/hooks/useUserProfile.ts",
-          "frontend/src/hooks/useUserLogs.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/ProfileSettingsPage.tsx",
-          "frontend/src/hooks/useUserProfile.ts",
-          "frontend/src/hooks/useUserLogs.ts"
-        ]
+        "summary": "Fix backend persistence so saving and later fetching the caller’s user profile works reliably after login (data must survive across calls and not be lost due to non-mutating map updates).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Add Lahiri Ayanamsa-based computations to derive Moon Nakshatra and Atmakaraka Nakshatra placements, and persist the computed results permanently as part of the user's saved birth chart data.",
+        "summary": "Add backend support for storing birth data required by the Nakshatra Calculator: date of birth, time of birth, and location (as selected city details), along with computed results for Moon birth nakshatra and Atmakaraka birth nakshatra (Jaimini highest-degree planet).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Implement Nakshatra Calculator computation in a callable API (backend query or update): given DOB, TOB, and location, compute (1) Moon birth nakshatra and (2) Atmakaraka birth nakshatra using the Jaimini method (highest-degree planet), and return both results in a single response.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Create a new frontend page as a separate navigation tab for “Nakshatra Calculator” where users can enter date of birth, time of birth, and location and then see the computed Moon birth nakshatra and Atmakaraka birth nakshatra results.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useUserProfile.ts",
+          "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "frontend/src/hooks/useNakshatraCalculator.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppHeader.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "frontend/src/hooks/useNakshatraCalculator.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppHeader.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Allow saving Nakshatra Calculator results into the logged-in user’s Profile: when authenticated, provide a “Save to Profile” action that persists DOB/TOB/location and the computed Moon/Atmakaraka nakshatras, and ensure the Profile page displays the saved results.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "frontend/src/hooks/useNakshatraCalculator.ts",
           "frontend/src/pages/ProfileSettingsPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useUserProfile.ts",
+          "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "frontend/src/hooks/useNakshatraCalculator.ts",
           "frontend/src/pages/ProfileSettingsPage.tsx"
         ]
       },
       {
-        "id": "REQ-3",
-        "summary": "Keep the existing Profile and Birth Chart UI/flow unchanged while wiring it to the updated backend so that the saved birth chart always reflects the persisted Moon/Atmakaraka Nakshatra values.",
+        "id": "REQ-6",
+        "summary": "Embed the Nakshatra Calculator UI (or an equivalent “Calculate and Save” section) inside the existing Profile page so users can compute and update their Moon/Atmakaraka nakshatras from there as well.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
+          "frontend/src/pages/NakshatraCalculatorPage.tsx",
           "frontend/src/pages/ProfileSettingsPage.tsx",
           "frontend/src/hooks/useUserProfile.ts"
         ],
         "matchedFiles": [
+          "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
+          "frontend/src/pages/NakshatraCalculatorPage.tsx",
           "frontend/src/pages/ProfileSettingsPage.tsx",
           "frontend/src/hooks/useUserProfile.ts"
         ]
@@ -55,12 +84,21 @@
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useUserLogs.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/layout/AppHeader.tsx",
+    "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useNakshatraCalculator.ts",
     "frontend/src/hooks/useUserProfile.ts",
+    "frontend/src/pages/NakshatraCalculatorPage.tsx",
     "frontend/src/pages/ProfileSettingsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

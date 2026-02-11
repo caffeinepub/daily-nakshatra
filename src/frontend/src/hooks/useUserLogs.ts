@@ -59,7 +59,7 @@ export function useGetNakshatraPatterns() {
     queryKey: ['nakshatraPatterns'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.getNakshtaraPatterns();
+      return actor.getNakshatraPatterns();
     },
     enabled: !!actor && !actorFetching,
     retry: false,
@@ -85,7 +85,7 @@ export function useSaveCheckIn() {
       await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
       await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
       await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
-      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'], type: 'active' });
     },
     onError: (error: unknown) => {
       console.error('Check-in save failed:', sanitizeError(error));
@@ -106,7 +106,7 @@ export function useSaveSleepLog() {
       await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
       await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
       await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
-      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'], type: 'active' });
     },
     onError: (error: unknown) => {
       console.error('Sleep log save failed:', sanitizeError(error));
@@ -127,7 +127,7 @@ export function useSaveDreamLog() {
       await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
       await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
       await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
-      await queryClient.refetchQueries({ queryKey: ['allLogs'] });
+      await queryClient.refetchQueries({ queryKey: ['allLogs'], type: 'active' });
     },
     onError: (error: unknown) => {
       console.error('Dream log save failed:', sanitizeError(error));

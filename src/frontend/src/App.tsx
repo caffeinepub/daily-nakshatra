@@ -10,6 +10,7 @@ import DailyForecastsPage from './pages/DailyForecastsPage';
 import NakshatraCalculatorPage from './pages/NakshatraCalculatorPage';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
+import AppErrorBoundary from './components/errors/AppErrorBoundary';
 
 const rootRoute = createRootRoute({
   component: AppLayout,
@@ -84,9 +85,11 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <RouterProvider router={router} />
-      <Toaster />
-    </ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <RouterProvider router={router} />
+        <Toaster />
+      </ThemeProvider>
+    </AppErrorBoundary>
   );
 }

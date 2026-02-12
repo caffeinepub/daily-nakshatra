@@ -1,105 +1,77 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T01:23:21.104Z",
+  "generatedAt": "2026-02-12T02:57:13.425Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
+    "total": 3,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix backend persistence so saving and later fetching the caller’s user profile works reliably after login (data must survive across calls and not be lost due to non-mutating map updates).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Re-run the full deployment (frontend + backend canisters) and ensure the deployment completes successfully without errors.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/DEPLOYMENT_RUNBOOK.md",
+          "frontend/src/main.tsx",
+          "frontend/src/lib/diagnostics/startupDiagnostics.ts"
+        ],
+        "matchedFiles": [
+          "frontend/DEPLOYMENT_RUNBOOK.md",
+          "frontend/src/lib/diagnostics/startupDiagnostics.ts"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Add backend support for storing birth data required by the Nakshatra Calculator: date of birth, time of birth, and location (as selected city details), along with computed results for Moon birth nakshatra and Atmakaraka birth nakshatra (Jaimini highest-degree planet).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "After redeploy, perform the production smoke/verification checks defined in frontend/DEPLOYMENT_VERIFICATION.md for Version 24.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/DEPLOYMENT_VERIFICATION.md",
+          "frontend/src/App.tsx",
+          "frontend/src/components/errors/AppErrorBoundary.tsx",
+          "frontend/src/components/auth/LoginButton.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/DEPLOYMENT_VERIFICATION.md",
+          "frontend/src/App.tsx",
+          "frontend/src/components/errors/AppErrorBoundary.tsx",
+          "frontend/src/components/auth/LoginButton.tsx"
+        ]
       },
       {
         "id": "REQ-3",
-        "summary": "Implement Nakshatra Calculator computation in a callable API (backend query or update): given DOB, TOB, and location, compute (1) Moon birth nakshatra and (2) Atmakaraka birth nakshatra using the Jaimini method (highest-degree planet), and return both results in a single response.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Create a new frontend page as a separate navigation tab for “Nakshatra Calculator” where users can enter date of birth, time of birth, and location and then see the computed Moon birth nakshatra and Atmakaraka birth nakshatra results.",
+        "summary": "If redeploy fails again, capture and surface the specific deployment error output (build step and failing component) so it can be fixed deterministically, and apply the minimal code/config change required to make the deployment succeed.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "frontend/src/hooks/useNakshatraCalculator.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/components/layout/AppHeader.tsx"
+          "frontend/DEPLOYMENT_FAILURE_REPORT.md",
+          "frontend/src/lib/diagnostics/deploymentReport.ts",
+          "frontend/src/components/errors/AppErrorBoundary.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "frontend/src/hooks/useNakshatraCalculator.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/components/layout/AppHeader.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Allow saving Nakshatra Calculator results into the logged-in user’s Profile: when authenticated, provide a “Save to Profile” action that persists DOB/TOB/location and the computed Moon/Atmakaraka nakshatras, and ensure the Profile page displays the saved results.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "frontend/src/hooks/useNakshatraCalculator.ts",
-          "frontend/src/pages/ProfileSettingsPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "frontend/src/hooks/useNakshatraCalculator.ts",
-          "frontend/src/pages/ProfileSettingsPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Embed the Nakshatra Calculator UI (or an equivalent “Calculate and Save” section) inside the existing Profile page so users can compute and update their Moon/Atmakaraka nakshatras from there as well.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
-          "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "frontend/src/pages/ProfileSettingsPage.tsx",
-          "frontend/src/hooks/useUserProfile.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
-          "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "frontend/src/pages/ProfileSettingsPage.tsx",
-          "frontend/src/hooks/useUserProfile.ts"
+          "frontend/DEPLOYMENT_FAILURE_REPORT.md",
+          "frontend/src/lib/diagnostics/deploymentReport.ts",
+          "frontend/src/components/errors/AppErrorBoundary.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/DEPLOYMENT_FAILURE_REPORT.md",
+    "frontend/DEPLOYMENT_RUNBOOK.md",
+    "frontend/DEPLOYMENT_VERIFICATION.md",
     "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/layout/AppHeader.tsx",
-    "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useNakshatraCalculator.ts",
-    "frontend/src/hooks/useUserProfile.ts",
-    "frontend/src/pages/NakshatraCalculatorPage.tsx",
-    "frontend/src/pages/ProfileSettingsPage.tsx",
+    "frontend/src/components/auth/LoginButton.tsx",
+    "frontend/src/components/errors/AppErrorBoundary.tsx",
+    "frontend/src/lib/diagnostics/deploymentReport.ts",
+    "frontend/src/lib/diagnostics/startupDiagnostics.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -2,13 +2,33 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-new-frontend-page-as-a-separate-navigation-tab-for-nakshatra-calculator-where-users-can-enter-date-of-birth-time-of-birth-and-location-and-then-see-the-computed-moon-birth-nakshatra-and-atmakaraka-birth-nakshatra-results",
-      "featureTitle": "Create a new frontend page as a separate navigation tab for “Nakshatra Calculator” where users can enter date of birth, time of birth, and location and then see the computed Moon birth nakshatra and Atmakaraka birth nakshatra results.",
+      "featureId": "feature-re-run-the-full-deployment-frontend-backend-canisters-and-ensure-the-deployment-completes-successfully-without-errors",
+      "featureTitle": "Re-run the full deployment (frontend + backend canisters) and ensure the deployment completes successfully without errors.",
       "files": [
+        "frontend/DEPLOYMENT_RUNBOOK.md",
+        "frontend/src/lib/diagnostics/startupDiagnostics.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-redeploy-perform-the-production-smoke-verification-checks-defined-in-frontend-deployment-verification-md-for-version-24",
+      "featureTitle": "After redeploy, perform the production smoke/verification checks defined in frontend/DEPLOYMENT_VERIFICATION.md for Version 24.",
+      "files": [
+        "frontend/DEPLOYMENT_VERIFICATION.md",
         "frontend/src/App.tsx",
-        "frontend/src/components/layout/AppHeader.tsx",
-        "frontend/src/hooks/useNakshatraCalculator.ts",
-        "frontend/src/pages/NakshatraCalculatorPage.tsx"
+        "frontend/src/components/auth/LoginButton.tsx",
+        "frontend/src/components/errors/AppErrorBoundary.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -19,17 +39,17 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-allow-saving-nakshatra-calculator-results-into-the-logged-in-user-s-profile-when-authenticated-provide-a-save-to-profile-action-that-persists-dob-tob-location-and-the-computed-moon-atmakaraka-nakshatras-and-ensure-the-profile-page-displays-the-saved-results",
-      "featureTitle": "Allow saving Nakshatra Calculator results into the logged-in user’s Profile: when authenticated, provide a “Save to Profile” action that persists DOB/TOB/location and the computed Moon/Atmakaraka nakshatras, and ensure the Profile page displays the saved results.",
+      "featureId": "feature-if-redeploy-fails-again-capture-and-surface-the-specific-deployment-error-output-build-step-and-failing-component-so-it-can-be-fixed-deterministically-and-apply-the-minimal-code-config-change-required-to-make-the-deployment-succeed",
+      "featureTitle": "If redeploy fails again, capture and surface the specific deployment error output (build step and failing component) so it can be fixed deterministically, and apply the minimal code/config change required to make the deployment succeed.",
       "files": [
-        "frontend/src/hooks/useNakshatraCalculator.ts",
-        "frontend/src/pages/NakshatraCalculatorPage.tsx",
-        "frontend/src/pages/ProfileSettingsPage.tsx"
+        "frontend/DEPLOYMENT_FAILURE_REPORT.md",
+        "frontend/src/components/errors/AppErrorBoundary.tsx",
+        "frontend/src/lib/diagnostics/deploymentReport.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -40,29 +60,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-embed-the-nakshatra-calculator-ui-or-an-equivalent-calculate-and-save-section-inside-the-existing-profile-page-so-users-can-compute-and-update-their-moon-atmakaraka-nakshatras-from-there-as-well",
-      "featureTitle": "Embed the Nakshatra Calculator UI (or an equivalent “Calculate and Save” section) inside the existing Profile page so users can compute and update their Moon/Atmakaraka nakshatras from there as well.",
-      "files": [
-        "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
-        "frontend/src/hooks/useUserProfile.ts",
-        "frontend/src/pages/NakshatraCalculatorPage.tsx",
-        "frontend/src/pages/ProfileSettingsPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
+        "REQ-3"
       ],
       "confidence": "high"
     }

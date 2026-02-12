@@ -1,90 +1,75 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T01:23:21.101Z",
-  "summary": "Diff adds a new Nakshatra Calculator page/route and a reusable calculator section embedded in Profile, plus new backend types and a migration module. However, several key requirements are either not evidenced in the diff (backend API + persistence fix) or appear only partially implemented (saving full location details, clear validation errors, auth-blocked save messaging, and correct Atmakaraka computation method).",
+  "generatedAt": "2026-02-12T02:57:13.422Z",
+  "summary": "The diff adds frontend diagnostics/error-handling and deployment documentation (runbook, failure report template, verification checklist updates), plus wraps the app in an error boundary and adds deployment-error logging. However, the BuildRequest’s core operational requirements (actually re-running deployment, verifying production behavior, and capturing concrete failing-step output if deployment fails) are not evidenced as completed by the code/documentation changes alone. The diff also appears to include multiple UI/feature changes (e.g., new navigation link, layout/typography changes, geolocation city picker, alerts UI changes) that are not requested and conflict with the non-goal of avoiding unrelated product work.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Fix backend persistence so saving and later fetching the caller’s user profile works reliably after login (data must survive across calls and not be lost due to non-mutating map updates).",
-      "reason": "The diff shows `localUserProfiles = Map.empty<Principal, UserProfile>()` but does not show any `stable` state, proper map update patterns, or the implementations of `saveCallerUserProfile`/`getCallerUserProfile` demonstrating persistence and correct mutation. With truncation, the required fix is not verifiable from the provided evidence.",
+      "requirement": "Re-run the full deployment (frontend + backend canisters) and ensure the deployment completes successfully without errors; both canisters deployed and reachable from the production URL.",
+      "reason": "The diff only shows code/docs changes; it does not include any evidence of an actual deployment run completing successfully or production reachability (no pipeline logs, config, canister IDs, or deployment outputs).",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/hooks/useUserProfile.ts"
+        "project_state.json (REQ-1 status still \"pending\")",
+        "frontend/DEPLOYMENT_RUNBOOK.md (documents steps but does not show a completed deployment result)"
       ]
     },
     {
       "id": "REQ-2",
-      "requirement": "Store per-user birth data including DOB, TOB, and location (selected city details) along with computed Moon and Atmakaraka nakshatra names; handle existing saved birth chart data via migration if needed.",
-      "reason": "While new backend types include a `BirthData` with `location : Location` (lat/long), the frontend save path passes only `location: currentCity.name` (a string) to `actor.saveBirthData(...)`, which does not evidence persisting selected city details (lat/long). Also, `backend/main.mo` still defines an older `BirthChartData` type (`birthDate`, `moonNakshatra`, `atmakarakaNakshatra`) and a `birthCharts` map, suggesting incomplete/unclear migration of existing birth-chart storage to the new schema.",
+      "requirement": "After redeploy, perform the production smoke/verification checks in frontend/DEPLOYMENT_VERIFICATION.md for Version 24 (no blank screen/critical console errors; footer shows Version 24; navigation works; II login/logout works).",
+      "reason": "The diff updates/contains verification documentation and adds diagnostics, but provides no evidence that the checks were executed in production (no results, screenshots, console captures, or confirmation of footer/nav/II flow in production).",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo",
-        "frontend/src/hooks/useNakshatraCalculator.ts",
-        "frontend/src/pages/NakshatraCalculatorPage.tsx",
-        "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx"
+        "frontend/DEPLOYMENT_VERIFICATION.md (checklist/instructions present; no recorded completion)",
+        "project_state.json (REQ-2 status still \"pending\")"
       ]
     },
     {
       "id": "REQ-3",
-      "requirement": "Backend callable API that accepts DOB, TOB, and location and returns both Moon and Atmakaraka nakshatra names with clear errors on invalid input.",
-      "reason": "Frontend calls `actor.computeNakshatraData(moonLongitude, birthTime, birthLocation, dob, timeOfBirth)`, but the diff does not show the backend method definition/signature or any input validation/error behavior. Additionally, the API usage shown is not 'given DOB/TOB/location compute', since it requires a `moonLongitude` computed client-side.",
+      "requirement": "If redeploy fails again, capture and surface the specific deployment error output (build step and failing component) and apply the minimal fix required to make deployment succeed.",
+      "reason": "The diff adds mechanisms/templates to log or report errors, but does not include any concrete captured deployment failure output (e.g., the specific failing step’s logs) nor evidence of a subsequent successful redeploy.",
       "evidence": [
-        "frontend/src/hooks/useNakshatraCalculator.ts",
-        "frontend/src/pages/NakshatraCalculatorPage.tsx",
-        "backend/main.mo (truncated; method not shown)"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Header navigation includes a link to a new navigation tab labeled “Nakshatra Calculator”.",
-      "reason": "Navigation link added is labeled “Calculator”, not “Nakshatra Calculator” as specified.",
-      "evidence": [
-        "frontend/src/components/layout/AppHeader.tsx"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "When not logged in, calculator can compute but saving is blocked with an English sign-in prompt.",
-      "reason": "On the calculator page, `handleSave` returns early when not authenticated (`if (!calculatedResults || !isAuthenticated) return;`) but there is no evidence of a UI prompt/message telling the user to sign in when save is blocked.",
-      "evidence": [
-        "frontend/src/pages/NakshatraCalculatorPage.tsx"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "Saving persists DOB/TOB/location (city details) and computed nakshatras to backend and Profile displays stored DOB/TOB/location and both nakshatras.",
-      "reason": "The save hook sends only a string `location` (city name), not city details. Also, the truncated Profile page content shows embedding `NakshatraCalculatorSection` but does not provide evidence that Profile renders stored DOB/TOB/location + nakshatra values outside the embedded calculator or that the embedded section is wired to show a 'Save to Profile' action with appropriate states.",
-      "evidence": [
-        "frontend/src/hooks/useNakshatraCalculator.ts",
-        "frontend/src/pages/ProfileSettingsPage.tsx",
-        "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx"
+        "frontend/DEPLOYMENT_FAILURE_REPORT.md (template, but not an actual filled report with real error output)",
+        "frontend/src/lib/diagnostics/deploymentReport.ts (logging utilities; no captured failure output shown in diff)",
+        "project_state.json (REQ-3 status still \"pending\")"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Nakshatra computation API appears to require client-provided `moonLongitude` (computed in the browser) rather than computing from DOB/TOB/location on the backend.",
-      "reason": "REQ-3 specifies backend computation given DOB/TOB/location. The diff shows frontend computing `moonLongitude = calculateMoonLongitude(birthDateTime)` and passing it into `computeNakshatraData`, implying a different architecture than requested.",
+      "description": "Added a global React error boundary UI (Application Error screen with reload/copy error details) rather than only deploying/verifying Version 24.",
+      "reason": "BuildRequest focuses on redeploying and verifying production plus capturing deployment failure output; it does not request adding new runtime UI/UX for application errors.",
       "evidence": [
-        "frontend/src/pages/NakshatraCalculatorPage.tsx",
-        "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
-        "frontend/src/hooks/useNakshatraCalculator.ts"
+        "frontend/src/components/errors/AppErrorBoundary.tsx",
+        "frontend/src/App.tsx (wraps app in AppErrorBoundary)"
+      ]
+    },
+    {
+      "description": "Introduced startup diagnostics that log a boot message and tag the root element with data-app-version.",
+      "reason": "Not explicitly requested; verification was to be performed using an existing checklist, not to add new production instrumentation (even if helpful).",
+      "evidence": [
+        "frontend/src/lib/diagnostics/startupDiagnostics.ts",
+        "frontend/DEPLOYMENT_VERIFICATION.md (now references boot message and root tagging checks)"
+      ]
+    },
+    {
+      "description": "Multiple UI/product changes unrelated to deployment retry/verification (e.g., new Calculator navigation link; layout/typography changes across pages; city geolocation picker; alerts glyph/banner changes; additional forecast/calculator routes).",
+      "reason": "Explicit non-goal: avoid new product features unrelated to completing deployment; these appear to be feature/UI enhancements beyond deployment verification needs.",
+      "evidence": [
+        "frontend-file-summaries.txt (mentions: AppHeader new Calculator link; Today/Knowledge Base/Nakshatra detail layout/typography changes; CityPicker geolocation; AlertsToggle/NakshatraChangeBanner changes; new routes like /calculator, /forecasts)"
       ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.78,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/DEPLOYMENT_FAILURE_REPORT.md",
+    "frontend/DEPLOYMENT_RUNBOOK.md",
+    "frontend/DEPLOYMENT_VERIFICATION.md",
     "frontend/src/App.tsx",
-    "frontend/src/components/layout/AppHeader.tsx",
-    "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
-    "frontend/src/hooks/useNakshatraCalculator.ts",
-    "frontend/src/hooks/useUserProfile.ts",
-    "frontend/src/pages/NakshatraCalculatorPage.tsx",
-    "frontend/src/pages/ProfileSettingsPage.tsx",
+    "frontend/src/components/auth/LoginButton.tsx",
+    "frontend/src/components/errors/AppErrorBoundary.tsx",
+    "frontend/src/lib/diagnostics/deploymentReport.ts",
+    "frontend/src/lib/diagnostics/startupDiagnostics.ts",
     "project_state.json"
   ]
 }

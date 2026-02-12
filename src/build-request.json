@@ -1,133 +1,71 @@
 {
   "kind": "build_request",
-  "title": "Fix profile persistence and add Nakshatra Calculator (Moon + Jaimini Atmakaraka) with profile save",
+  "title": "Retry deployment and verify production is serving Version 24",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix backend persistence so saving and later fetching the caller’s user profile works reliably after login (data must survive across calls and not be lost due to non-mutating map updates).",
-      "target": "backend",
+      "text": "Re-run the full deployment (frontend + backend canisters) and ensure the deployment completes successfully without errors.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-14"
+          "msg-2"
         ],
         "quotes": [
-          "The profile page is still not saving information.",
-          "Should this build *also* include fixing the existing profile‑saving issue...?\nUser: yes."
+          "deploy again"
         ]
       },
       "acceptanceCriteria": [
-        "After a logged-in user calls saveCallerUserProfile and then refreshes the app (new query), getCallerUserProfile returns the saved values.",
-        "Saving a profile does not affect other users’ profiles.",
-        "Unauthenticated callers still receive an authorization error when calling profile APIs."
+        "Deployment pipeline completes successfully (no 'Deployment didn't complete' status).",
+        "Both frontend and backend canisters are deployed and reachable from the production URL."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add backend support for storing birth data required by the Nakshatra Calculator: date of birth, time of birth, and location (as selected city details), along with computed results for Moon birth nakshatra and Atmakaraka birth nakshatra (Jaimini highest-degree planet).",
-      "target": "backend",
+      "text": "After redeploy, perform the production smoke/verification checks defined in frontend/DEPLOYMENT_VERIFICATION.md for Version 24.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "date of birth, time of birth, and location.  Use jaimini highest degree planet."
+          "Deployment didn't complete"
         ]
       },
       "acceptanceCriteria": [
-        "There is a single persisted birth-chart record per authenticated user that includes DOB, TOB, and location (not just a date string).",
-        "The persisted record also includes both computed nakshatra names (Moon and Atmakaraka).",
-        "Existing users with previously saved birth chart data (birthDate/moonNakshatra/atmakarakaNakshatra) are handled without canister upgrade failure (add a migration if required by the state/type change)."
+        "Production URL loads without a blank screen and without critical console errors.",
+        "Footer shows the version label \"Version 24\" (data-testid=\"app-version\").",
+        "Navigation between core pages works (Today, Tomorrow, Knowledge Base, History, Profile).",
+        "Internet Identity login/logout flow works in production."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Implement Nakshatra Calculator computation in a callable API (backend query or update): given DOB, TOB, and location, compute (1) Moon birth nakshatra and (2) Atmakaraka birth nakshatra using the Jaimini method (highest-degree planet), and return both results in a single response.",
-      "target": "backend",
+      "text": "If redeploy fails again, capture and surface the specific deployment error output (build step and failing component) so it can be fixed deterministically, and apply the minimal code/config change required to make the deployment succeed.",
+      "target": "unknown",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "Please also create a nakshatra calculator tab that will calculate the users moon birth nakshatra and atmakarka birth nakshatra placement",
-          "Use jaimini highest degree planet."
+          "Deployment didn't complete",
+          "deploy again"
         ]
       },
       "acceptanceCriteria": [
-        "A single backend method accepts DOB, TOB, and location input and returns both Moon birth nakshatra and Atmakaraka birth nakshatra names.",
-        "The method is usable by the frontend Nakshatra Calculator tab to display results.",
-        "If inputs are invalid/missing, the method returns a clear error (no silent failure)."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Create a new frontend page as a separate navigation tab for “Nakshatra Calculator” where users can enter date of birth, time of birth, and location and then see the computed Moon birth nakshatra and Atmakaraka birth nakshatra results.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "make the nakshatra calculator a seperate tab"
-        ]
-      },
-      "acceptanceCriteria": [
-        "App routing includes a dedicated route for the Nakshatra Calculator page.",
-        "The header navigation (desktop and mobile) includes a link to the new Nakshatra Calculator tab.",
-        "The page contains inputs for date of birth, time of birth, and location selection, plus a calculate action and a results display showing both nakshatras."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Allow saving Nakshatra Calculator results into the logged-in user’s Profile: when authenticated, provide a “Save to Profile” action that persists DOB/TOB/location and the computed Moon/Atmakaraka nakshatras, and ensure the Profile page displays the saved results.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-6"
-        ],
-        "quotes": [
-          "...and saves that info in the profile tab once the user has logged in.",
-          "make the nakshatra calculator ... also have it in the profile page."
-        ]
-      },
-      "acceptanceCriteria": [
-        "When logged in, saving from the Nakshatra Calculator updates backend persisted birth-chart data and is reflected on the Profile page after save completes.",
-        "When not logged in, the calculator can still compute results, but saving is blocked with an English sign-in prompt.",
-        "The Profile page shows the stored Moon nakshatra and Atmakaraka nakshatra (and the stored DOB/TOB/location) when available."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Embed the Nakshatra Calculator UI (or an equivalent “Calculate and Save” section) inside the existing Profile page so users can compute and update their Moon/Atmakaraka nakshatras from there as well.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "make the nakshatra calculator ... also have it in the profile page."
-        ]
-      },
-      "acceptanceCriteria": [
-        "The Profile page contains a section that collects DOB/TOB/location, runs the same calculation, and can save updated results.",
-        "If a birth chart is already saved, the embedded calculator initializes its fields from the saved data.",
-        "Saving from the Profile-embedded calculator shows success/error states consistent with the existing Profile save UX."
+        "A concrete, reproducible error message is recorded for the failing step (e.g., frontend build, backend build, canister install/upgrade).",
+        "Any required fix is implemented and the subsequent redeploy completes successfully."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no multi-service architecture).",
-    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, and anything under frontend/src/components/ui; compose existing components instead.",
-    "Use English for all user-facing UI text.",
-    "If backend state schema changes, add/adjust backend migration according to the project’s conditional migration policy."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo changes if an upgrade requires state migration.",
+    "Do not edit files under frontend/src/components/ui or any other frontend immutablePaths; compose existing UI components instead."
   ],
   "nonGoals": [
-    "Implementing daily forecast generation/storage (existing UI indicates the feature is coming soon).",
-    "Adding third-party ephemeris/astrology APIs or external databases/services.",
-    "Adding non-Internet-Identity authentication providers."
+    "Implementing new product features unrelated to completing deployment.",
+    "Changing the application version string (should remain Version 24 unless explicitly requested)."
   ],
   "imageRequirements": {
     "required": [],

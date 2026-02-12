@@ -2,80 +2,39 @@
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [
-    "Nakshatra calculator inputs: date of birth, time of birth, and location of birth.",
-    "Atmakaraka calculation method: Jaimini (planet with highest degree).",
-    "Nakshatra calculator UX: dedicated tab in navigation and also accessible/displayed within the Profile page; computed results persist to the user profile after login."
-  ],
+  "architectural_notes": [],
   "known_issues": [
-    "Profile page is not saving user information (needs fix)."
+    "Deployment failed to complete; user requested redeploy/retry."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-new-frontend-page-as-a-separate-navigation-tab-for-nakshatra-calculator-where-users-can-enter-date-of-birth-time-of-birth-and-location-and-then-see-the-computed-moon-birth-nakshatra-and-atmakaraka-birth-nakshatra-results",
-      "title": "Create a new frontend page as a separate navigation tab for “Nakshatra Calculator” where users can enter date of birth, time of birth, and location and then see the computed Moon birth nakshatra and Atmakaraka birth nakshatra results.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-allow-saving-nakshatra-calculator-results-into-the-logged-in-user-s-profile-when-authenticated-provide-a-save-to-profile-action-that-persists-dob-tob-location-and-the-computed-moon-atmakaraka-nakshatras-and-ensure-the-profile-page-displays-the-saved-results",
-      "title": "Allow saving Nakshatra Calculator results into the logged-in user’s Profile: when authenticated, provide a “Save to Profile” action that persists DOB/TOB/location and the computed Moon/Atmakaraka nakshatras, and ensure the Profile page displays the saved results.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-embed-the-nakshatra-calculator-ui-or-an-equivalent-calculate-and-save-section-inside-the-existing-profile-page-so-users-can-compute-and-update-their-moon-atmakaraka-nakshatras-from-there-as-well",
-      "title": "Embed the Nakshatra Calculator UI (or an equivalent “Calculate and Save” section) inside the existing Profile page so users can compute and update their Moon/Atmakaraka nakshatras from there as well.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    }
-  ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Fix profile page not saving user information after login",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add Nakshatra Calculator (separate tab + embedded in Profile) that computes Moon birth nakshatra and Jaimini Atmakaraka (highest-degree planet) nakshatra from DOB/TOB/location and saves results to the user profile",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Fix backend persistence so saving and later fetching the caller’s user profile works reliably after login (data must survive across calls and not be lost due to non-mutating map updates).",
+      "id": "feature-re-run-the-full-deployment-frontend-backend-canisters-and-ensure-the-deployment-completes-successfully-without-errors",
+      "title": "Re-run the full deployment (frontend + backend canisters) and ensure the deployment completes successfully without errors.",
       "reqIds": [
         "REQ-1"
       ],
-      "status": "pending"
+      "version": 1
     },
     {
-      "id": "AR-4",
-      "summary": "Add backend support for storing birth data required by the Nakshatra Calculator: date of birth, time of birth, and location (as selected city details), along with computed results for Moon birth nakshatra and Atmakaraka birth nakshatra (Jaimini highest-degree planet).",
+      "id": "feature-after-redeploy-perform-the-production-smoke-verification-checks-defined-in-frontend-deployment-verification-md-for-version-24",
+      "title": "After redeploy, perform the production smoke/verification checks defined in frontend/DEPLOYMENT_VERIFICATION.md for Version 24.",
       "reqIds": [
         "REQ-2"
       ],
-      "status": "pending"
+      "version": 1
     },
     {
-      "id": "AR-5",
-      "summary": "Implement Nakshatra Calculator computation in a callable API (backend query or update): given DOB, TOB, and location, compute (1) Moon birth nakshatra and (2) Atmakaraka birth nakshatra using the Jaimini method (highest-degree planet), and return both results in a single response.",
+      "id": "feature-if-redeploy-fails-again-capture-and-surface-the-specific-deployment-error-output-build-step-and-failing-component-so-it-can-be-fixed-deterministically-and-apply-the-minimal-code-config-change-required-to-make-the-deployment-succeed",
+      "title": "If redeploy fails again, capture and surface the specific deployment error output (build step and failing component) so it can be fixed deterministically, and apply the minimal code/config change required to make the deployment succeed.",
       "reqIds": [
         "REQ-3"
       ],
-      "status": "pending"
+      "version": 1
     }
   ],
-  "projectName": "Fix profile persistence and add Nakshatra Calculator (Moon + Jaimini Atmakaraka) with profile save",
+  "new_feature_requests": [],
+  "projectName": "Retry deployment and verify production is serving Version 24",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

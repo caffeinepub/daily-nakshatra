@@ -1,42 +1,31 @@
-# Production Deployment Verification
+# Deployment Verification Checklist - Version 24
 
-This checklist helps verify that Version 24 has been successfully deployed to production.
+## Overview
+This checklist ensures that Version 24 is successfully deployed and functioning in production.
 
-## Post-Deployment Verification Steps
+## Pre-Verification Setup
 
-### 1. Basic Availability
-- [ ] Navigate to the production URL
-- [ ] Confirm the application loads without errors
-- [ ] Check browser console for any critical errors
+### 1. Locate Production URL
+After deployment completes, find the frontend canister URL:
+- Local: `http://<frontend-canister-id>.localhost:4943`
+- IC Mainnet: `https://<frontend-canister-id>.ic0.app`
 
-### 2. Version Verification
-- [ ] Scroll to the footer at the bottom of any page
-- [ ] Confirm the version label displays **"Version 24"**
-- [ ] Verify the version is visible in monospace font below the caffeine.ai attribution
+### 2. Open Browser DevTools
+- Chrome/Edge: F12 or Cmd+Option+I (Mac) / Ctrl+Shift+I (Windows)
+- Firefox: F12 or Cmd+Option+K (Mac) / Ctrl+Shift+K (Windows)
+- Safari: Cmd+Option+C (enable Developer menu first)
 
-### 3. Core Functionality Smoke Test
-- [ ] Test navigation between pages (Today, Tomorrow, Knowledge Base, History, Profile)
-- [ ] Verify the city picker opens and displays cities
-- [ ] Confirm the alerts toggle is functional
-- [ ] Test login/logout flow with Internet Identity
+## Core Verification Steps
 
-### 4. Technical Verification (Optional)
-- [ ] Open browser DevTools Console
-- [ ] Look for the boot message: `🌙 Daily Nakshatra Version 24 initialized`
-- [ ] Inspect the root element (`#root`) and verify `data-app-version="Version 24"` attribute
-- [ ] Check footer element for `data-testid="app-version"` attribute
+### ✓ Step 1: URL Loads Successfully
+- [ ] Production URL opens without errors
+- [ ] Page renders (not a blank screen)
+- [ ] No immediate JavaScript errors in console
 
-## Rollback Criteria
+### ✓ Step 2: Runtime Boot Log
+Open browser Console tab and verify:
+- [ ] Boot message appears: `🌙 Daily Nakshatra App booting - Version 24`
+- [ ] Version tagging confirmation: `✓ Root element tagged with Version 24`
 
-If any of the following occur, consider rollback:
-- Application fails to load or shows blank screen
-- Critical JavaScript errors in console preventing core functionality
-- Version label does not update to Version 24
-- Authentication flow is broken
-
-## Notes
-
-- This verification focuses on frontend deployment only
-- Backend canister should already be deployed and stable
-- All checks should be performed in production environment
-- Test on multiple browsers if possible (Chrome, Firefox, Safari)
+### ✓ Step 3: Root Element Version Attribute
+In Console, run:

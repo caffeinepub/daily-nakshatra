@@ -79,11 +79,30 @@ export function useSaveCheckIn() {
       restlessness: bigint | null;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.saveCheckIn(data.dayOfYear, data.nakshatra, data.mood, data.energy, data.restlessness);
+      
+      // Save the check-in
+      await actor.saveCheckIn(data.dayOfYear, data.nakshatra, data.mood, data.energy, data.restlessness);
+      
+      // Verify the save by re-reading logs
+      const logs = await actor.getAllLogs();
+      const savedEntry = logs.checkIns.find(
+        (entry) => 
+          entry.nakshatra === data.nakshatra && 
+          entry.dayOfYear === data.dayOfYear &&
+          entry.mood === data.mood
+      );
+      
+      if (!savedEntry) {
+        throw new Error('Check-in was not saved successfully. Please try again.');
+      }
+      
+      return savedEntry;
     },
     onSuccess: async () => {
+      // Invalidate and refetch all relevant queries
       await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
       await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
+      await queryClient.invalidateQueries({ queryKey: ['logsByNakshatra'] });
       await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
       await queryClient.refetchQueries({ queryKey: ['allLogs'], type: 'active' });
     },
@@ -100,11 +119,30 @@ export function useSaveSleepLog() {
   return useMutation({
     mutationFn: async (data: { dayOfYear: bigint; nakshatra: string; sleepNotes: string | null }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.saveSleepLog(data.dayOfYear, data.nakshatra, data.sleepNotes);
+      
+      // Save the sleep log
+      await actor.saveSleepLog(data.dayOfYear, data.nakshatra, data.sleepNotes);
+      
+      // Verify the save by re-reading logs
+      const logs = await actor.getAllLogs();
+      const savedEntry = logs.sleepLogs.find(
+        (entry) => 
+          entry.nakshatra === data.nakshatra && 
+          entry.dayOfYear === data.dayOfYear &&
+          entry.sleepNotes === data.sleepNotes
+      );
+      
+      if (!savedEntry) {
+        throw new Error('Sleep log was not saved successfully. Please try again.');
+      }
+      
+      return savedEntry;
     },
     onSuccess: async () => {
+      // Invalidate and refetch all relevant queries
       await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
       await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
+      await queryClient.invalidateQueries({ queryKey: ['logsByNakshatra'] });
       await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
       await queryClient.refetchQueries({ queryKey: ['allLogs'], type: 'active' });
     },
@@ -121,11 +159,30 @@ export function useSaveDreamLog() {
   return useMutation({
     mutationFn: async (data: { dayOfYear: bigint; nakshatra: string; dreamNotes: string | null }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.saveDreamLog(data.dayOfYear, data.nakshatra, data.dreamNotes);
+      
+      // Save the dream log
+      await actor.saveDreamLog(data.dayOfYear, data.nakshatra, data.dreamNotes);
+      
+      // Verify the save by re-reading logs
+      const logs = await actor.getAllLogs();
+      const savedEntry = logs.dreamLogs.find(
+        (entry) => 
+          entry.nakshatra === data.nakshatra && 
+          entry.dayOfYear === data.dayOfYear &&
+          entry.dreamNotes === data.dreamNotes
+      );
+      
+      if (!savedEntry) {
+        throw new Error('Dream log was not saved successfully. Please try again.');
+      }
+      
+      return savedEntry;
     },
     onSuccess: async () => {
+      // Invalidate and refetch all relevant queries
       await queryClient.invalidateQueries({ queryKey: ['allLogs'] });
       await queryClient.invalidateQueries({ queryKey: ['logsByDay'] });
+      await queryClient.invalidateQueries({ queryKey: ['logsByNakshatra'] });
       await queryClient.invalidateQueries({ queryKey: ['nakshatraPatterns'] });
       await queryClient.refetchQueries({ queryKey: ['allLogs'], type: 'active' });
     },

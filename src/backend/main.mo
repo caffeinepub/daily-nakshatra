@@ -10,9 +10,9 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import Runtime "mo:core/Runtime";
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   type Nakshatra = {
     name : Text;
@@ -584,3 +584,4 @@ actor {
     };
   };
 };
+

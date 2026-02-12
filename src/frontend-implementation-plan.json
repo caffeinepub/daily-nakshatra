@@ -1,93 +1,87 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Nakshatra Calculator tab + Profile embedded calculator with save-to-profile wiring",
+  "title": "Production redeploy verification hardening for Version 24 (frontend)",
   "requirements": [
     {
-      "id": "REQ-4",
-      "summary": "Add a dedicated Nakshatra Calculator page with DOB/TOB/location inputs, calculate action, and results display; wire it into routing and navigation.",
+      "id": "REQ-1",
+      "summary": "Add frontend-side deploy runbook and runtime version diagnostics to support a successful full redeploy verification.",
       "acceptanceCriteria": [
-        "App routing includes a dedicated route for the Nakshatra Calculator page.",
-        "The header navigation (desktop and mobile) includes a link to the new Nakshatra Calculator tab.",
-        "The page contains inputs for date of birth, time of birth, and location selection, plus a calculate action and a results display showing both nakshatras."
+        "Deployment pipeline completes successfully (no 'Deployment didn't complete' status).",
+        "Both frontend and backend canisters are deployed and reachable from the production URL."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "path": "frontend/DEPLOYMENT_RUNBOOK.md",
           "operation": "create",
-          "description": "Create the Nakshatra Calculator page UI using existing shadcn-ui building blocks (Card, Input, Label, Button, Alert) to collect DOB/TOB and a location selector (compose existing CityPicker + useCitySelection for city details). Show Moon Nakshatra and Atmakaraka Nakshatra results, and provide clear loading/error states. Verify the component's usage instructions before implementing."
+          "description": "Create a concise runbook describing how to rerun the full deployment and what artifacts/logs to capture for each step (frontend build, backend build, canister install/upgrade) when the deployment reports it didn't complete. Include where to find the production URL and what to check immediately after deployment."
         },
         {
-          "path": "frontend/src/hooks/useNakshatraCalculator.ts",
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Add a startup diagnostic that (1) logs the exact boot message referenced by the verification checklist (including the Version 24 string from APP_VERSION), and (2) sets the #root element attribute data-app-version=\"Version 24\" at runtime to support production verification."
+        },
+        {
+          "path": "frontend/src/lib/diagnostics/startupDiagnostics.ts",
           "operation": "create",
-          "description": "Add React Query hooks for (a) computing nakshatra results via the backend actor and (b) saving computed birth data, including consistent error handling (English messages) and query invalidation to refresh Profile data after save. Use the core-infrastructure actor wiring via existing useActorStable. Verify the component's usage instructions before implementing."
+          "description": "Add a small utility to centralize the startup diagnostic behavior (boot console message + root attribute assignment) so it can be reused and kept consistent across environments."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Ensure production smoke checks for Version 24 are reliable (no blank screen), version label is verifiable, core navigation works, and Internet Identity login/logout is stable.",
+      "acceptanceCriteria": [
+        "Production URL loads without a blank screen and without critical console errors.",
+        "Footer shows the version label \"Version 24\" (data-testid=\"app-version\").",
+        "Navigation between core pages works (Today, Tomorrow, Knowledge Base, History, Profile).",
+        "Internet Identity login/logout flow works in production."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/DEPLOYMENT_VERIFICATION.md",
+          "operation": "modify",
+          "description": "Update the Version 24 verification checklist to align with the app’s current behavior: explicitly call out checking the runtime boot log, checking #root data-app-version=\"Version 24\" (now set at runtime), and verifying navigation for the named core pages. Add a note to verify login/logout using the existing Internet Identity UI and confirm React Query cache is cleared on logout (per the authorization component guidance). Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Register a new TanStack Router route for the Nakshatra Calculator page (e.g., /calculator) and add it to the route tree so it is navigable. Verify the component's usage instructions before implementing."
+          "description": "Wrap the app router with a top-level error boundary so unexpected runtime errors do not present as a blank screen in production; render a user-friendly fallback and preserve a way to inspect sanitized error details. (Do not modify any files under frontend/src/components/ui.)"
         },
         {
-          "path": "frontend/src/components/layout/AppHeader.tsx",
-          "operation": "modify",
-          "description": "Add a 'Nakshatra Calculator' navigation link in both desktop and mobile nav lists, consistent with existing Link usage and activeProps styling. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Allow saving Nakshatra Calculator inputs/results to the authenticated user's Profile and display saved DOB/TOB/location + Moon/Atmakaraka nakshatras on the Profile page; block saving for unauthenticated users with an English sign-in prompt.",
-      "acceptanceCriteria": [
-        "When logged in, saving from the Nakshatra Calculator updates backend persisted birth-chart data and is reflected on the Profile page after save completes.",
-        "When not logged in, the calculator can still compute results, but saving is blocked with an English sign-in prompt.",
-        "The Profile page shows the stored Moon nakshatra and Atmakaraka nakshatra (and the stored DOB/TOB/location) when available."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/NakshatraCalculatorPage.tsx",
-          "operation": "modify",
-          "description": "Add a 'Save to Profile' action that is enabled only when the user is authenticated (use the authorization component pattern via useInternetIdentity). When unauthenticated, keep 'Calculate' available but show an English sign-in prompt for saving (reuse existing RequireAuth messaging patterns without adding new auth providers). On successful save, show a success state and ensure relevant cached queries are invalidated/refetched so Profile reflects updates. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useNakshatraCalculator.ts",
-          "operation": "modify",
-          "description": "Implement save mutation logic that persists DOB/TOB/location and computed nakshatras, and on success invalidates/refetches the same profile-related queries used by ProfileSettingsPage (e.g., currentUserProfile and/or allLogs depending on where birth data is read). Ensure authorization failures are surfaced as clear English errors (no silent failure). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/ProfileSettingsPage.tsx",
-          "operation": "modify",
-          "description": "Update Profile UI to display saved birth data (DOB/TOB/location) and the saved Moon/Atmakaraka nakshatra values when available. Prefer reading from the caller profile birthData when present, while keeping compatibility with any existing birthChart display already shown via logs. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Embed a Calculate-and-Save Nakshatra Calculator section inside the Profile page that initializes from saved data and uses consistent save success/error UX.",
-      "acceptanceCriteria": [
-        "The Profile page contains a section that collects DOB/TOB/location, runs the same calculation, and can save updated results.",
-        "If a birth chart is already saved, the embedded calculator initializes its fields from the saved data.",
-        "Saving from the Profile-embedded calculator shows success/error states consistent with the existing Profile save UX."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/nakshatra/NakshatraCalculatorSection.tsx",
+          "path": "frontend/src/components/errors/AppErrorBoundary.tsx",
           "operation": "create",
-          "description": "Create a reusable, composable calculator section component (no new route) that renders DOB/TOB inputs, a location selector (compose existing CityPicker + useCitySelection), a 'Calculate' action, results display, and (optionally) a 'Save' action. Use shadcn-ui components for layout and feedback (Card, Button, Alert) and keep all user-facing text English. Verify the component's usage instructions before implementing."
+          "description": "Create a reusable top-level React error boundary component that displays a safe fallback UI and uses existing error UI patterns (e.g., sanitized error details) so production failures are visible and diagnosable instead of a blank screen."
         },
         {
-          "path": "frontend/src/pages/NakshatraCalculatorPage.tsx",
+          "path": "frontend/src/components/auth/LoginButton.tsx",
           "operation": "modify",
-          "description": "Refactor the page to reuse the shared NakshatraCalculatorSection so the standalone tab and the Profile-embedded calculator stay functionally consistent (same compute logic, same result rendering). Verify the component's usage instructions before implementing."
+          "description": "Harden production logging around login/logout failures: ensure errors are sanitized/clearly logged (without breaking UX) to support the production smoke check. This should continue to follow the authorization component’s Internet Identity login/logout guidance and keep clearing cached data on logout. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Improve frontend diagnostics so any repeated deployment failure or post-deploy runtime breakage is captured with concrete, reproducible output and minimal corrective changes.",
+      "acceptanceCriteria": [
+        "A concrete, reproducible error message is recorded for the failing step (e.g., frontend build, backend build, canister install/upgrade).",
+        "Any required fix is implemented and the subsequent redeploy completes successfully."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/DEPLOYMENT_FAILURE_REPORT.md",
+          "operation": "create",
+          "description": "Add a structured template for recording a failed deployment attempt: failing step name, full error output, timestamp, commit/build identifier (if available), and reproduction notes. Include a section to paste browser console output from production when smoke checks fail."
         },
         {
-          "path": "frontend/src/pages/ProfileSettingsPage.tsx",
-          "operation": "modify",
-          "description": "Embed the shared NakshatraCalculatorSection within the Profile page. Initialize the section from saved birth data (from profile and/or existing logs fallback). Wire calculate/save handlers to the same hooks used by the standalone calculator, and align success/error presentation with existing Profile save UX patterns (e.g., Saved/Unable to save alerts). Verify the component's usage instructions before implementing."
+          "path": "frontend/src/lib/diagnostics/deploymentReport.ts",
+          "operation": "create",
+          "description": "Add a small diagnostics helper that standardizes how runtime-critical errors are logged (using sanitizeError) and optionally tags messages with APP_VERSION to make production troubleshooting deterministic."
         },
         {
-          "path": "frontend/src/hooks/useUserProfile.ts",
+          "path": "frontend/src/components/errors/AppErrorBoundary.tsx",
           "operation": "modify",
-          "description": "Extend existing profile hooks to support reading and updating birth-data-related fields as needed by the embedded calculator (query invalidation/refetch to keep Profile UI in sync after save). Keep compatibility with existing ProfileSettingsPage flows and avoid changes to immutable hook paths. Verify the component's usage instructions before implementing."
+          "description": "Extend the error boundary fallback to surface a copyable sanitized error string (for deterministic bug reports) and reference the failure report template for what to capture."
         }
       ]
     }

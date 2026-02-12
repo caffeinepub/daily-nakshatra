@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSaveCheckIn, useSaveSleepLog, useSaveDreamLog, useGetCurrentDayOfYear } from '@/hooks/useUserLogs';
 import { CheckCircle2, AlertCircle, Heart, Moon as MoonIcon } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { sanitizeError } from '@/lib/diagnostics/sanitizeError';
 
 interface DailyLogsPanelProps {
   nakshatraName: string;
@@ -26,9 +27,34 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
   const saveSleepLog = useSaveSleepLog();
   const saveDreamLog = useSaveDreamLog();
 
+  // Reset success states when user starts typing again
+  useEffect(() => {
+    if (saveCheckIn.isSuccess) {
+      const timer = setTimeout(() => saveCheckIn.reset(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveCheckIn.isSuccess]);
+
+  useEffect(() => {
+    if (saveSleepLog.isSuccess) {
+      const timer = setTimeout(() => saveSleepLog.reset(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveSleepLog.isSuccess]);
+
+  useEffect(() => {
+    if (saveDreamLog.isSuccess) {
+      const timer = setTimeout(() => saveDreamLog.reset(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveDreamLog.isSuccess]);
+
   const handleCheckInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dayOfYear) return;
+
+    // Clear any previous success state before new submission
+    saveCheckIn.reset();
 
     try {
       await saveCheckIn.mutateAsync({
@@ -38,11 +64,13 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
         energy: BigInt(energy[0]),
         restlessness: BigInt(restlessness[0]),
       });
+      // Only clear form on verified success
       setMood('');
       setEnergy([5]);
       setRestlessness([5]);
     } catch (error) {
       console.error('Failed to save check-in:', error);
+      // Error is already handled by mutation's onError
     }
   };
 
@@ -50,15 +78,20 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
     e.preventDefault();
     if (!dayOfYear) return;
 
+    // Clear any previous success state before new submission
+    saveSleepLog.reset();
+
     try {
       await saveSleepLog.mutateAsync({
         dayOfYear,
         nakshatra: nakshatraName,
         sleepNotes: sleepNotes || null,
       });
+      // Only clear form on verified success
       setSleepNotes('');
     } catch (error) {
       console.error('Failed to save sleep log:', error);
+      // Error is already handled by mutation's onError
     }
   };
 
@@ -66,15 +99,20 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
     e.preventDefault();
     if (!dayOfYear) return;
 
+    // Clear any previous success state before new submission
+    saveDreamLog.reset();
+
     try {
       await saveDreamLog.mutateAsync({
         dayOfYear,
         nakshatra: nakshatraName,
         dreamNotes: dreamNotes || null,
       });
+      // Only clear form on verified success
       setDreamNotes('');
     } catch (error) {
       console.error('Failed to save dream log:', error);
+      // Error is already handled by mutation's onError
     }
   };
 
@@ -132,7 +170,9 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
               {saveCheckIn.isError && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Failed to save check-in. Please try again.</AlertDescription>
+                  <AlertDescription>
+                    {sanitizeError(saveCheckIn.error)}
+                  </AlertDescription>
                 </Alert>
               )}
             </form>
@@ -167,7 +207,9 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
               {saveSleepLog.isError && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Failed to save sleep log. Please try again.</AlertDescription>
+                  <AlertDescription>
+                    {sanitizeError(saveSleepLog.error)}
+                  </AlertDescription>
                 </Alert>
               )}
             </form>
@@ -203,7 +245,9 @@ export default function DailyLogsPanel({ nakshatraName }: DailyLogsPanelProps) {
               {saveDreamLog.isError && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Failed to save dream log. Please try again.</AlertDescription>
+                  <AlertDescription>
+                    {sanitizeError(saveDreamLog.error)}
+                  </AlertDescription>
                 </Alert>
               )}
             </form>

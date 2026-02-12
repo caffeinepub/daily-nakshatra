@@ -17,6 +17,7 @@ import UnableToProceedScreen from '@/components/errors/UnableToProceedScreen';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { getNakshatraSlug } from '@/lib/nakshatra';
+import { getTropicalZodiacPosition, formatTropicalZodiacPosition } from '@/lib/astro/tropicalZodiac';
 
 export default function TodayPage() {
   const {
@@ -144,6 +145,9 @@ export default function TodayPage() {
 
           <div className="space-y-4 text-sm text-muted-foreground">
             <p className="tracking-wide">Longitude: {data.preciseLongitude.toFixed(3)}°</p>
+            <p className="tracking-wide">
+              Tropical Zodiac: {formatTropicalZodiacPosition(getTropicalZodiacPosition(data.preciseLongitude))}
+            </p>
             <div className="flex items-center justify-center gap-2 text-xs">
               <MapPin className="h-3.5 w-3.5" />
               <span className="tracking-wide">
